@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GaGi'S CheatSheet</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div id="php">
+          <h1>PHP</h1>
+<pre>
+function ocisti($input){
+  $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
+  $input = trim($input);
+  $input = str_replace('"', "", $input);
+  $input = str_replace("'", "", $input);
+  $input = htmlspecialchars($input); // Mora ispod str_replace jer htmlspecialchars pretvara " u &nesto; i onda ga str_replace ne nadje
+
+  return $input;
+}
+
+if(isset($_POST['prijava'])){  
+  $email = ocisti($_POST['email']);
+  $brojTelefona = ocisti($_POST['broj_telefona']);
+  $imeIPrezime = ocisti($_POST['ime_i_prezime']);
+  $fakultet = ocisti($_POST['fakultet']);
+  $trenutnaGodina = $_POST['trenutna_godina'];
+  $bioRanije = $_POST['bio_ranije'];
+  $zeliDaBudeGost = $_POST['zeli_gost'];
+  $cv = ocisti($_POST['cv']);
+  $zeliObavestenja = $_POST['zeli_obavestenja'];
+
+  $greske = array();
+
+  if(empty($email)){
+    $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas unesite email.&lt;/label&gt;&lt;/p&gt;';
+  }
+
+  if(empty($brojTelefona)){
+    $greske['broj_telefona'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas unesite broj telefona.&lt;/label&gt;&lt;/p&gt;';
+  }
+
+  if(empty($imeIPrezime)){
+    $greske['ime_i_prezime'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas unesite ime i prezime.&lt;/label&gt;&lt;/p&gt;';
+  }
+
+  if(empty($fakultet)){
+    $greske['fakultet'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas unesite fakultet.&lt;/label&gt;&lt;/p&gt;';
+  }
+
+  $data = array(
+    "email" =&gt; $email,
+    "broj_telefona" =&gt; $brojTelefona,
+    "ime_i_prezime" =&gt; $imeIPrezime,
+    "fakultet" =&gt; $fakultet,
+    "trenutna_godina" =&gt; $trenutnaGodina,
+    "bio_ranije" =&gt; $bioRanije,
+    "zeli_gost" =&gt; $zeliDaBudeGost,
+    "cv" =&gt; $cv,
+    "zeli_obavestenja" =&gt; $zeliObavestenja,
+  );
+
+  if(count($greske) == 0){
+    echo "&lt;p class='text-white'&gt;";
+    print_r($data);
+    echo "&lt;/p&gt;";
+    $uspesnaPrijava = '&lt;p&gt;&lt;label class="text-success text-center font-weight-bold text-uppercase"&gt;Uspešna prijava.&lt;/label&gt;&lt;/p&gt;';
+  }
+}
+
+&lt;!-- -------- PRIJAVE ---------- --&gt;
+  &lt;section id="prijave"&gt;
+    &lt;div class="container"&gt;
+      &lt;div class="row justify-content-center"&gt;
+        &lt;div class="col-md-6 col-sm-8 col-8 text-center text-white"&gt;
+          &lt;h1 class="mt-5"&gt;PRIJAVE&lt;/h1&gt;
+
+          &lt;?php echo $uspesnaPrijava ?? ""; ?&gt;
+
+          &lt;form method="POST" class="mb-5"&gt;
+            &lt;fieldset&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="email"&gt;Email&lt;/label&gt;
+                &lt;input type="email" name="email" class="form-control" id="email" placeholder="Unesite email" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;             
+                &lt;?php echo $greske['email'] ?? '&lt;small id="emailHelp" class="form-text text-left text-white"&gt;Vašu e-mail adresu nećemo deliti sa drugima.&lt;/small&gt;'; ?&gt;
+              &lt;/div&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="broj-telefona"&gt;Broj telefona&lt;/label&gt;
+                &lt;input type="tel" name="broj_telefona" class="form-control" id="broj-telefona" 
+                placeholder="Format: +381-XXXXXXX" value="&lt;?php echo $brojTelefona ?? ""; ?&gt;" 
+                pattern="\+[0-9]{3}-[0-9]{8,9}"&gt;
+                &lt;?php echo $greske['broj_telefona'] ?? ""; ?&gt;
+              &lt;/div&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="ime-i-prezime"&gt;Ime i prezime&lt;/label&gt;
+                &lt;input type="text" name="ime_i_prezime" class="form-control" id="ime-i-prezime" placeholder="Unesite ime i prezime" value="&lt;?php echo $imeIPrezime ?? ""; ?&gt;"&gt;
+                &lt;?php echo $greske['ime_i_prezime'] ?? ""; ?&gt;
+              &lt;/div&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="fakultet"&gt;Fakultet koji studirate&lt;/label&gt;
+                &lt;input type="text" name="fakultet" class="form-control" id="fakultet" placeholder="Unesite ime fakulteta" value="&lt;?php echo $fakultet ?? ""; ?&gt;"&gt;
+                &lt;?php echo $greske['fakultet'] ?? ""; ?&gt;
+              &lt;/div&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="trenutna-godina"&gt;Trenutna godina studija&lt;/label&gt;
+                &lt;select class="form-control text-black" name="trenutna_godina" id="trenutna-godina" style="width: 10%;"&gt;
+                  &lt;option value="1"&gt;1&lt;/option&gt;
+                  &lt;option value="2"&gt;2&lt;/option&gt;
+                  &lt;option value="3"&gt;3&lt;/option&gt;
+                  &lt;option value="4"&gt;4&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+
+              &lt;fieldset class="form-group"&gt;
+                &lt;legend class="text-left"&gt;Da li ste ranije učestvovali na S2S-u ?&lt;/legend&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="bio_ranije" value="DA" checked=""&gt;
+                    DA
+                  &lt;/label&gt;
+                &lt;/div&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="bio_ranije" value="NE"&gt;
+                    Ne
+                  &lt;/label&gt;
+                &lt;/div&gt;
+              &lt;/fieldset&gt;
+
+              &lt;fieldset class="form-group"&gt;
+                &lt;legend class="text-left"&gt;Da li želite da budete gost na panelu&lt;/legend&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="zeli_gost" value="DA" checked=""&gt;
+                    DA
+                  &lt;/label&gt;
+                &lt;/div&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="zeli_gost" value="NE"&gt;
+                    NE
+                  &lt;/label&gt;
+                &lt;/div&gt;
+              &lt;/fieldset&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="prezime"&gt;Ukoliko želite priložite link CV-a&lt;/label&gt;
+                &lt;input type="text" name="cv" class="form-control" id="cv" placeholder="Unesite link" value="&lt;?php echo $cv ?? ""; ?&gt;"&gt;
+                &lt;?php echo $greske['cv'] ?? ""; ?&gt;
+              &lt;/div&gt;
+
+              &lt;fieldset class="form-group"&gt;
+                &lt;legend class="text-left"&gt;Da li želite da dobijate obaveštenja o FONISovim projektima ?&lt;/legend&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="DA" checked=""&gt;
+                    DA
+                  &lt;/label&gt;
+                &lt;/div&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="NE"&gt;
+                    NE
+                  &lt;/label&gt;
+                &lt;/div&gt;
+              &lt;/fieldset&gt;
+
+              &lt;button id="posalji-btn" type="submit" name="prijava" class="btn btn-primary d-block w-100"&gt;POŠALJI&lt;/button&gt;
+            &lt;/fieldset&gt;
+          &lt;/form&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+  &lt;!-- -------- PRIJAVE ---------- --&gt;
+</pre>
+        </div>
+
+        <h1>NODEJS</h1>
+        <h1>JS</h1>
+
+        <div id="html">
+          <h1>HTML</h1>
+<pre>
+  &lt;input type="tel" name="broj_telefona" class="form-control" id="broj-telefona" placeholder="Format: +381-XXXXXXX" value="&lt;?php echo $brojTelefona ?? ''; ?&gt;" pattern="\+[0-9]{3}-[0-9]{8,9}"&gt;
+</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
