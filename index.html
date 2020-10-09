@@ -17,104 +17,7 @@
         <!-- ---------- PHP ---------- -->
         <div id="php">
           <h1 class="mb-5 mt-5"><u>PHP</u></h1>
-          <p class="font-weight-bold text-success">
-            Form With Validation (Select, Radio Buttons) - S2S 2020.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
-          </p>
-          <hr>
-<pre class="collapse" id="collapseExample1">
-function ocisti($input){
-  $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
-  $input = trim($input);
-  $input = str_replace('"', "", $input);
-  $input = str_replace("'", "", $input);
-  $input = htmlspecialchars($input); // Mora ispod str_replace jer htmlspecialchars pretvara " u &nesto; i onda ga str_replace ne nadje
 
-  return $input;
-}
-
-if(isset($_POST['prijava'])){  
-  $email = ocisti($_POST['email']);
-  $trenutnaGodina = $_POST['trenutna_godina'];
-  $zeliObavestenja = $_POST['zeli_obavestenja'];
-
-  $greske = array();
-
-  if(empty($email)){
-    $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas unesite email.&lt;/label&gt;&lt;/p&gt;';
-  }else{
-      if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-          $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Invalid Email Format.&lt;/label&gt;&lt;/p&gt;';
-      }
-  }
-
-  $data = array(
-    "email" =&gt; $email,
-    "trenutna_godina" =&gt; $trenutnaGodina,
-    "zeli_obavestenja" =&gt; $zeliObavestenja,
-  );
-
-  if(count($greske) == 0){
-    echo "&lt;p class='text-white'&gt;";
-    print_r($data);
-    echo "&lt;/p&gt;";
-    $uspesnaPrijava = '&lt;p&gt;&lt;label class="text-success text-center font-weight-bold text-uppercase"&gt;Uspešna prijava.&lt;/label&gt;&lt;/p&gt;';
-  }
-}
-
-&lt;!-- -------- PRIJAVE ---------- --&gt;
-  &lt;section id="prijave"&gt;
-    &lt;div class="container"&gt;
-      &lt;div class="row justify-content-center"&gt;
-        &lt;div class="col-md-6 col-sm-8 col-8 text-center text-white"&gt;
-          &lt;h1 class="mt-5"&gt;PRIJAVE&lt;/h1&gt;
-
-          &lt;?php echo $uspesnaPrijava ?? ""; ?&gt;
-
-          &lt;form method="POST" class="mb-5"&gt;
-            &lt;fieldset&gt;
-
-              &lt;div class="form-group"&gt;
-                &lt;label for="email"&gt;Email&lt;/label&gt;
-                &lt;input type="email" name="email" class="form-control" id="email" placeholder="Unesite email" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;             
-                &lt;?php echo $greske['email'] ?? '&lt;small id="emailHelp" class="form-text text-left text-white"&gt;Vašu e-mail adresu nećemo deliti sa drugima.&lt;/small&gt;'; ?&gt;
-              &lt;/div&gt;
-
-              &lt;div class="form-group"&gt;
-                &lt;label for="trenutna-godina"&gt;Trenutna godina studija&lt;/label&gt;
-                &lt;select class="form-control text-black" name="trenutna_godina" id="trenutna-godina" style="width: 10%;"&gt;
-                  &lt;option value="1"&gt;1&lt;/option&gt;
-                  &lt;option value="2"&gt;2&lt;/option&gt;
-                  &lt;option value="3"&gt;3&lt;/option&gt;
-                  &lt;option value="4"&gt;4&lt;/option&gt;
-                &lt;/select&gt;
-              &lt;/div&gt;
-
-              &lt;fieldset class="form-group"&gt;
-                &lt;legend class="text-left"&gt;Da li želite da dobijate obaveštenja o FONISovim projektima ?&lt;/legend&gt;
-                &lt;div class="form-check"&gt;
-                  &lt;label class="form-check-label"&gt;
-                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="DA" checked=""&gt;
-                    DA
-                  &lt;/label&gt;
-                &lt;/div&gt;
-                &lt;div class="form-check"&gt;
-                  &lt;label class="form-check-label"&gt;
-                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="NE"&gt;
-                    NE
-                  &lt;/label&gt;
-                &lt;/div&gt;
-              &lt;/fieldset&gt;
-
-              &lt;button id="posalji-btn" type="submit" name="prijava" class="btn btn-primary d-block w-100"&gt;POŠALJI&lt;/button&gt;
-            &lt;/fieldset&gt;
-          &lt;/form&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/section&gt;
-  &lt;!-- -------- PRIJAVE ---------- --&gt;
-</pre>
 
 
 
@@ -447,6 +350,268 @@ if(isset($_POST['prijava'])){
   }
 </pre>
 
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Insert / Form With Validation (Select, Radio Buttons) <br> Flash Messages  - S2S 2020, Cinematic.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExample1">
+function ocisti($input){
+  $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
+  $input = trim($input);
+  $input = str_replace('"', "", $input);
+  $input = str_replace("'", "", $input);
+  $input = htmlspecialchars($input); // Mora ispod str_replace jer htmlspecialchars pretvara " u &nesto; i onda ga str_replace ne nadje
+
+  return $input;
+}
+
+if(isset($_POST['prijava'])){  
+  $email = ocisti($_POST['email']);
+  $trenutnaGodina = $_POST['trenutna_godina'];
+  $zeliObavestenja = $_POST['zeli_obavestenja'];
+
+  $greske = array();
+  $fail = false;
+
+  if(empty($email)){
+    $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas unesite email.&lt;/label&gt;&lt;/p&gt;';
+    $fail = true;
+  }else{
+      if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+          $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Invalid Email Format.&lt;/label&gt;&lt;/p&gt;';
+          $fail = true;
+      }
+  }
+
+  if(count($greske) == 0){
+    $data = array(
+      "email" =&gt; $email,
+      "trenutna_godina" =&gt; $trenutnaGodina,
+      "zeli_obavestenja" =&gt; $zeliObavestenja,
+    );
+
+    if(Rezervacija::dodaj($props)){
+      $_SESSION['success_message'] = "&lt;div class='container-fluid'&gt;
+                                        &lt;div class='row'&gt;
+                                            &lt;div class='col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5'&gt;
+                                                &lt;div class='alert alert-dismissible alert-success'&gt;
+                                                    &lt;button type='button' class='close' data-dismiss='alert'&gt;&amp;times;&lt;/button&gt;
+                                                    &lt;strong&gt;Rezervacija uspešno sačuvana.&lt;/strong&gt;.
+                                                &lt;/div&gt;
+                                            &lt;/div&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;";
+    }else{
+      $fail = true;
+    }
+
+    if($fail){
+      $failMsg = "&lt;div class='container-fluid'&gt;
+                    &lt;div class='row'&gt;
+                        &lt;div class='col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5'&gt;
+                            &lt;div class='alert alert-dismissible alert-danger'&gt;
+                                &lt;button type='button' class='close' data-dismiss='alert'&gt;&amp;times;&lt;/button&gt;
+                                &lt;strong&gt;Rezervacija nije uspela.&lt;/strong&gt;.
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;";
+    }
+  } // COUNT GRESKE CLOSE
+} // POST REQ CLOSE
+
+
+&lt;?php 
+  if(isset($fail) &amp;&amp; $fail) echo $failMsg;
+
+  if(isset($_SESSION['success_message'])){
+      echo $_SESSION['success_message'];
+      unset($_SESSION['success_message']);
+  }
+?&gt;
+
+&lt;!-- -------- PRIJAVE ---------- --&gt;
+  &lt;section id="prijave"&gt;
+    &lt;div class="container"&gt;
+      &lt;div class="row justify-content-center"&gt;
+        &lt;div class="col-md-6 col-sm-8 col-8 text-center text-white"&gt;
+          &lt;h1 class="mt-5"&gt;PRIJAVE&lt;/h1&gt;
+
+          &lt;?php echo $uspesnaPrijava ?? ""; ?&gt;
+
+          &lt;form method="POST" class="mb-5"&gt;
+            &lt;fieldset&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="email"&gt;Email&lt;/label&gt;
+                &lt;input type="email" name="email" class="form-control" id="email" placeholder="Unesite email" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;             
+                &lt;?php echo $greske['email'] ?? '&lt;small id="emailHelp" class="form-text text-left text-white"&gt;Vašu e-mail adresu nećemo deliti sa drugima.&lt;/small&gt;'; ?&gt;
+              &lt;/div&gt;
+
+              &lt;div class="form-group"&gt;
+                &lt;label for="trenutna-godina"&gt;Trenutna godina studija&lt;/label&gt;
+                &lt;select class="form-control text-black" name="trenutna_godina" id="trenutna-godina" style="width: 10%;"&gt;
+                  &lt;option value="1"&gt;1&lt;/option&gt;
+                  &lt;option value="2"&gt;2&lt;/option&gt;
+                  &lt;option value="3"&gt;3&lt;/option&gt;
+                  &lt;option value="4"&gt;4&lt;/option&gt;
+                &lt;/select&gt;
+              &lt;/div&gt;
+
+              &lt;fieldset class="form-group"&gt;
+                &lt;legend class="text-left"&gt;Da li želite da dobijate obaveštenja o FONISovim projektima ?&lt;/legend&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="DA" checked=""&gt;
+                    DA
+                  &lt;/label&gt;
+                &lt;/div&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="NE"&gt;
+                    NE
+                  &lt;/label&gt;
+                &lt;/div&gt;
+              &lt;/fieldset&gt;
+
+              &lt;button id="posalji-btn" type="submit" name="prijava" class="btn btn-primary d-block w-100"&gt;POŠALJI&lt;/button&gt;
+            &lt;/fieldset&gt;
+          &lt;/form&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+  &lt;!-- -------- PRIJAVE ---------- --&gt;
+</pre>
+
+
+
+            <p class="font-weight-bold text-success">
+              GET - Cinematic
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleP5">
+  $filmID = $_GET['id'];
+  $film = Film::vratiPoID($filmID);
+</pre>
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Update / Delete - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP5">
+  if(isset($_POST['izbrisi_rezervaciju'])){
+    $rezervacijaID = $_POST['rezervacijaID'];
+    if(Rezervacija::izbrisi($rezervacijaID)){
+        header('Location: karte.php');
+    }
+  }
+  
+  &lt;form method="POST"&gt;
+    &lt;input type="hidden" name="rezervacijaID" value="&lt;?php echo $karta['id']; ?&gt;"&gt;
+    &lt;button type="submit" name="izbrisi_rezervaciju" class="izbrisi-rezervaciju-btn"&gt;&lt;i class="far fa-times-circle"&gt;&lt;/i&gt;&lt;/button&gt;
+  &lt;/form&gt;
+</pre>
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Foreach Index - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP5">
+  &lt;?php foreach($karte as $key=&gt;$karta): ?&gt;
+
+  &lt;?php if($key % 2 == 0){ ?&gt;
+</pre>
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Odjava / Logout - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP5">
+  &lt;?php
+
+    require_once 'classes/Korisnik.php';
+
+    if(!Korisnik::ulogovan()){
+        header("Location: index.php");
+    }
+
+    Korisnik::odjavi();
+    header("Location: index.php");
+</pre>
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                Email Validation - Cinematic
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleP5">
+  if(empty($email)){
+    $poruka['email'] = '&lt;p class="error-p"&gt;&lt;label class="text-danger error"&gt;Molimo Vas unesite email.&lt;/label&gt;&lt;/p&gt;';
+  }else{
+      $email = ocisti($email);
+      if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+          $poruka['email'] = '&lt;p class="error-p"&gt;&lt;label class="text-danger error"&gt;Pogrešan Email Format&lt;/label&gt;&lt;/p&gt;';
+      }
+  }
+</pre>
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Username / Email Exists - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP5">
+  if(count($poruka) == 0){
+    if(Korisnik::zauzetEmail($email)){
+        $poruka['email'] = '&lt;p class="error-p"&gt;&lt;label class="text-dange errorr"&gt;Email zauzet.&lt;/label&gt;&lt;/p&gt;';
+    }else if(Korisnik::zauzetoIme($ime)){
+        $poruka['ime'] = '&lt;p class="error-p"&gt;&lt;label class="text-danger error"&gt;Ime zauzeto.&lt;/label&gt;&lt;/p&gt;';
+    }else if(Korisnik::registruj($ime, $email, $password, 0)){
+      //print_r($_SESSION['korisnik']['ime']);
+      header("Location: index.php");
+    }else{
+      $poruka['registracija'] = '&lt;p class="error-p"&gt;&lt;label class="text-danger error"&gt;Greška prilikom registracije.&lt;/label&gt;&lt;/p&gt;';
+    }
+  }
+
+
+  &lt;div&gt;
+    &lt;?php echo $poruka['registracija'] ?? ""; ?&gt;
+  &lt;/div&gt;
+</pre>
 
 
 
