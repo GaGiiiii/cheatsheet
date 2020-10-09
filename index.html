@@ -19,7 +19,7 @@
           <h1 class="mb-5 mt-5"><u>PHP</u></h1>
           <p class="font-weight-bold text-success">
             Form With Validation (Select, Radio Buttons) - S2S 2020.
-            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
           </p>
           <hr>
 <pre class="collapse" id="collapseExample1">
@@ -120,7 +120,7 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Header Already Sent Information - E-commerce 2020.
-            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">+</button>
           </p>
           <hr>
 <pre class="collapse" id="collapseExample2">
@@ -131,7 +131,7 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Session Already Exists - Cinematic
-            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample3" aria-expanded="false" aria-controls="collapseExample3">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample3" aria-expanded="false" aria-controls="collapseExample3">+</button>
           </p>
           <hr>
 <pre class="collapse" id="collapseExample3">
@@ -143,7 +143,7 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Database Class - Cinematic
-            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
           </p>
           <hr>
 <pre class="collapse" id="collapseExample4">
@@ -182,7 +182,7 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Film Class - Cinematic
-            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExampleP1" aria-expanded="false" aria-controls="collapseExampleP1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP1" aria-expanded="false" aria-controls="collapseExampleP1">+</button>
           </p>
           <hr>
 <pre class="collapse" id="collapseExampleP1">
@@ -243,7 +243,7 @@ if(isset($_POST['prijava'])){
 
             <p class="font-weight-bold text-success">
               Korisnik Class - Cinematic
-              <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExampleP2" aria-expanded="false" aria-controls="collapseExampleP2">+</button>
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP2" aria-expanded="false" aria-controls="collapseExampleP2">+</button>
             </p>
             <hr>
 <pre class="collapse" id="collapseExampleP2">
@@ -334,6 +334,120 @@ if(isset($_POST['prijava'])){
 
 
 
+          <p class="font-weight-bold text-success">
+            Header - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP3" aria-expanded="false" aria-controls="collapseExampleP3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP3">
+  &lt;?php require_once "classes/Korisnik.php"; ?&gt;
+  &lt;?php 
+    $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/')); //  /prijava /registracija /index.php
+  ?&gt;
+  
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="ie=edge"&gt;
+    &lt;title&gt;CINEMATIC&lt;/title&gt;
+     &lt;!-- OWL CAROUSEL --&gt;
+    &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" integrity="sha512-tS3S5qG0BlhnQROyJXvNjeEM4UpMXHrQfTGmbQ1gKmelCxlSEBUaxhRBj/EFTzpbP4RVSrpEikbmdJobCvhE3g==" crossorigin="anonymous" /&gt;
+    &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" integrity="sha512-sMXtMNL1zRzolHYKEujM2AqCLUR9F2C4/05cdbxjjLSRvMQIciEPCQZo++nk7go3BtSuK9kfa/s+a4f4i5pLkw==" crossorigin="anonymous" /&gt;
+    &lt;!-- BOOTSTRAP --&gt;
+    &lt;link rel="stylesheet" href="./public/css/bootstrap/bootstrap.min.css"&gt; &lt;!-- Ovde treba putanja kao da smo u index.php fajlu a ne u header.php --&gt;
+    &lt;!-- CUSTOM CSS --&gt;
+    &lt;link rel="stylesheet" href="./public/css/styles.css"&gt; &lt;!-- Ovde treba putanja kao da smo u index.php fajlu a ne u header.php --&gt;
+    &lt;!-- FONT AWESOME --&gt;
+    &lt;script src="https://kit.fontawesome.com/5c5689b7a2.js"&gt;&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+  
+    &lt;!-- NAVBAR --&gt;
+    &lt;nav id="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary"&gt;
+      &lt;a class="navbar-brand" href="index.php"&gt;CINEMATIC&lt;/a&gt;
+      &lt;button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation"&gt;
+        &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+  
+      &lt;div class="collapse navbar-collapse" id="navbarColor01"&gt;
+        &lt;ul class="navbar-nav mr-auto"&gt;
+          &lt;li class="nav-item &lt;?php if($currentPage == '/index.php') echo 'active'; ?&gt;"&gt;
+            &lt;a class="nav-link" href="index.php"&gt;Početna &lt;span class="sr-only"&gt;(current)&lt;/span&gt;&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li class="nav-item &lt;?php if($currentPage == '/repertoar.php') echo 'active'; ?&gt;"&gt;
+                &lt;a class="nav-link" href="repertoar.php"&gt;Repertoar&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li class="nav-item &lt;?php if($currentPage == '/uskoro.php') echo 'active'; ?&gt;"&gt;
+                &lt;a class="nav-link" href="uskoro.php"&gt;Uskoro&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;?php if(Korisnik::ulogovan() &amp;&amp; $_SESSION['korisnik']['isAdmin']) { ?&gt;
+            &lt;li class="nav-item &lt;?php if($currentPage == '/karte.php') echo 'active'; ?&gt;"&gt;
+                  &lt;a class="nav-link" href="karte.php"&gt;Karte&lt;/a&gt;
+            &lt;/li&gt;
+          &lt;?php }?&gt;
+        &lt;/ul&gt;
+        &lt;ul class="navbar-nav"&gt;
+        &lt;?php if(Korisnik::ulogovan()){ ?&gt;
+            &lt;li class="nav-item &lt;?php if($currentPage == '/admin.php') echo 'active'; ?&gt;"&gt;
+                &lt;a class="nav-link" href="&lt;?php if($_SESSION['korisnik']['isAdmin']) echo 'admin.php'; else echo '#'; ?&gt;"&gt;Ulogovani kao: &lt;strong&gt;&lt;?php echo $_SESSION['korisnik']['ime']; ?&gt;&lt;?php if($_SESSION['korisnik']['isAdmin']) echo " (admin)"; ?&gt;&lt;/strong&gt;&lt;/a&gt;
+            &lt;/li&gt;
+            &lt;li class="nav-item"&gt;
+                &lt;a class="nav-link" href="odjava.php"&gt;Odjavi se&lt;/a&gt;
+            &lt;/li&gt;
+        &lt;?php }else{ ?&gt;
+          &lt;li class="nav-item &lt;?php if($currentPage == '/registracija.php') echo 'active'; ?&gt;"&gt;
+            &lt;a class="nav-link" href="registracija.php"&gt;Registracija&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li class="nav-item &lt;?php if($currentPage == '/prijava.php') echo 'active'; ?&gt;"&gt;
+            &lt;a class="nav-link" href="prijava.php"&gt;Prijava&lt;/a&gt;
+          &lt;/li&gt;
+        &lt;?php } ?&gt;
+        &lt;/ul&gt;
+      &lt;/div&gt;
+    &lt;/nav&gt;
+    &lt;!-- NAVBAR --&gt;
+</pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            Footer - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP4" aria-expanded="false" aria-controls="collapseExampleP4">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP4">
+    &lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+    &lt;script src="https://code.jquery.com/jquery-3.4.1.min.js"&gt;&lt;/script&gt;
+    &lt;script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"&gt;&lt;/script&gt;
+    &lt;!-- OWL CAROUSEL --&gt;
+    &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous"&gt;&lt;/script&gt;
+    &lt;script src="public/scripts/script.js"&gt;&lt;/script&gt;
+
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Is Admin - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP5">
+  require_once 'classes/Korisnik.php';
+
+  if(!Korisnik::ulogovan() || (Korisnik::ulogovan() && !$_SESSION['korisnik']['isAdmin'])){
+    header("Location: index.php");
+  }
+</pre>
+
+
 
 
 
@@ -341,14 +455,59 @@ if(isset($_POST['prijava'])){
         <!-- ---------- PHP ---------- -->
 
         <h1>NODEJS</h1>
-        <h1>JS</h1>
+        <!-- ---------- JS ---------- -->
+        <h1 class="mb-5"><u>JS</u></h1>
+
+
+
+        <p class="font-weight-bold text-success">
+          Animate Logo - Cinematic.
+          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+        </p>
+        <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  let logo = document.querySelector('a.navbar-brand');
+
+  setInterval(() => {
+    if(logo.style.color == ""){
+        logo.style.color = "#000";
+    }else if(logo.style.color == "rgb(255, 255, 255)"){
+        logo.style.color = "#000";
+    }else if(logo.style.color == "rgb(0, 0, 0)"){
+        logo.style.color = "#fff";
+    }
+  }, 1000);
+</pre>
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Get / Change Data Or Any Other Attribute - CheatSheet.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  buttons[i].dataset.target = "#collapseExample" + i; // If attr is data-index-here-comes in JS it will return dataset.indexHereComes
+  buttons[i].setAttribute("aria-controls", "collapseExample" + i);
+</pre>
+
+
+
+
+
+
+
+
+        <!-- ---------- JS ---------- -->
+
 
         <!-- ---------- HTML ---------- -->
         <div id="html" class="mb-5">
           <h1 class="mb-5"><u>HTML</u></h1>
           <p class="font-weight-bold text-success">
             Input With Pattern - S2S 2020.
-            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">+</button>
           </p>
           <hr>
 <pre class="collapse" id="collapseExample5">
@@ -359,7 +518,7 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Send Form To JS - Cvećara Mirković.
-            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample6" aria-expanded="false" aria-controls="collapseExample6">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample6" aria-expanded="false" aria-controls="collapseExample6">+</button>
           </p>
           <hr>
 <pre class="collapse" id="collapseExample6">
@@ -371,6 +530,125 @@ if(isset($_POST['prijava'])){
         </div>
         <!-- ---------- HTML ---------- -->
 
+        <!-- ---------- OWL CAROUSEL ---------- -->
+        <div id="html" class="mb-5">
+          <h1 class="mb-5"><u>OWL CAROUSEL</u></h1>
+
+          <p class="font-weight-bold text-success">
+            HTML
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;!-- OWL CAROSEL --&gt;
+  &lt;section id="banner-area"&gt;
+      &lt;div class="owl-carousel owl-theme"&gt;
+          &lt;?php foreach($filmovi as $film): ?&gt;
+              &lt;div class="item"&gt;
+                  &lt;img src="&lt;?php echo $film['slika']; ?&gt;" alt="Banner1"&gt;
+              &lt;/div&gt;
+          &lt;?php endforeach; ?&gt;
+      &lt;/div&gt;
+  &lt;/section&gt;
+  &lt;!-- OWL CAROSEL --&gt;
+</pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            CSS
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC1" aria-expanded="false" aria-controls="collapseExampleOC1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC1">
+  #banner-area img{
+    max-height: 700px;
+  }
+</pre>
+
+
+
+        <p class="font-weight-bold text-success">
+          JS
+          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC2" aria-expanded="false" aria-controls="collapseExampleOC2">+</button>
+        </p>
+        <hr>
+<pre class="collapse" id="collapseExampleOC2">
+// BANNER OWL CAROUSEL
+$("#banner-area .owl-carousel").owlCarousel({
+  dots: true,
+  items: 1,
+  loop: true,
+  autoplay: true,
+  autoplayTimeout: 2500,
+  autoplayHoverPause: true,
+  smartSpeed: 2000
+});
+
+// BANNER OWL CAROUSEL
+$("#banner-area .owl-carousel").owlCarousel({
+    dots: true,
+    items: 1
+});
+
+// TOP SALE OWL CAROUSEL
+$("#top-sale .owl-carousel").owlCarousel({
+    loop: true,
+    nav: true,
+    dots: false,
+    responsive: {
+        0: {
+            items: 1
+        },
+        600: {
+            items: 3
+        },
+        1000: {
+            items: 5
+        }
+    }
+});
+
+// NEW PHONES OWL CAROUSEL
+$("#new-phones .owl-carousel").owlCarousel({
+    loop: true,
+    nav: false,
+    dots: true,
+    responsive: {
+        0: {
+            items: 1
+        },
+        600: {
+            items: 3
+        },
+        1000: {
+            items: 5
+        }
+    }
+});
+
+// BLOGS OWL CAROUSEL
+$("#blogs .owl-carousel").owlCarousel({
+    loop: true,
+    nav: false,
+    dots: true,
+    responsive: {
+        0: {
+            items: 1
+        },
+        600: {
+            items: 3
+        }
+    }
+});
+
+</pre>
+
+
+
+        </div>
+        <!-- ---------- OWL CAROUSEL ---------- -->
+
       </div>
     </div>
   </div>
@@ -379,6 +657,7 @@ if(isset($_POST['prijava'])){
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="script.js"></script>
 </body>
 
 </html>
