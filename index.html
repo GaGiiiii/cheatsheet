@@ -14,11 +14,15 @@
   <div class="container">
     <div class="row">
       <div class="col">
+        <!-- ---------- PHP ---------- -->
         <div id="php">
           <h1 class="mb-5 mt-5"><u>PHP</u></h1>
-          <p class="font-weight-bold text-success">Form With Validation (Select, Radio Buttons) - S2S 2020.</p>
+          <p class="font-weight-bold text-success">
+            Form With Validation (Select, Radio Buttons) - S2S 2020.
+            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
+          </p>
           <hr>
-<pre>
+<pre class="collapse" id="collapseExample1">
 function ocisti($input){
   $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
   $input = trim($input);
@@ -111,26 +115,268 @@ if(isset($_POST['prijava'])){
   &lt;/section&gt;
   &lt;!-- -------- PRIJAVE ---------- --&gt;
 </pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            Header Already Sent Information - E-commerce 2020.
+            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExample2">
+  ob_start();
+</pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            Session Already Exists - Cinematic
+            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample3" aria-expanded="false" aria-controls="collapseExample3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExample3">
+  if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+  }
+</pre>
+
+
+          <p class="font-weight-bold text-success">
+            Database Class - Cinematic
+            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExample4">
+  if (session_status() == PHP_SESSION_NONE) {
+      session_start();
+  }
+
+  class Database{
+      private $host = "localhost"; // Host
+      private $db_name = "cinematic"; // DB Name
+      private $username = "root"; // DB Username
+      private $password = ""; // DB Password
+
+      private static $instance = null; // Instanca klase
+      public $connection = null; // Konekcija
+  
+      private function __construct(){    
+          $this->connection = mysqli_connect($this->host, $this->username, $this->password, $this->db_name);
+      }
+
+      public function getConnection(){
+          return $this->connection;
+      }
+      
+      public static function getInstance(){
+          if(!isset(self::$instance)){
+              self::$instance = new Database();
+          }
+
+          return self::$instance;
+      }   
+  }
+</pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            Film Class - Cinematic
+            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExampleP1" aria-expanded="false" aria-controls="collapseExampleP1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleP1">
+  require_once 'Database.php';
+
+  class Film{
+
+      public function dodaj($props){
+          $props = (object) $props;
+          // print_r($props);
+          $query = "INSERT INTO Film (naziv, žanr, trailer, trajanje, glumci, direktor, kontent, godina, slika, dan, vreme, uskoro) VALUES ('$props->nazivFilma2', '$props->zanr2', '$props->trailer2', '$props->trajanje2', '$props->glumci2', '$props->reziser2', '$props->sadrzaj2', '$props->godina2', '$props->slika2', '$props->dan2', '$props->vreme2', '$props->uskoro2')";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query) or die(mysqli_error(Database::getInstance()->getConnection()));
+
+          // print_r($query);
+          
+          if($result){
+              return true;
+          }
+
+          return false;
+      }
+
+      public static function uzmiSve(){
+          $query = "SELECT * FROM Film";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+          $filmovi = mysqli_fetch_all($result, MYSQLI_ASSOC);
+          
+          return $filmovi;
+      }
+
+      public static function vratiPoID($filmID){
+          $query = "SELECT * FROM Film WHERE id = $filmID";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+          $film = $result->fetch_assoc();
+          
+          return $film;
+      }
+
+      public static function izbrisi($filmID){
+          $query = "DELETE FROM Film WHERE id = $filmID LIMIT 1";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+
+          return $result;
+      }
+
+      public static function izmeni($props, $filmID){
+          $props = (object) $props;
+          $query = "UPDATE Film SET naziv = '$props->nazivFilma', žanr = '$props->zanr', trailer = '$props->trailer', trajanje = '$props->trajanje', glumci = '$props->glumci', direktor = '$props->reziser', kontent = '$props->sadrzaj', godina = '$props->godina', slika = '$props->slika', vreme = '$props->vreme', dan = '$props->dan', uskoro = '$props->uskoro' WHERE id = $filmID LIMIT 1";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query) or die(mysqli_error(Database::getInstance()->getConnection()));
+
+          return $result;
+      }
+
+  }
+</pre>
+
+
+
+            <p class="font-weight-bold text-success">
+              Korisnik Class - Cinematic
+              <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExampleP2" aria-expanded="false" aria-controls="collapseExampleP2">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleP2">
+  require_once 'Database.php'; // Pozivanje fajla gde je Database
+
+  class Korisnik{
+
+      public static function registruj($ime, $email, $password, $isAdmin){
+          $password = md5(md5($password)); // Hashovanje sifre sa md5
+          $query = "INSERT INTO Korisnik (ime, email, password, is_admin) VALUES ('$ime', '$email', '$password', '$isAdmin')";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+          
+          if($result){ // Ukoliko je query uspesan pravimo sesiju i vracamo true
+              self::napraviSession(mysqli_insert_id(Database::getInstance()->getConnection()), $ime, $email, $isAdmin);
+
+              return true;
+          }
+
+          return false;
+      }
+
+      public static function zauzetEmail($email){
+          $query = "SELECT email FROM Korisnik WHERE email = '$email'";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+          $korisnik = mysqli_fetch_array($result);
+
+          if($korisnik){
+              return true;
+          }
+
+          return false;
+      }
+
+      public static function zauzetoIme($ime){
+          $query = "SELECT ime FROM Korisnik WHERE ime = '$ime'";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+          $korisnik = mysqli_fetch_array($result);
+
+          if($korisnik){
+              return true;
+          }
+
+          return false;
+      }
+
+      public static function prijavi($email, $password){
+          $password = md5(md5($password));
+          $query = "SELECT id, ime, email, is_admin FROM Korisnik WHERE email = '$email' AND password = '$password'";
+          $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+
+          $korisnik = mysqli_fetch_array($result);
+
+          if($korisnik){
+              self::napraviSession($korisnik['id'], $korisnik['ime'], $korisnik['email'], $korisnik['is_admin']);
+
+              return true;
+          }
+
+          return false;
+      }
+
+      public static function napraviSession($id, $ime, $email, $isAdmin){
+          $_SESSION['korisnik'] = [
+              'id' => $id,
+              'ime' => $ime,
+              'email' => $email,
+              'isAdmin' => $isAdmin,
+          ];
+      }
+
+      public static function odjavi(){
+          // Gasimo i unistavamo sesiju nakon logout
+          session_unset();
+          session_destroy();
+      }
+
+      public static function ulogovan(){
+          // Ako je sesija aktivna znaci da je korisnik ulogovan i dalje.
+          if(isset($_SESSION['korisnik'])){
+              return true;
+          }
+
+          return false;
+      }
+
+  }
+</pre>
+
+
+
+
+
+
         </div>
+        <!-- ---------- PHP ---------- -->
 
         <h1>NODEJS</h1>
         <h1>JS</h1>
 
+        <!-- ---------- HTML ---------- -->
         <div id="html" class="mb-5">
           <h1 class="mb-5"><u>HTML</u></h1>
-          <p class="font-weight-bold text-success">Input With Pattern - S2S 2020.</p>
+          <p class="font-weight-bold text-success">
+            Input With Pattern - S2S 2020.
+            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">+</button>
+          </p>
           <hr>
-<pre>
+<pre class="collapse" id="collapseExample5">
   &lt;input type="tel" name="broj_telefona" class="form-control" id="broj-telefona" placeholder="Format: +381-XXXXXXX" value="&lt;?php echo $brojTelefona ?? ''; ?&gt;" pattern="\+[0-9]{3}-[0-9]{8,9}"&gt;
 </pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            Send Form To JS - Cvećara Mirković.
+            <button class="btn btn-primary btn-sm ml-2" type="button" data-toggle="collapse" data-target="#collapseExample6" aria-expanded="false" aria-controls="collapseExample6">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExample6">
+  &lt;form onsubmit="return validateForm(this)"&gt;&lt;/form&gt;
+</pre>
+
+
+
         </div>
+        <!-- ---------- HTML ---------- -->
+
       </div>
     </div>
   </div>
 
 
-
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
