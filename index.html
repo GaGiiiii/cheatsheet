@@ -84,7 +84,7 @@
 
 
           <p class="font-weight-bold text-success">
-            Film Class - Cinematic
+            Film / Knjiga Class - Cinematic, Neda
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP1" aria-expanded="false" aria-controls="collapseExampleP1">+</button>
           </p>
           <hr>
@@ -138,6 +138,50 @@
 
           return $result;
       }
+
+      public static function pripadaKorisniku($knjigaID, $korisnikID){
+        $query = "SELECT korisnik_id FROM Knjiga WHERE id = $knjigaID";
+        $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+        $red = mysqli_fetch_array($result);      
+
+        if($red['korisnik_id'] == $korisnikID){
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function sortirajPoCeni(){
+        $query = "SELECT * FROM Knjiga ORDER BY cena";
+        $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+        $knjige = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        
+        return $knjige;
+    }
+
+    public static function sortirajPoNazivu(){
+        $query = "SELECT * FROM Knjiga ORDER BY naslov";
+        $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+        $knjige = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        
+        return $knjige;
+    }
+
+    public static function trazi($tekst){
+        $query = "SELECT * FROM Knjiga WHERE naslov LIKE '%" . $tekst . "%'";
+        $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+        $knjige = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        return $knjige;
+    }
+
+    public static function nadjiKorisnika($korisnikID){
+      $query = "SELECT nadimak FROM Korisnik WHERE id = $korisnikID";
+      $result = mysqli_query(Database::getInstance()->getConnection(), $query);
+      $korisnik = mysqli_fetch_array($result);      
+
+      return $korisnik['nadimak'];
+    }
 
   }
 </pre>
@@ -616,6 +660,269 @@ if(isset($_POST['prijava'])){
 
 
 
+
+
+
+            <p class="font-weight-bold text-success">
+              Search - Neda
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleP5">
+  &lt;?php
+
+  require_once 'classes/Knjiga.php';
+  session_start();
+
+  if(isset($_POST['trazi'])){
+      $html2 = '';
+
+          $knjige = Knjiga::trazi($_POST['tekst']);
+
+          foreach($knjige as $knjiga){
+                  $html2 .= '&lt;div class="col-md-4 mb-3 mt-3"&gt;
+                      &lt;div class="card mb-3"&gt;
+                          &lt;h3 class="card-header"&gt;NASLOV: ' . $knjiga["naslov"] . '&lt;/h3&gt;
+                          &lt;div class="card-body"&gt;
+                              &lt;h5 class="card-title"&gt;AUTOR: ' . $knjiga["autor"] . '&lt;/h5&gt;
+                              &lt;h6 class="card-subtitle text-muted"&gt;Predlozio/la: ' . Knjiga::nadjiKorisnika($knjiga["korisnik_id"]) . '&lt;/h6&gt;
+                          &lt;/div&gt;
+                          &lt;div class="card-body"&gt;
+                              &lt;p class="card-text"&gt;OPIS: &lt;br&gt;' . $knjiga["opis"] . '&lt;/p&gt;
+                          &lt;/div&gt;
+                          &lt;ul class="list-group list-group-flush"&gt;
+                              &lt;li class="list-group-item"&gt;&lt;a href="' . $knjiga['prodavnica'] . '" class="card-link"&gt;Link do prodavnice&lt;/a&gt;&lt;/li&gt;
+                          &lt;/ul&gt;
+                          &lt;div class="card-body"&gt;';
+
+                              if(isset($_SESSION["korisnik"]) &amp;&amp; Knjiga::pripadaKorisniku($knjiga["id"], $_SESSION["korisnik"]["id"])){
+                                  $html2 .= '
+                                  &lt;a class="btn btn-warning btn-sm" role="button" data-toggle="collapse" href="#collapseEditForm' . $knjiga['id'] . '" aria-expanded="false" aria-controls="collapseEditForm"&gt;
+                                      &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt; Ažuriraj
+                                  &lt;/a&gt;
+                                  &lt;form method="POST" style="display: inline-block;"&gt;
+                                      &lt;input type="hidden" name="knjigaID" value="' . $knjiga['id'] . '"&gt;
+                                      &lt;button name="izbrisi" class="btn btn-sm btn-danger"&gt;Izbriši&lt;/button&gt;
+                                  &lt;/form&gt;
+                                  &lt;div class="collapse" id="collapseEditForm' . $knjiga['id'] . '" style="margin-top: 2rem; margin-bottom: 4rem;"&gt;
+                                      &lt;div class="well"&gt;
+                                          &lt;h4&gt;Popunite podatke o knjizi &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
+                                          &lt;form method="POST"&gt;
+                                              &lt;input type="hidden" name="knjiga2ID" value="' . $knjiga['id'] . '"&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" type="text" disabled value="Korisnik: ' . $_SESSION['korisnik']['nadimak'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="naslov2" type="text" placeholder="Naslov" value="' . $knjiga['naslov'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="autor2" type="text" placeholder="Autor" value="' . $knjiga['autor'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;textarea class="form-control" name="opis2" placeholder="Opis..." rows="5" cols="70"&gt;' . $knjiga['opis'] . '&lt;/textarea&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="cena2" type="number" placeholder="Cena u $" value="' . $knjiga['cena'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="link2" type="text" placeholder="Link prodavnice" value="' . $knjiga['prodavnica'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;button type="submit" class="btn btn-success" name="knjiga2" style="width: 100%;"&gt;Ažuriraj &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
+                                              &lt;/div&gt;
+                                          &lt;/form&gt;
+                                      &lt;/div&gt;
+                                  &lt;/div&gt;';
+
+                              }
+                              $html2 .= '
+                          &lt;/div&gt;
+                          &lt;div class="card-footer text-muted"&gt;
+                              CENA: ' . $knjiga["cena"] . '$
+                          &lt;/div&gt;
+                      &lt;/div&gt;
+                  &lt;/div&gt;';
+          }
+
+          if(count($knjige) &gt; 0){
+              echo $html2;
+          }
+
+  }
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                Sort - Neda
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleP5">
+  &lt;?php
+
+  require_once 'classes/Knjiga.php';
+  session_start();
+
+  if(isset($_POST['vrstaSorta'])){
+      $html2 = '';
+
+      if($_POST['vrstaSorta'] == 'cena'){
+          $knjige = Knjiga::sortirajPoCeni();
+
+          foreach($knjige as $knjiga){
+                  $html2 .= '&lt;div class="col-md-4 mb-3 mt-3"&gt;
+                      &lt;div class="card mb-3"&gt;
+                          &lt;h3 class="card-header"&gt;NASLOV: ' . $knjiga["naslov"] . '&lt;/h3&gt;
+                          &lt;div class="card-body"&gt;
+                              &lt;h5 class="card-title"&gt;AUTOR: ' . $knjiga["autor"] . '&lt;/h5&gt;
+                              &lt;h6 class="card-subtitle text-muted"&gt;Predlozio/la: ' . Knjiga::nadjiKorisnika($knjiga["korisnik_id"]) . '&lt;/h6&gt;
+                          &lt;/div&gt;
+                          &lt;div class="card-body"&gt;
+                              &lt;p class="card-text"&gt;OPIS: &lt;br&gt;' . $knjiga["opis"] . '&lt;/p&gt;
+                          &lt;/div&gt;
+                          &lt;ul class="list-group list-group-flush"&gt;
+                              &lt;li class="list-group-item"&gt;&lt;a href="' . $knjiga['prodavnica'] . '" class="card-link"&gt;Link do prodavnice&lt;/a&gt;&lt;/li&gt;
+                          &lt;/ul&gt;
+                          &lt;div class="card-body"&gt;';
+
+                              if(isset($_SESSION["korisnik"]) &amp;&amp; Knjiga::pripadaKorisniku($knjiga["id"], $_SESSION["korisnik"]["id"])){
+                                  $html2 .= '
+                                  &lt;a class="btn btn-warning btn-sm" role="button" data-toggle="collapse" href="#collapseEditForm' . $knjiga['id'] . '" aria-expanded="false" aria-controls="collapseEditForm"&gt;
+                                      &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt; Ažuriraj
+                                  &lt;/a&gt;
+                                  &lt;form method="POST" style="display: inline-block;"&gt;
+                                      &lt;input type="hidden" name="knjigaID" value="' . $knjiga['id'] . '"&gt;
+                                      &lt;button name="izbrisi" class="btn btn-sm btn-danger"&gt;Izbriši&lt;/button&gt;
+                                  &lt;/form&gt;
+                                  &lt;div class="collapse" id="collapseEditForm' . $knjiga['id'] . '" style="margin-top: 2rem; margin-bottom: 4rem;"&gt;
+                                      &lt;div class="well"&gt;
+                                          &lt;h4&gt;Popunite podatke o knjizi &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
+                                          &lt;form method="POST"&gt;
+                                              &lt;input type="hidden" name="knjiga2ID" value="' . $knjiga['id'] . '"&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" type="text" disabled value="Korisnik: ' . $_SESSION['korisnik']['nadimak'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="naslov2" type="text" placeholder="Naslov" value="' . $knjiga['naslov'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="autor2" type="text" placeholder="Autor" value="' . $knjiga['autor'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;textarea class="form-control" name="opis2" placeholder="Opis..." rows="5" cols="70"&gt;' . $knjiga['opis'] . '&lt;/textarea&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="cena2" type="number" placeholder="Cena u $" value="' . $knjiga['cena'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="link2" type="text" placeholder="Link prodavnice" value="' . $knjiga['prodavnica'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;button type="submit" class="btn btn-success" name="knjiga2" style="width: 100%;"&gt;Ažuriraj &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
+                                              &lt;/div&gt;
+                                          &lt;/form&gt;
+                                      &lt;/div&gt;
+                                  &lt;/div&gt;';
+
+                              }
+                              $html2 .= '
+                          &lt;/div&gt;
+                          &lt;div class="card-footer text-muted"&gt;
+                              CENA: ' . $knjiga["cena"] . '$
+                          &lt;/div&gt;
+                      &lt;/div&gt;
+                  &lt;/div&gt;';
+          }
+
+          echo $html2;
+      }else if($_POST['vrstaSorta'] == 'naziv'){
+          $knjige = Knjiga::sortirajPoNazivu();
+
+          foreach($knjige as $knjiga){
+              $html2 .= '&lt;div class="col-md-4 mb-3 mt-3"&gt;
+                      &lt;div class="card mb-3"&gt;
+                          &lt;h3 class="card-header"&gt;NASLOV: ' . $knjiga["naslov"] . '&lt;/h3&gt;
+                          &lt;div class="card-body"&gt;
+                              &lt;h5 class="card-title"&gt;AUTOR: ' . $knjiga["autor"] . '&lt;/h5&gt;
+                              &lt;h6 class="card-subtitle text-muted"&gt;Predlozio/la: ' . Knjiga::nadjiKorisnika($knjiga["korisnik_id"]) . '&lt;/h6&gt;
+                          &lt;/div&gt;
+                          &lt;div class="card-body"&gt;
+                              &lt;p class="card-text"&gt;OPIS: &lt;br&gt;' . $knjiga["opis"] . '&lt;/p&gt;
+                          &lt;/div&gt;
+                          &lt;ul class="list-group list-group-flush"&gt;
+                              &lt;li class="list-group-item"&gt;&lt;a href="' . $knjiga['prodavnica'] . '" class="card-link"&gt;Link do prodavnice&lt;/a&gt;&lt;/li&gt;
+                          &lt;/ul&gt;
+                          &lt;div class="card-body"&gt;';
+
+                              if(isset($_SESSION["korisnik"]) &amp;&amp; Knjiga::pripadaKorisniku($knjiga["id"], $_SESSION["korisnik"]["id"])){
+                                  $html2 .= '
+                                  &lt;a class="btn btn-warning btn-sm" role="button" data-toggle="collapse" href="#collapseEditForm' . $knjiga['id'] . '" aria-expanded="false" aria-controls="collapseEditForm"&gt;
+                                      &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt; Ažuriraj
+                                  &lt;/a&gt;
+                                  &lt;form method="POST" style="display: inline-block;"&gt;
+                                      &lt;input type="hidden" name="knjigaID" value="' . $knjiga['id'] . '"&gt;
+                                      &lt;button name="izbrisi" class="btn btn-sm btn-danger"&gt;Izbriši&lt;/button&gt;
+                                  &lt;/form&gt;
+                                  &lt;div class="collapse" id="collapseEditForm' . $knjiga['id'] . '" style="margin-top: 2rem; margin-bottom: 4rem;"&gt;
+                                      &lt;div class="well"&gt;
+                                          &lt;h4&gt;Popunite podatke o knjizi &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
+                                          &lt;form method="POST"&gt;
+                                              &lt;input type="hidden" name="knjiga2ID" value="' . $knjiga['id'] . '"&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" type="text" disabled value="Korisnik: ' . $_SESSION['korisnik']['nadimak'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="naslov2" type="text" placeholder="Naslov" value="' . $knjiga['naslov'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="autor2" type="text" placeholder="Autor" value="' . $knjiga['autor'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;textarea class="form-control" name="opis2" placeholder="Opis..." rows="5" cols="70"&gt;' . $knjiga['opis'] . '&lt;/textarea&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="cena2" type="number" placeholder="Cena u $" value="' . $knjiga['cena'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;input class="form-control" name="link2" type="text" placeholder="Link prodavnice" value="' . $knjiga['prodavnica'] . '"&gt;
+                                              &lt;/div&gt;
+                                              &lt;div class="form-group"&gt;
+                                                  &lt;button type="submit" class="btn btn-success" name="knjiga2" style="width: 100%;"&gt;Ažuriraj &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
+                                              &lt;/div&gt;
+                                          &lt;/form&gt;
+                                      &lt;/div&gt;
+                                  &lt;/div&gt;';
+
+                              }
+                              $html2 .= '
+                          &lt;/div&gt;
+                          &lt;div class="card-footer text-muted"&gt;
+                              CENA: ' . $knjiga["cena"] . '$
+                          &lt;/div&gt;
+                      &lt;/div&gt;
+                  &lt;/div&gt;';
+          }
+
+          echo $html2;
+      }
+  }
+</pre>
+
+
+
+
+
         </div>
         <!-- ---------- PHP ---------- -->
 
@@ -824,6 +1131,851 @@ $("#blogs .owl-carousel").owlCarousel({
 
         </div>
         <!-- ---------- OWL CAROUSEL ---------- -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <!-- ---------- AJAX ---------- -->
+          <div id="OWL" class="mb-5">
+            <h1 class="mb-5"><u>AJAX / .htaccess</u></h1>
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              .htaccess - Traversy Ajax
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  ## SOURCE: http://www.developphp.com/video/Miscellaneous/Semantic-URL-htaccess-Tutorial-SEO-Friendly-and-Clean-Links
+
+  # Turn Rewrite Engine On
+  
+  RewriteEngine on
+  
+  # Rewrite for user.php
+  
+  RewriteRule ^user/([0-9]+)$ user.php?id=$1 [NC,L]
+  
+  # NC makes the rule non case sensitive
+  # L makes this the last rule that this specific condition will match
+  # $ in the regular expression makes the matching stop so that "customblah" will not work
+  
+  
+  
+  # Rewrite for article.php?id=1&title=Title-Goes-Here
+  # RewriteRule ^article/([0-9]+)/([0-9a-zA-Z_-]+)$ article.php?id=$1&title=$2 [NC,L]
+</pre>
+
+
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              SQL FILE - Traversy Ajax
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  -- phpMyAdmin SQL Dump
+  -- version 5.0.2
+  -- https://www.phpmyadmin.net/
+  --
+  -- Host: 127.0.0.1
+  -- Generation Time: Aug 17, 2020 at 08:37 PM
+  -- Server version: 10.4.13-MariaDB
+  -- PHP Version: 7.4.8
+  
+  SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+  START TRANSACTION;
+  SET time_zone = "+00:00";
+  
+  
+  /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+  /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+  /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+  /*!40101 SET NAMES utf8mb4 */;
+  
+  --
+  -- Database: `ajax`
+  --
+  
+  -- --------------------------------------------------------
+  
+  --
+  -- Table structure for table `user`
+  --
+  
+  CREATE TABLE `user` (
+    `id` int(11) NOT NULL,
+    `name` varchar(40) NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  
+  --
+  -- Dumping data for table `user`
+  --
+  
+  INSERT INTO `user` (`id`, `name`) VALUES
+  (3, 'gagi'),
+  (4, 'dzadzi'),
+  (5, 'Djadji'),
+  (6, 'gagoj'),
+  (7, 'gagoli');
+  
+  --
+  -- Indexes for dumped tables
+  --
+  
+  --
+  -- Indexes for table `user`
+  --
+  ALTER TABLE `user`
+    ADD PRIMARY KEY (`id`);
+  
+  --
+  -- AUTO_INCREMENT for dumped tables
+  --
+  
+  --
+  -- AUTO_INCREMENT for table `user`
+  --
+  ALTER TABLE `user`
+    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  COMMIT;
+  
+  /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+  /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+  /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+</pre>
+
+
+
+
+
+
+
+
+                <p class="font-weight-bold text-success">
+                  sample.txt - Traversy Ajax
+                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                </p>
+                <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum dignissimos cum nam temporibus, itaque vitae maxime enim iste magni perspiciatis illo animi quae accusamus quasi maiores aspernatur qui perferendis? Ullam, quia. Magni laudantium accusantium exercitationem itaque, facilis quia nam, sint est illo sequi quod rerum aliquid doloribus? Numquam, est assumenda.
+</pre>
+
+
+
+
+                  <p class="font-weight-bold text-success">
+                    user.json - Traversy Ajax
+                    <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                  </p>
+                  <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  {
+    "id": 1,
+    "name": "Dzadzi",
+    "email": "dzadzi@gmail.com"
+  }
+</pre>
+
+
+
+
+
+
+
+
+                    <p class="font-weight-bold text-success">
+                      users.json - Traversy Ajax
+                      <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                    </p>
+                    <hr>
+<pre class="collapse" id="collapseExampleOC3">
+[
+  {
+      "id": 1,
+      "name": "Dzadzi",
+      "email": "dzadzi@gmail.com"
+  },
+  {
+      "id": 1,
+      "name": "RopeFS",
+      "email": "ropefs@gmail.com"
+  },
+  {
+      "id": 1,
+      "name": "Grog",
+      "email": "grog@gmail.com"
+  }
+]
+</pre>
+
+
+
+
+
+
+                <p class="font-weight-bold text-success">
+                  user.php - Traversy Ajax
+                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                </p>
+                <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;?php
+
+  if(isset($_GET['id'])){
+      $id = $_GET['id'];
+      $connection = mysqli_connect('localhost', 'root', '', 'ajax');
+      $query = "SELECT * FROM User WHERE id = $id";
+      $result = mysqli_query($connection, $query);
+  
+      $user = mysqli_fetch_all($result, MYSQLI_ASSOC);
+      // print_r($user);
+  
+      echo "&lt;strong&gt;ID: &lt;/strong&gt;" . $user[0]['id'] . "&lt;br&gt;";
+      echo "&lt;strong&gt;Name: &lt;/strong&gt;" . $user[0]['name'] . "&lt;br&gt;";
+  }else{
+      echo "No selected user.";
+  }
+</pre>
+
+
+
+
+
+                <p class="font-weight-bold text-success">
+                  users.php - Traversy Ajax
+                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                </p>
+                <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;?php
+
+  $connection = mysqli_connect('localhost', 'root', '', 'ajax');
+  $query = "SELECT * FROM User";
+  $result = mysqli_query($connection, $query);
+
+  $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+  echo json_encode($users);
+</pre>
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                proccess.php - Traversy Ajax
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;?php
+
+  $connection = mysqli_connect('localhost', 'root', '', 'ajax');
+
+
+  echo "Processing...\n";
+
+  if(isset($_GET['name'])){
+      echo 'GET: Your name is: ' . $_GET['name'];
+  }
+
+  if(isset($_POST['name'])){
+      $name = $_POST['name'];
+      $name = mysqli_real_escape_string($connection, $name);
+      
+      $query = "INSERT INTO User (name) VALUES ('$name')";
+
+      if(mysqli_query($connection, $query)){
+          echo 'User Added';
+      }else{
+          echo 'Error: ' . mysqli_error($connection);
+      }
+
+
+      echo '\nPOST: Your name is: ' . $_POST['name'];
+  }
+
+
+  // FOR FETCH API !!! 
+  // https://codepen.io/dericksozo/post/fetch-api-json-php
+
+  $contentType = isset($_SERVER["CONTENT_TYPE"]) ? trim($_SERVER["CONTENT_TYPE"]) : '';
+
+  if ($contentType === "application/json") {
+      //Receive the RAW post data.
+      $content = trim(file_get_contents("php://input"));
+
+      //print_r($content); // Prints JSON That we sent
+
+      $decoded = json_decode($content, true);
+      $name = $decoded['name'];
+
+      //print_r($decoded); // Prints associative array
+
+      //If json_decode failed, the JSON is invalid.
+      if(is_array($decoded)) {
+          $query = "INSERT INTO User (name) VALUES ('$name')";
+
+          if(mysqli_query($connection, $query)){
+              echo "User $name added.";
+          }else{
+              echo 'Error: ' . mysqli_error($connection);
+          }
+      } else {
+          // Send error back to user.
+      }
+  }
+</pre>
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            XHR File - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+      &lt;meta charset="UTF-8"&gt;
+      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+      &lt;title&gt;Ajax 1 - Text File&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+      
+      &lt;button id="button"&gt;Get Text File&lt;/button&gt;
+  
+      &lt;script&gt;
+  
+          const button = document.getElementById('button');
+          button.addEventListener('click', loadText);
+  
+          function loadText(){
+              
+              let xhr = new XMLHttpRequest(); // XHR Object
+  
+              // OPEN - type, url, async
+              xhr.open('GET', 'sample.txt', true);
+  
+              // OPTIONAL - used for loaders
+              xhr.onprogress = function(){
+                  // Here we put loading icon.
+              }
+  
+              // ONLOAD
+              xhr.onload = function(){ // Function is callback
+                  if(xhr.status == 200){ // this.status
+                      console.log(this.responseText);
+                  }
+              }
+  
+              xhr.onerror = function(){ // We use this if we use ONLOAD
+                  console.log('Request Error.');
+              }
+  
+              xhr.send(); // Sending Request
+          }
+  
+      &lt;/script&gt;
+  
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+
+
+
+
+
+
+                <p class="font-weight-bold text-success">
+                  XHR JSON - Traversy Ajax
+                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                </p>
+                <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+      &lt;meta charset="UTF-8"&gt;
+      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+      &lt;title&gt;Ajax 2 - JSON&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+      
+      &lt;button id="button"&gt;Get User&lt;/button&gt;
+      &lt;button id="button2"&gt;Get Users&lt;/button&gt;
+  
+      &lt;script&gt;
+  
+          const button = document.getElementById('button');
+          const button2 = document.getElementById('button2');
+          button.addEventListener('click', loadUser);
+          button2.addEventListener('click', loadUsers);
+  
+          function loadUser(){
+              let xhr = new XMLHttpRequest();
+              
+              xhr.open('GET', 'user.json', true);
+  
+              xhr.onload = () =&gt; { // If we use lambda expression we can't use this
+                  if(xhr.status == 200){
+                      let user = JSON.parse(xhr.responseText);
+                      console.log(user.name);
+                  }
+              }
+  
+              xhr.onerror = () =&gt; {
+                  console.log('Request Error.');
+              }
+  
+              xhr.send();
+          }
+  
+          function loadUsers(){
+              let xhr = new XMLHttpRequest();
+              
+              xhr.open('GET', 'users.json', true);
+  
+              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
+                  if(xhr.status == 200){
+                      let users = JSON.parse(xhr.responseText);
+                      console.log(users[0]);
+                      console.log(users[1]);
+                      console.log(users[2]);
+                  }
+              }
+  
+              xhr.onerror = () =&gt; {
+                  console.log('Request Error.');
+              }
+  
+              xhr.send();
+          }
+  
+      &lt;/script&gt;
+  
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              XHR GITHUB API - Traversy Ajax
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+      &lt;meta charset="UTF-8"&gt;
+      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+      &lt;title&gt;Ajax 3 - External API&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+      
+      &lt;button id="button"&gt;Get Github Users&lt;/button&gt;
+  
+      &lt;script&gt;
+  
+          const button = document.getElementById('button');
+          button.addEventListener('click', loadGithubUsers);
+  
+          function loadGithubUsers(){
+              let xhr = new XMLHttpRequest();
+              
+              xhr.open('GET', 'https://api.github.com/users', true);
+  
+              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
+                  if(xhr.status == 200){
+                      let users = JSON.parse(xhr.responseText);
+                      console.log(users);
+                  }
+              }
+  
+              xhr.onerror = () =&gt; {
+                  console.log('Request Error.');
+              }
+  
+              xhr.send();
+          }
+  
+      &lt;/script&gt;
+  
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+
+
+
+
+
+
+                    <p class="font-weight-bold text-success">
+                      XHR PHP FORMS - Traversy Ajax
+                      <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                    </p>
+                    <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+      &lt;meta charset="UTF-8"&gt;
+      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+      &lt;title&gt;Ajax 4 - PHP Forms&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+      
+      &lt;button id="button"&gt;Get Name&lt;/button&gt;
+  
+      &lt;h1&gt;NORMAL GET FORM&lt;/h1&gt;
+      &lt;form method="GET" action="process.php"&gt;
+          &lt;input type="text" name="name" id="name"&gt;
+          &lt;input type="submit" name="submit" id="submit" value="Submit"&gt;
+      &lt;/form&gt;
+  
+      &lt;h1&gt;AJAX GET FORM&lt;/h1&gt;
+      &lt;form id="getForm"&gt;
+          &lt;input type="text" name="name" id="name2"&gt;
+          &lt;input type="submit" name="submit" id="submit2" value="Submit"&gt;
+      &lt;/form&gt;
+  
+      &lt;h1&gt;NORMAL POST FORM&lt;/h1&gt;
+      &lt;form method="POST" action="process.php"&gt;
+          &lt;input type="text" name="name" id="name3"&gt;
+          &lt;input type="submit" name="submit" id="submit3" value="Submit"&gt;
+      &lt;/form&gt;
+  
+      &lt;h1&gt;AJAX POST FORM&lt;/h1&gt;
+      &lt;form id="postForm"&gt;
+          &lt;input type="text" name="name" id="name4"&gt;
+          &lt;input type="submit" name="submit" id="submit4" value="Submit"&gt;
+      &lt;/form&gt;
+  
+  
+      &lt;script&gt;
+  
+          const button = document.getElementById('button');
+          const form = document.getElementById('getForm');
+          const form2 = document.getElementById('postForm');
+          button.addEventListener('click', loadName);
+          form.addEventListener('submit', loadNameGet);
+          form2.addEventListener('submit', loadNamePost);
+  
+          function loadName(){
+              let xhr = new XMLHttpRequest();
+              
+              xhr.open('GET', 'process.php?name=Dzadzi', true);
+  
+              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
+                  if(xhr.status == 200){
+                      console.log(xhr.responseText);
+                  }
+              }
+  
+              xhr.onerror = () =&gt; {
+                  console.log('Request Error.');
+              }
+  
+              xhr.send();
+          }
+  
+          function loadNameGet(event){
+              event.preventDefault();
+  
+              let xhr = new XMLHttpRequest();
+              let name = document.getElementById('name2');
+              
+              xhr.open('GET', 'process.php?name=' + name.value, true);
+  
+              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
+                  if(xhr.status == 200){
+                      console.log(xhr.responseText);
+                  }
+              }
+  
+              xhr.onerror = () =&gt; {
+                  console.log('Request Error.');
+              }
+  
+              xhr.send();
+          }
+  
+          function loadNamePost(event){
+              event.preventDefault();
+  
+              let xhr = new XMLHttpRequest();
+              let name = document.getElementById('name4');
+              let params = 'name=' + name.value;
+  
+              xhr.open('POST', 'process.php', true);
+              xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  
+              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
+                  if(xhr.status == 200){
+                      console.log(xhr.responseText);
+                  }
+              }
+  
+              xhr.onerror = () =&gt; {
+                  console.log('Request Error.');
+              }
+  
+              xhr.send(params);
+          }
+  
+      &lt;/script&gt;
+  
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                XHR GET DATA FROM DATABASE - Traversy Ajax
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+      &lt;meta charset="UTF-8"&gt;
+      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+      &lt;title&gt;Ajax 5 - Get From Database&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+      
+      &lt;button id="button"&gt;Get Users&lt;/button&gt;
+  
+      &lt;script&gt;
+  
+          const button = document.getElementById('button');
+          button.addEventListener('click', loadUsers);
+  
+          function loadUsers(){
+              let xhr = new XMLHttpRequest();
+              
+              xhr.open('GET', 'users.php', true);
+  
+              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
+                  if(xhr.status == 200){
+                      let users = JSON.parse(xhr.responseText);
+                      console.log(users);
+                  }
+              }
+  
+              xhr.onerror = () =&gt; {
+                  console.log('Request Error.');
+              }
+  
+              xhr.send();
+          }
+  
+      &lt;/script&gt;
+  
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+
+
+
+
+
+                <p class="font-weight-bold text-success">
+                  FETCH - Traversy Ajax
+                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+                </p>
+                <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+      &lt;meta charset="UTF-8"&gt;
+      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+      &lt;title&gt;Fetch&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+      
+      &lt;button id="button"&gt;Get Users&lt;/button&gt;
+  
+      &lt;h1&gt;POST FORM&lt;/h1&gt;
+      &lt;form id="postForm"&gt;
+          &lt;input type="text" name="name" id="name"&gt;
+          &lt;input type="submit" name="submit" id="submit" value="Submit"&gt;
+      &lt;/form&gt;
+  
+      &lt;script&gt;
+  
+          const button = document.getElementById('button');
+          const form = document.getElementById('postForm');
+          button.addEventListener('click', loadUsers);
+          form.addEventListener('submit', sendUser);
+  
+          function loadUsers(){
+              
+              fetch('users.php').then(res =&gt; res.json()).then((data) =&gt; {
+                  console.log(data);
+                  data.forEach(user =&gt; {
+                      console.log(user.name);
+                  });
+  
+              }).catch((error) =&gt; {
+                  console.log(error);
+              });
+  
+          }
+  
+          function sendUser(event){
+              event.preventDefault();
+  
+              let name = document.getElementById('name');
+  
+              fetch('process.php', {
+                  method: "POST",
+                  headers: {
+                      'Accept': 'application/json, text/plain, */*',
+                      'Content-type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                      name: name.value,
+                  })
+              }).then(res =&gt; res.text()).then(data =&gt; console.log(data)).catch(err =&gt; console.log(err));
+          }
+  
+      &lt;/script&gt;
+  
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+            <p class="font-weight-bold text-success">
+              Sort / Search - Neda
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  const form = document.getElementById('sortiraj-forma');
+  const select = document.getElementById('sortiraj-select');
+  
+  const traziForm = document.getElementById('trazi-form');
+  const traziInput = document.getElementById('trazi-input');
+  
+  
+  form.addEventListener('submit', (event) => {
+      event.preventDefault();
+  
+      let izbor = select.options[select.selectedIndex].value;
+  
+      $.ajax({
+          url: 'sortiraj.php',
+          type: 'POST',
+          data: {
+              vrstaSorta: izbor
+          },
+          success: (response) => {
+              console.log(response)
+              document.getElementById('knjige-container').innerHTML = response;
+          }
+      });
+  });
+  
+  traziForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+  
+      let unetiTekst = traziInput.value;
+  
+      $.ajax({
+          url: 'trazi.php',
+          type: 'POST',
+          data: {
+              trazi: true,
+              tekst: unetiTekst
+          },
+          success: (response) => {
+              console.log(response)
+              if(response != ''){
+                  document.getElementById('knjige-container').innerHTML = response;
+              }
+          }
+      });
+  });
+</pre>
+  
+  
+  
+  
+          </div>
+          <!-- ---------- AJAX ---------- -->
 
       </div>
     </div>
