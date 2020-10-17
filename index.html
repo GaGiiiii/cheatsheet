@@ -932,6 +932,1993 @@ if(isset($_POST['prijava'])){
         <!-- ---------- NODEJS ---------- -->
         <div id="NODEJS" class="mb-5">
           <h1 class="mb-5"><u>NODEJS</u></h1>
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Database Config - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  /* ********** DB CONFIG ********** */
+
+  module.exports = {
+    database: 'mongodb://admin:admin123@ds135068.mlab.com:35068/dfd',
+    secret: 'dfd'
+  }
+</pre>
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                Passport Config - DFD.
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const LocalStrategy = require('passport-local').Strategy;
+  const UserModel = require('../models/user.model');
+  const config = require('../config/database');
+  const bcrypt = require('bcryptjs');
+  
+  module.exports = (passport) => {
+    // Local Strategy
+  
+    passport.use(new LocalStrategy((username, password, done) => {
+      // Match Username
+  
+      let query = {
+        username: username
+      };
+  
+      UserModel.findOne(query, (error, user) => {
+        if(error){
+          throw error;
+        }
+  
+        if(!user){
+          return done(null, false, {
+            message: 'No User Found'
+          });
+        }
+  
+        // Match Password
+  
+        bcrypt.compare(password, user.password, (error, isMatch) => {
+          if(error){
+            throw error;
+          }
+  
+          if(isMatch){
+            return done(null, user);
+          }else{
+            return done(null, false, {
+              message: 'Wrong Password'
+            });
+          }
+        })
+      });
+  
+    }));
+  
+    passport.serializeUser((user, done) => {
+      done(null, user.id);
+    });
+  
+    passport.deserializeUser((id, done) => {
+      UserModel.findById(id, (error, user) => {
+        done(error, user);
+      });
+    });
+  }
+</pre>
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Comment Controller (async, await) - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  /* ********** MODELS ********** */
+
+  const CommentModel = require('../models/comment.model');
+  const UserModel = require('../models/user.model');
+  const MovieModel = require('../models/movie.model');
+  
+  /* ********** OPERATIONS ********** */
+  
+      /* ********** CREATE ********** */
+  
+          exports.create = (req, res, next) => {
+  
+            // Create Comment Object
+  
+            let comment = new CommentModel({
+              body: req.body.commentBody,
+              author: req.user._id,
+              movie: req.body.movieID
+            });
+  
+            // Save Comment
+  
+            comment.save(async (error) => {
+              if(!error){
+  
+                // Push Comment To Movie / User Comments Array | Relationships
+  
+                await UserModel.findById(comment.author, (error, user) => {
+                  if(error)
+                    return next(error);
+              
+                  user.comments.push(comment._id);
+                  user.save();    
+                });
+  
+                await MovieModel.findById(comment.movie, (error, movie) => {
+                  if(error)
+                    return next(error);
+              
+                  movie.comments.push(comment._id);
+                  movie.save();    
+                });
+  
+                req.flash('createdComment', 'Comment Successfully Sent.')
+                res.redirect('/movie/' + req.body.movieID);
+              }else{
+                  return next(error);
+              }
+            });
+          };
+  
+      /* ********** UPDATE ********** */
+  
+          exports.update = (req, res, next) => {
+            CommentModel.findByIdAndUpdate(req.params.id, {
+              body: req.body.commentBodyEdit
+            }, (error, comment) => {
+              if(error)
+                return next(error);
+              
+              req.flash('updatedComment', 'Comment Successfully Updated.')
+              res.redirect('/movie/' + req.body.movieID);
+            });
+          };
+  
+      /* ********** DELETE ********** */
+  
+          exports.delete = (req, res, next) => {
+            CommentModel.findByIdAndRemove(req.params.id, (error, comment) => {
+              if(error){
+                return next(error);
+              }
+  
+              // Remove Comment From Movie / User Comments Array
+  
+              UserModel.findById(comment.author, (error, user) => {
+                if(error)
+                  return next(error);
+            
+                  // const index = user.comments.indexOf(req.params.id);
+                  // if (index > -1) {
+                  //   user.comments.splice(index, 1);
+                  // }
+  
+                user.comments.pull({_id: req.params.id});
+                user.save();
+              });
+  
+              MovieModel.findById(comment.movie, (error, movie) => {
+                if(error)
+                  return next(error);
+            
+                  // const index = movie.comments.indexOf(req.params.id);
+                  // if (index > -1) {
+                  //   movie.comments.splice(index, 1);
+                  // }
+  
+  
+                  movie.comments.pull({_id: req.params.id});
+                  movie.save();  
+              });
+  
+              req.flash('deletedComment', 'Comment Successfully Deleted.')
+              res.redirect('/movie/' + req.body.movieID);
+            });
+          };
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              Like Controller - DFD.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  /* ********** MODELS ********** */
+
+  const MovieModel = require('../models/movie.model');
+  const UserModel = require('../models/user.model');
+  const CommentModel = require('../models/comment.model');
+  const LikeModel = require('../models/like.model');
+  
+  /* ********** OPERATIONS ********** */
+  
+      /* ********** CREATE ********** */
+  
+          exports.create = (req, res, next) => {
+              let movieName; // We Need This Name When We Redirect
+  
+              // Create Like Object
+  
+              let like = new LikeModel({
+                  author: req.user._id,
+                  movie: req.params.id
+                });
+  
+                // Save Like
+              
+                like.save(async (error) => {
+                  if(!error){
+  
+                  // Push Like To Movie / User Likes Array | Relationships
+              
+                  await UserModel.findById(like.author, (error, user) => {
+                      if(error)
+                        return next(error);
+                  
+                      user.likes.push(like._id);
+                      user.save();    
+                    });
+              
+                    await MovieModel.findById(like.movie, (error, movie) => {
+                      if(error)
+                        return next(error);
+                  
+                      movieName = movie.name;
+                      movie.likes.push(like._id);
+                      movie.save();    
+                    });
+              
+                    req.flash('createdLike', 'Movie "' + movieName + '" Liked.');
+                    res.redirect('/movie/' + req.params.id);
+                  }else{
+                      return next(error);
+                  }
+                });
+          };
+  
+      /* ********** DELETE ********** */
+  
+          exports.delete = (req, res, next) => {
+            let movieName; // For Redirect
+  
+            LikeModel.findByIdAndRemove(req.params.likeid, async (error, like) => {
+              if(error){
+                return next(error);
+              }
+  
+              // Remove Like From Movie / User Likes Array | Relationships
+  
+              await UserModel.findById(like.author, (error, user) => {
+                if(error)
+                  return next(error);
+            
+                  // const index = user.movies.indexOf(req.params.id);
+                  // if (index > -1) {
+                  //   user.movies.splice(index, 1);
+                  // }
+  
+                user.likes.pull({_id: req.params.likeid});
+                user.save(); 
+              });
+  
+              await MovieModel.findById(like.movie, (error, movie) => {
+                if(error)
+                  return next(error);
+            
+                  // const index = user.movies.indexOf(req.params.id);
+                  // if (index > -1) {
+                  //   user.movies.splice(index, 1);
+                  // }
+  
+                movieName = movie.name;
+                movie.likes.pull({_id: req.params.likeid});
+                movie.save(); 
+              });
+  
+              req.flash('deletedLike', 'Movie "' + movieName + '" Unliked.');
+              res.redirect('/movie/' + req.params.id);
+            });
+          };
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            User Controller Populate Chain - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  /* ********** MODELS ********** */
+
+  const UserModel = require('../models/user.model');
+  const bcrypt = require('bcryptjs');
+  const passport = require('passport');
+  
+  /* ********** OPERATIONS ********** */
+  
+      /* ********** REGISTER ********** */
+  
+          exports.registerView = (req, res) => {
+            res.render('user/registerORlogin' ,{
+              title: 'Register Here',
+              layout: 'main',
+              registering: true
+            });
+          };
+  
+          exports.register = (req, res, next) => {
+            let confirmPasswordError = false;
+            let isValid = false;
+            let beforeHash;
+  
+            // Create User Object
+  
+            let user = new UserModel({
+              username: req.body.username,
+              email: req.body.email,
+              password: req.body.password
+            });
+  
+            beforeHash = user.password;
+  
+            user.validate((error) => {
+              if(beforeHash !== req.body.confirmPassword){
+                confirmPasswordError = true;
+              }
+  
+              if(!error && !confirmPasswordError){
+                isValid = true;
+              }else{
+                if((error && error.name == 'ValidationError') || confirmPasswordError){
+                  handleValidationErrors(error, req.body, confirmPasswordError);
+                }else
+                  console.log("Error: " + error);
+              }
+  
+              // Hash
+  
+              bcrypt.genSalt(10, (error, salt) => {
+                bcrypt.hash(user.password, salt, (error, hash) => {
+                  if(error){
+                    console.log("Error: " + error);
+            
+                    return next(error);
+                  }
+            
+                  user.password = hash;
+                  
+                  if(isValid){
+                    user.save();
+                
+                    req.flash('userRegistered', 'Welcome To DFD "' + req.body.username + '" You Can Now Login.');
+                    res.redirect('/');
+                  }else{
+                    res.render("user/registerORlogin", {
+                      title: 'Register Here',
+                      layout: 'main',
+                      user: req.body,
+                      registering: true
+                    });
+                  }
+                });
+              });
+            });
+  
+          };
+  
+      /* ********** LOGIN ********** */
+  
+          exports.loginView = (req, res) => {
+            res.render('user/registerORlogin' ,{
+              title: 'Login Here',
+              layout: 'main',
+              registering: false,
+              message: req.flash('error'),
+              notLoggedIn: req.flash('notLoggedIn')
+            });
+          };
+  
+          exports.login = (req, res, next) => {
+            passport.authenticate('local', {
+              successRedirect: '/',
+              failureRedirect: '/login',
+              failureFlash: true,
+              successFlash: true,
+            })(req, res, next);
+  
+            req.flash('success', 'Welcome Back "' + req.body.username + '".');
+          };
+  
+      /* ********** LOGOUT ********** */
+  
+          exports.logout = (req, res, next) => {
+            if(!req.isAuthenticated()){
+              req.flash('notLoggedIn', "Please Login.");
+              res.redirect('/login');
+  
+              return(next);
+            }
+  
+            req.flash('userLoggedOut', 'See Ya Later "' + req.user.username + '".');
+            req.logout();
+            res.redirect('/');
+          };
+  
+      /* ********** PROFILE ********** */
+  
+          exports.profileView = (req, res, next) => {
+            UserModel.findById(req.params.id, (error, user) => {
+              if(error){
+                return next(error);
+              }
+  
+              res.render('user/profile', {
+                // title: 'Update Movie "' + movie.name + '".',
+                layout: 'main',
+                user: user,
+              });
+            }).populate('movies').populate('comments').populate({
+              path: 'likes',
+              populate:{
+                path: 'movie',
+                model: 'MovieModel',
+              }
+            });
+          };
+  
+  /* ********** METHODS ********** */
+  
+      function handleValidationErrors(error, body, confirmPasswordError){
+        if(error){
+          for(field in error.errors){
+            switch(error.errors[field].path){
+              case 'username':
+                body['usernameError'] = error.errors[field].message;
+                break;
+              case 'email':
+                body['emailError'] = error.errors[field].message;
+                break;
+              case 'password':
+                body['passwordError'] = error.errors[field].message;
+                break;
+            }
+          }
+        }
+  
+        if(confirmPasswordError){
+          body['confirmPasswordError'] = 'Passwords Do Not Match.';
+        }
+      }
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Movie Controller - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  /* ********** MODELS ********** */
+
+  const MovieModel = require('../models/movie.model');
+  const UserModel = require('../models/user.model');
+  const CommentModel = require('../models/comment.model');
+  const LikeModel = require('../models/like.model');
+  
+  /* ********** OPERATIONS ********** */
+  
+      /* ********** GET ALL ********** */
+  
+          exports.getAll = function (req, res) {
+            MovieModel.find((error, movies) => {
+              if(error){
+                console.log('Error | getAllMovies.' + error);
+              }else{
+  
+                let dates = new Array();
+                let options = { year: 'numeric', month: 'long', day: 'numeric' };
+  
+                movies.forEach((movie) => {
+                  let date = movie.created_at;
+                  date = date.toLocaleDateString("en-US", options);
+                  dates.push(date);
+                });
+  
+                res.render('index' , {
+                  layout: 'main',
+                  createdMovie: req.flash('createdMovie'),
+                  deletedMovie: req.flash('deletedMovie'),
+                  userRegistered: req.flash('userRegistered'),
+                  userLoggedOut: req.flash('userLoggedOut'),
+                  alreadyLoggedIn: req.flash('alreadyLoggedIn'),
+                  message: req.flash('error'),
+                  success: req.flash('success'),
+                  movies: movies,
+                  dates: dates
+                });
+              }
+            }).populate('author');
+          };
+  
+      /* ********** CREATE ********** */
+  
+          exports.createView = (req, res) => {
+            res.render('movie/createORupdate' ,{
+              title: 'Suggest New Movie',
+              layout: 'main'
+            });
+          };
+  
+          exports.create = (req, res, next) => {
+  
+            // Create Movie Object
+  
+            let movie = new MovieModel({
+              name: req.body.name,
+              description: req.body.description,
+              image: req.body.image,
+              author: req.user._id
+            });
+  
+            // Save Movie
+  
+            movie.save((error) => {
+              if(!error){
+  
+                // Push Movie User Movies Array | Relationships
+  
+                UserModel.findById(movie.author, (error, user) => {
+                  if(error)
+                    return next(error);
+              
+                  user.movies.push(movie._id);
+                  user.save();    
+                });
+  
+                req.flash('createdMovie', 'Movie "' + req.body.name + '" Successfully Suggested.')
+                res.redirect('/');
+              }else{
+                if(error.name == 'ValidationError'){
+                  handleValidationErrors(error, req.body);
+                  res.render("movie/createORupdate", {
+                    title: "Suggest New Movie",
+                    movie: req.body,
+                    userLel: req.user
+                  });
+                }
+                else
+                  console.log("Error: " + error);
+              }
+            });
+          };
+  
+      /* ********** READ ********** */
+  
+          exports.read = (req, res, next) => {
+  
+            // console.log("\n\n\n\n\n******************************")
+            // console.log("USAO U READ")
+            // console.log("******************************")
+  
+            let correctUser = false;
+            let alreadyLiked = false;
+            let likeID;
+  
+            // Find Movie 
+  
+            MovieModel.findById(req.params.id, (error, movie) => {
+  
+              // console.log("******************************")
+              // console.log("MOVIE FIND")
+              // console.log(movie);
+              // console.log("******************************")
+  
+              if(!movie)
+                return next(); // Failed To Cast Ako Nema Slike
+  
+              if(error){
+                return next(error);
+              }
+  
+              // Find User For That Movie 
+  
+              UserModel.findById(movie.author, (error, user) => {
+  
+                // console.log("******************************")
+                // console.log("USER FIND")
+                // console.log(user);
+                // console.log("******************************")
+                
+                if(error)
+                  return next(error);
+  
+                // console.log("REQ: " + req.user);
+                // console.log("U: " + user);
+  
+                // Check If User Is Author So He Can Edit And Delete Movie
+                
+                if(req.user && user && String(req.user._id) == String(user._id)){
+                  correctUser = true
+                }
+  
+                // Check To See If User Already Liked The Movie 
+  
+                if(req.user){
+                  movie.likes.forEach((like) => {
+  
+                    req.user.likes.forEach((userLike) => {
+                      if(String(like) == String(userLike)){
+                        alreadyLiked = true;
+                        likeID = like;
+                      }
+                    });    
+            
+                  });
+                }
+  
+                let options = { year: 'numeric', month: 'long', day: 'numeric' };
+                let date = movie.created_at;
+                date = date.toLocaleDateString("en-US", options);
+  
+                res.render('movie/read' , {
+                  layout: 'main',
+                  movie: movie,
+                  date: date,
+                  updatedMovie: req.flash('updatedMovie'),
+                  notAuthorized: req.flash('notAuthorized'),
+                  createdComment: req.flash('createdComment'),
+                  updatedComment: req.flash('updatedComment'),
+                  deletedComment: req.flash('deletedComment'),
+                  createdLike: req.flash('createdLike'),
+                  deletedLike: req.flash('deletedLike'),
+                  user: user,
+                  correctUser: correctUser,
+                  alreadyLiked: alreadyLiked,
+                  likeID: likeID,
+                });
+              });
+  
+            }).populate({
+              path: 'comments',
+              populate:{
+                path: 'author',
+                model: 'UserModel',
+                populate: {
+                  path: 'likes',
+                  model: 'LikeModel'
+                }
+              }
+            });
+          };
+  
+          // SAME AS ABOVE, ONLY ONE DIFFERENCE, OPTIMIZE THIS !!!!!!!!!!!! TODO 
+  
+          exports.readComment = (req, res, next) => {
+            let correctUser = false;
+            let alreadyLiked = false;
+            let likeID;
+            let commentID = req.params.commentID;
+            
+            MovieModel.findById(req.params.id, (error, movie) => {
+  
+              if(error){
+                return next(error);
+              }
+  
+              UserModel.findById(movie.author, (error, user) => {
+                if(error)
+                  return next(error);
+  
+  
+                // console.log("REQ: " + req.user);
+                // console.log("U: " + user);
+                
+                if(req.user && user && String(req.user._id) == String(user._id)){
+                  correctUser = true
+                }
+  
+                if(req.user){
+                  movie.likes.forEach((like) => {
+  
+                    req.user.likes.forEach((userLike) => {
+                      if(String(like) == String(userLike)){
+                        alreadyLiked = true;
+                        likeID = like;
+                      }
+                    });    
+            
+                  });
+                }
+  
+                let options = { year: 'numeric', month: 'long', day: 'numeric' };
+                let date = movie.created_at;
+                date = date.toLocaleDateString("en-US", options)
+  
+                res.render('movie/read' , {
+                  layout: 'main',
+                  movie: movie,
+                  date: date,
+                  updatedMovie: req.flash('updatedMovie'),
+                  notAuthorized: req.flash('notAuthorized'),
+                  createdComment: req.flash('createdComment'),
+                  updatedComment: req.flash('updatedComment'),
+                  deletedComment: req.flash('deletedComment'),
+                  createdLike: req.flash('createdLike'),
+                  deletedLike: req.flash('deletedLike'),
+                  user: user,
+                  correctUser: correctUser,
+                  alreadyLiked: alreadyLiked,
+                  likeID: likeID,
+                  commentID: commentID,
+                });
+              });
+  
+            }).populate({
+              path: 'comments',
+              populate:{
+                path: 'author',
+                model: 'UserModel',
+                populate: {
+                  path: 'likes',
+                  model: 'LikeModel'
+                }
+              }
+            });
+          };
+  
+      /* ********** UPDATE ********** */
+  
+          exports.updateView = (req, res, next) => {
+            MovieModel.findById(req.params.id, (error, movie) => {
+              if(error){
+                return next(error);
+              }
+  
+              // console.log("\n\n\nMOVIE: " + movie.author + ".");
+              // console.log("AUTHOR: " + req.user._id + ".\n\n\n\n");
+  
+              let omg1 = String (movie.author);
+              let omg2 = String(req.user._id);
+  
+              if(omg1 == omg2){
+                // console.log("DSADSADAS");
+              }
+  
+              if(omg1 != omg2){
+                req.flash('notAuthorized', 'Not Authorized.');
+                res.redirect('/movie/' + movie._id);
+              }else{
+                res.render('movie/createORupdate', {
+                  title: 'Update Movie "' + movie.name + '".',
+                  layout: 'main',
+                  movie: movie,
+                  updating: true,
+                });
+              }
+            });
+          };
+  
+          exports.update = (req, res, next) => {
+            MovieModel.findByIdAndUpdate(req.params.id, {
+              $set: req.body
+            }, (error, movie) => {
+              if(error)
+                return next(error);
+              
+              req.flash('updatedMovie', 'Movie "' + req.body.name + '" Successfully Updated.')
+              res.redirect('/movie/' + req.params.id);
+            });
+          };
+  
+          // exports.update = (req, res) => {
+          //   MovieModel.findOneAndUpdate({
+          //     _id: req.body._id,
+          //   }, req.body, {
+          //       new: true,
+          //       runValidators: true
+          //   }, (error, movie) => {
+  
+          //     console.log(movie);
+          //     if(!error){
+          //       req.flash('updatedMovie', 'Movie "' + req.body.name + '" Successfully Updated.')
+          //       res.redirect('/movie/' + req.params.id);
+          //     }else{
+          //       if(error.name == "ValidationError"){
+          //         handleValidationErrors(error, req.body);
+          //         res.render("movie/createORupdate", {
+          //           title: 'Update Movie "' + req.body.name + '".',
+          //           movie: movie,
+          //           updating: true
+          //         });
+          //       }else{
+          //         console.log("Error: " + error);
+          //       }
+          //     }
+          //   });
+          // };
+  
+      /* ********** DELETE ********** */
+  
+          exports.delete = (req, res, next) => {
+            MovieModel.findByIdAndRemove(req.params.id, (error, movie) => {
+              if(error){
+                return next(error);
+              }
+  
+              LikeModel.find((error, likes) => {
+                likes.forEach((like) => {
+                  if(String(like.movie) == String(req.params.id)){
+  
+                    // Pre Brisanja Likea Moramo Iz User Likes Arraya Da Izbrisemo Like
+  
+                    UserModel.findById(like.author, (error, user) => {
+                      if(error)
+                        return next(error);
+                        
+                        user.likes.pull({_id: like._id});
+                        user.save(); 
+                    });
+  
+                    like.remove();
+                  }
+                })
+              });
+  
+  
+              // Moram Izbrisati Iz User Movies Ovaj Movie I Sve Komentare Vezane Za Taj Film Kao i Kad Brisem Komentare Onda I Iz Usera Moram Komentare || Ovo mora da moze lakse
+  
+              UserModel.findById(movie.author, (error, user) => {
+                if(error)
+                  return next(error);
+            
+                  // const index = user.movies.indexOf(req.params.id);
+                  // if (index > -1) {
+                  //   user.movies.splice(index, 1);
+                  // }
+  
+                user.movies.pull({_id: req.params.id});
+                user.save(); 
+              });
+  
+              CommentModel.find((error, comments) => {
+                comments.forEach((comment) => {
+                  if(String(comment.movie) == String(req.params.id)){
+                    
+                    // Pre Brisanja Komentara Moramo Iz User Comments Arraya Da Izbrisemo Comment
+  
+                    UserModel.findById(comment.author, (error, user) => {
+                      if(error)
+                        return next(error);
+                  
+                        // const index = user.comments.indexOf(comment._id);
+                        // if (index > -1) {
+                        //   user.comments.splice(index, 1);
+                        // }
+                      
+                        
+                        user.comments.pull({_id: comment._id});
+                        user.save(); 
+                    });
+  
+                    comment.remove();
+                  }
+                });
+              });
+  
+              req.flash('deletedMovie', 'Movie "' + movie.name + '" Successfully Deleted.')
+              res.redirect('/');
+            });
+          };
+  
+  /* ********** METHODS ********** */
+  
+      function handleValidationErrors(error, body){
+        for(field in error.errors){
+          switch(error.errors[field].path){
+            case 'name':
+              body['nameError'] = error.errors[field].message;
+              break;
+            case 'description':
+              body['descriptionError'] = error.errors[field].message;
+              break;
+          }
+        }
+      }
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Comment Model - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const mongoose = require('mongoose');
+  const Schema = mongoose.Schema;
+  
+  let commentSchema = new Schema({
+      body: {
+        type: String,
+      },
+      author: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'UserModel'
+      },
+      movie: { 
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'MovieModel'
+      },
+      created_at: {
+        type: Date,
+        default: Date.now
+      },
+  });
+  
+  // Export the model
+  module.exports = mongoose.model('CommentModel', commentSchema);
+</pre>
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Movie Model - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const mongoose = require('mongoose');
+  const Schema = mongoose.Schema;
+  
+  let movieSchema = new Schema({
+      name: {
+        type: String,
+        minlength: [2, 'Name Should Be At Least 2 Characters Long'],
+        maxlength: [30, "Name Can't Be Longer Than 30 Characters"],
+        required: [true, "Name Field Is Required"]
+      },
+      description: {
+        type: String,
+        minlength: [30, 'Description Should Be At Least 30 Characters Long'],
+        maxlength: [500, "Description Can't Be Longer Than 30 Characters"],
+        required: [true, "Description Field Is Required"]
+      },
+      image: { // TODO
+        type: String
+      },
+      created_at: {
+        type: Date,
+        default: Date.now
+      },
+      author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'UserModel'
+      },
+      comments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CommentModel'
+      }],
+      likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'LikeModel'
+      }]
+  });
+  
+  // Export the model
+  module.exports = mongoose.model('MovieModel', movieSchema);
+</pre>
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Database Config - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const mongoose = require('mongoose');
+  const Schema = mongoose.Schema;
+  
+  let userSchema = new Schema({
+      username: {
+        type: String,
+        minlength: [2, 'Username Should Be At Least 2 Characters Long'],
+        maxlength: [30, "Username Can't Be Longer Than 30 Characters"],
+        required: [true, "Username Field Is Required"],
+      },
+      email: {
+        type: String,
+        required: [true, "Email Field Is Required"],
+        // validate: [validateEmail, 'Please fill a valid email address'],
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please Enter a Valid Email']
+      },
+      password: {
+        type: String,
+        required: [true, "Password Field Is Required"]
+      },
+      created_at: {
+        type: Date,
+        default: Date.now
+      },
+      movies: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MovieModel'
+      }],
+      comments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CommentModel'
+      }],
+      likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'LikeModel'
+      }]
+  });
+  
+  // let validateEmail = (email) => {
+  //   var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  
+  //   return re.test(email)
+  // };
+  
+  // Export the model
+  module.exports = mongoose.model('UserModel', userSchema);
+</pre>
+
+
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              User Model - DFD.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const mongoose = require('mongoose');
+  const Schema = mongoose.Schema;
+  
+  let userSchema = new Schema({
+      username: {
+        type: String,
+        minlength: [2, 'Username Should Be At Least 2 Characters Long'],
+        maxlength: [30, "Username Can't Be Longer Than 30 Characters"],
+        required: [true, "Username Field Is Required"],
+      },
+      email: {
+        type: String,
+        required: [true, "Email Field Is Required"],
+        // validate: [validateEmail, 'Please fill a valid email address'],
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please Enter a Valid Email']
+      },
+      password: {
+        type: String,
+        required: [true, "Password Field Is Required"]
+      },
+      created_at: {
+        type: Date,
+        default: Date.now
+      },
+      movies: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MovieModel'
+      }],
+      comments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CommentModel'
+      }],
+      likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'LikeModel'
+      }]
+  });
+  
+  // let validateEmail = (email) => {
+  //   var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  
+  //   return re.test(email)
+  // };
+  
+  // Export the model
+  module.exports = mongoose.model('UserModel', userSchema);
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                User Routes - DFD.
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const express = require('express');
+  const router = express.Router();
+  
+  // Require The Controllers
+  
+  const userController = require('../controllers/user.controller');
+  
+  // Routes
+  
+  router.get('/register', ifLoggedIn, userController.registerView);
+  router.post('/register', ifLoggedIn, userController.register);
+  
+  router.get('/login', ifLoggedIn, userController.loginView);
+  router.post('/login', ifLoggedIn, userController.login);
+  
+  router.get('/logout', userController.logout);
+  
+  router.get('/users/:id', userController.profileView);
+  
+  // Access Control
+  
+  function ifLoggedIn(req, res, next){
+    if(req.isAuthenticated()){
+      req.flash('alreadyLoggedIn', "Please Logout Before Doing That.");
+      res.redirect('/');
+    }else{
+      return next();
+    }
+  }
+  
+  // Export Router
+  
+  module.exports = router;
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Movie Routes - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const express = require('express');
+  const router = express.Router();
+  
+  // Require The Controllers
+  
+  const movieController = require('../controllers/movie.controller');
+  
+  // Routes
+  
+  router.get('/', movieController.getAll);
+  router.get('/movie/create', ensureAuthenticated, movieController.createView);
+  router.post('/movie/create', ensureAuthenticated, movieController.create);
+  router.get('/movie/:id', movieController.read);
+  router.get('/movie/:id/comment/:commentID', movieController.readComment);
+  router.get('/movie/update/:id', ensureAuthenticated, movieController.updateView);
+  router.post('/movie/update/:id', ensureAuthenticated, movieController.update);
+  router.post('/movie/delete/:id', ensureAuthenticated, movieController.delete);
+  
+  // Access Control
+  
+  function ensureAuthenticated(req, res, next){
+    if(req.isAuthenticated()){
+      return next();
+    }else{
+      req.flash('notLoggedIn', "Please Login.");
+      res.redirect('/login');
+    }
+  }
+  
+  // Export Router
+  
+  module.exports = router;
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              HELP (Flash Messages, Handlebars Nesting) - DFD.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  https://gist.github.com/brianmacarthur/a4e3e0093d368aa8e423
+
+
+
+  res.render('index' , {
+    layout: 'main',
+    createdMovie: req.flash('createdMovie'),
+    deletedMovie: req.flash('deletedMovie'),
+    userRegistered: req.flash('userRegistered'),
+    userLoggedOut: req.flash('userLoggedOut'),
+    context: {
+      users: users,
+      movies: movies
+    },
+    // movies: movies,
+    message: req.flash('error'),
+    success: req.flash('success'),
+    // users: users
+  });
+
+
+  {{#context}}
+    {{#this.movies}}    
+      {{#../this.users}}
+        {{this._id}}
+        {{../this.author}}
+          {{#ifEquals this._id ../this.author}}
+            ZASTO NE ULAZI U OVAJ IF
+          {{/ifEquals}}
+      {{/../this.users}}
+    {{/this.movies}}
+  {{/context}}
+</pre>
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              APP JS - DFD.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  /* ********** DEPENDENCIES ********** */
+
+  const express = require('express');
+  const mongoose = require('mongoose');
+  const bodyParser = require('body-parser');
+  const path = require('path');
+  const expressHandlebars = require('express-handlebars');
+  const session = require('express-session');
+  const flash = require('req-flash');
+  const cookieParser = require('cookie-parser');
+  const passport = require('passport');
+  const config = require('./config/database');
+  
+  
+  /* ********** INITIALIZE EXPRESS APP ********** */
+  
+  const app = express();
+  
+  /* ********** IMPORT ROUTES ********** */
+  
+  const movieRoutes = require('./routes/movie.route');
+  const userRoutes = require('./routes/user.route');
+  const commentRoutes = require('./routes/comment.route');
+  const likeRoutes = require('./routes/like.route');
+  
+  
+  /* ********** MONGOOSE ********** */
+  
+  let dev_db_url = config.database;
+  const mongoDB = process.env.MONGODB_URI || dev_db_url;
+  mongoose.connect(mongoDB, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
+  mongoose.Promise = global.Promise;
+  const db = mongoose.connection;
+  db.on('error', console.error.bind(console, '\n\n *** MongoDB connection error:'));
+  
+  /* ********** APP USE ********** */
+  
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(cookieParser());
+  app.use(session({
+    secret: 'yourMOM',
+    resave: true,
+    saveUninitialized: true
+  }));
+  app.use(flash());
+  // app.use(express.static(__dirname + '/public/'));
+  app.use('*/images', express.static(path.join(__dirname, 'public/images')));
+  app.use('*/js', express.static(path.join(__dirname, 'public/js')));
+  app.use('*/css', express.static(path.join(__dirname, 'public/css')));
+  
+  /* ********** APP SET ********** */
+  
+  app.set('views', path.join(__dirname, '/views/'));
+  app.engine('.hbs', expressHandlebars({
+    extname: '.hbs',
+    // defaultLayout: 'mainLayout',
+    layoutsDir: __dirname + '/views/layouts',
+    helpers: {
+      ifEqualsString: (arg1, arg2, options) => {
+        return (String(arg1) == String(arg2)) ? options.fn(this) : options.inverse(this);
+      }
+    }
+  }));
+  app.set('view engine', '.hbs');
+  // app.set('views', path.join(__dirname, 'views'));
+  
+  /* ********** PASSPORT ********** */
+  
+  require('./config/passport')(passport);
+  app.use(passport.initialize());
+  app.use(passport.session());
+  
+  app.get('*', (req, res, next) => {
+    res.locals.loggedInUser = req.user || null;
+    next();
+  });
+  
+  app.use("/", movieRoutes);
+  app.use('/', userRoutes);
+  app.use('/', commentRoutes);
+  app.use('/', likeRoutes);
+  
+  /* ********** SERVER START ********** */
+  
+  let portNumber = process.env.PORT || 3000;
+  
+  app.listen(portNumber, () => {
+      console.log("*** Server is running on port: " + portNumber);
+  });
+</pre>
+
+
+
+
+
+
+
+
+
+        <p class="font-weight-bold text-success">
+          Index View - DFD.
+          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+        </p>
+        <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  {{#if message}}
+  &lt;div class="container-fluid mt-5"&gt;
+    &lt;div class="alert alert-success"&gt;{{message}}&lt;/div&gt;
+  &lt;/div&gt;
+{{/if}}
+
+
+{{#if alreadyLoggedIn}}
+  &lt;div class="container-fluid mt-5"&gt;
+    &lt;div class="alert alert-danger"&gt;{{alreadyLoggedIn}}&lt;/div&gt;
+  &lt;/div&gt;
+{{/if}}
+
+&lt;div class="container-fluid container-max-width mt-5"&gt;
+  &lt;div class="row" id="row-for-movie-cards"&gt;
+
+    {{#each movies}}
+
+        &lt;div class="col-md-8 offset-md-2 offset-sm-1 col-sm-10 card mb-3 mt-3"&gt;
+          &lt;div class="card-border"&gt;
+            &lt;a href="/movie/{{this._id}}" class="card-header-link"&gt;
+              &lt;h3 class="card-header"&gt;{{this.name}}&lt;/h3&gt;
+            &lt;/a&gt;
+            &lt;div class="card-body"&gt;
+              {{!-- &lt;h5 class="card-title"&gt;Special title treatment&lt;/h5&gt; --}}
+              {{!-- &lt;h6 class="card-subtitle text-muted"&gt;Support card subtitle&lt;/h6&gt; --}}
+            &lt;/div&gt;
+            &lt;a href="/movie/{{this._id}}"&gt;
+              &lt;img style="height: 500px; width: 100%; display: block;" src="{{this.image}}" alt="Card image"&gt;
+            &lt;/a&gt;
+            &lt;div class="card-body"&gt;
+              &lt;p class="card-text"&gt;{{this.description}}&lt;/p&gt;
+              &lt;i class="far fa-user"&gt;&lt;/i&gt; Suggested By: &lt;a href="/users/{{this.author._id}}"&gt;{{this.author.username}}&lt;/a&gt; 
+              &lt;br&gt;&lt;i class="far fa-comments"&gt;&lt;/i&gt; Comments: {{this.comments.length}}
+              &lt;br&gt;&lt;i class="far fa-heart"&gt;&lt;/i&gt; Likes: {{this.likes.length}}
+            &lt;/div&gt;
+            &lt;div class="card-footer dateDIVClass text-muted" id="dateDIV{{this._id}}" style="margin-top: .5rem;"&gt;
+              {{this.created_at}}
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+    {{/each}}
+
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+
+
+
+
+
+
+
+
+        <p class="font-weight-bold text-success">
+          Profile View - DFD.
+          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+        </p>
+        <hr>
+<pre class="collapse" id="collapseExampleJS1">
+
+  
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-8 offset-md-2" id="body-container"&gt;
+
+      User Profile For: {{user.username}} &lt;hr&gt;
+
+      {{#if user.movies}}
+
+        Movies That "{{user.username}}" Suggested: &lt;br&gt;
+
+        {{#each user.movies}}
+          &lt;a href="/movie/{{this._id}}" style="text-decoration: none;"&gt;&amp;nbsp; &amp;nbsp; &amp;bull; &amp;nbsp;{{this.name}}&lt;/a&gt;&lt;br&gt;
+        {{/each}}
+      
+      {{/if}}
+
+      {{#if user.comments}}
+
+        &lt;br&gt;Comments By "{{user.username}}": &lt;br&gt;
+
+        {{#each user.comments}}
+          &lt;a href="/movie/{{this.movie}}/comment/{{this._id}}" style="text-decoration: none;"&gt;&amp;nbsp; &amp;nbsp; &amp;bull; &amp;nbsp;{{this.body}}&lt;/a&gt;&lt;br&gt;
+        {{/each}}
+      
+      {{/if}}
+
+      {{#if user.likes}}
+
+        &lt;br&gt;Movies That "{{user.username}}" Liked: &lt;br&gt;
+
+        {{#each user.likes}}
+          &lt;a href="/movie/{{this.movie._id}}" style="text-decoration: none;"&gt;&amp;nbsp; &amp;nbsp; &amp;bull; &amp;nbsp;{{this.movie.name}}&lt;/a&gt;&lt;br&gt;
+        {{/each}}
+      
+      {{/if}}
+    &lt;/div&gt; 
+  &lt;/div&gt;
+</pre>
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Register / Login View - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-8 offset-md-2" id="body-container"&gt;
+
+      {{#if message}}
+          &lt;div class="alert alert-danger"&gt;{{message}}&lt;/div&gt;
+      {{/if}}  
+
+      {{#if notLoggedIn}}
+        &lt;div class="alert alert-danger"&gt;{{notLoggedIn}}&lt;/div&gt;
+      {{/if}}
+
+      &lt;h3&gt;{{title}}&lt;/h3&gt;
+
+      {{#if registering}}
+        &lt;form action="/register" method="POST"&gt;
+      {{else}}
+        &lt;form action="/login" method="POST"&gt;
+      {{/if}}
+      {{!-- &lt;input type="hidden" name="_id"&gt; --}}
+        &lt;fieldset&gt;
+          &lt;div class="form-group"&gt;
+            &lt;label for="usernameID"&gt;Username&lt;/label&gt;
+            &lt;input type="text"  name="username" class="form-control {{#if user.usernameError}}is-invalid{{/if}}" value="{{user.username}}" id="usernameID" placeholder="Enter Username"&gt;
+            &lt;div class="text-danger"&gt;
+              {{user.usernameError}}
+              {{user.usernameTaken}}
+            &lt;/div&gt;
+          &lt;/div&gt;
+          {{#if registering}}
+            &lt;div class="form-group"&gt;
+              &lt;label for="emailID"&gt;Email&lt;/label&gt;
+              &lt;input type="email"  name="email" class="form-control {{#if user.emailError}}is-invalid{{/if}}" value="{{user.email}}" id="emailID" placeholder="Enter Email"&gt;
+              &lt;div class="text-danger"&gt;
+                {{user.emailError}}
+                {{user.emailTaken}}
+              &lt;/div&gt;
+            &lt;/div&gt;
+          {{/if}}
+          &lt;div class="form-group"&gt;
+            &lt;label for="passwordID"&gt;Password&lt;/label&gt;
+            &lt;input type="password"  name="password" class="form-control {{#if user.passwordError}}is-invalid{{/if}}" id="passwordID" placeholder="Enter Password"&gt;
+            &lt;div class="text-danger"&gt;
+              {{user.passwordError}}
+            &lt;/div&gt;
+          &lt;/div&gt;
+          {{#if registering}}
+            &lt;div class="form-group"&gt;
+              &lt;label for="confirm-passwordID"&gt;Confirm Password&lt;/label&gt;
+              &lt;input type="password"  name="confirmPassword" class="form-control {{#if user.confirmPasswordError}}is-invalid{{/if}}" id="confirm-passwordID" placeholder="Confirm Password"&gt;
+              &lt;div class="text-danger"&gt;
+              {{user.confirmPasswordError}}
+            &lt;/div&gt;
+            &lt;/div&gt;
+          {{/if}}
+          &lt;button type="submit" class="btn btn-primary"&gt;Submit&lt;/button&gt;
+        &lt;/fieldset&gt;
+      &lt;/form&gt;
+      
+    &lt;/div&gt; 
+  &lt;/div&gt;
+</pre>
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                Read Movie - DFD.
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  {{!-- {{log commentID}} --}}
+
+  &lt;div class="container-fluid container-max-width mt-5"&gt;
+    &lt;div class="row" id="row-for-movie-cards"&gt;
+  
+        &lt;div class="col-md-8 col-sm-6 offset-md-2 offset-sm-6 card mb-3 mt-3"&gt;
+          {{#if updatedMovie}}
+            &lt;div class="alert alert-success mb-5"&gt;{{updatedMovie}}&lt;/div&gt;
+          {{/if}}
+  
+          {{#if createdComment}}
+            &lt;div class="alert alert-success mb-5"&gt;{{createdComment}}&lt;/div&gt;
+          {{/if}}
+  
+          {{#if updatedComment}}
+            &lt;div class="alert alert-success mb-5"&gt;{{updatedComment}}&lt;/div&gt;
+          {{/if}}
+  
+          {{#if deletedComment}}
+            &lt;div class="alert alert-success mb-5"&gt;{{deletedComment}}&lt;/div&gt;
+          {{/if}}
+  
+          {{#if createdLike}}
+            &lt;div class="alert alert-success mb-5"&gt;{{createdLike}}&lt;/div&gt;
+          {{/if}}
+  
+          {{#if deletedLike}}
+            &lt;div class="alert alert-success mb-5"&gt;{{deletedLike}}&lt;/div&gt;
+          {{/if}}
+  
+          &lt;div class="card-border"&gt;
+  
+            {{#if notAuthorized}}
+                &lt;div class="alert alert-danger mt-3"&gt;{{notAuthorized}}&lt;/div&gt;
+            {{/if}}
+  
+            &lt;h3 class="card-header"&gt;{{movie.name}}&lt;/h3&gt;
+            &lt;div class="card-body"&gt;
+              {{!-- &lt;h5 class="card-title"&gt;Special title treatment&lt;/h5&gt; --}}
+              {{!-- &lt;h6 class="card-subtitle text-muted"&gt;Support card subtitle&lt;/h6&gt; --}}
+            &lt;/div&gt;
+            &lt;img style="height: 500px; width: 100%; display: block;" src="{{movie.image}}" alt="Card image"&gt;
+            &lt;div class="card-body"&gt;
+              &lt;p class="card-text"&gt;{{movie.description}}&lt;/p&gt;
+              &lt;br&gt;&lt;i class="far fa-user"&gt;&lt;/i&gt; Suggested By:  &lt;a href="/users/{{user._id}}"&gt;{{user.username}}&lt;/a&gt; 
+              &lt;br&gt;&lt;i class="far fa-comments"&gt;&lt;/i&gt; Comments: {{movie.comments.length}}
+              &lt;br&gt;&lt;i class="far fa-heart"&gt;&lt;/i&gt; Likes: {{movie.likes.length}}
+              &lt;br&gt;&lt;br&gt;
+  
+              {{#if loggedInUser}}
+                {{#if correctUser}}
+                    &lt;a href="/movie/update/{{movie._id}}" class="card-link btn btn-warning"&gt;&lt;i class="far fa-edit"&gt;&lt;/i&gt; Edit&lt;/a&gt;
+                    &lt;button data-toggle="modal" data-target="#deleteModal" class="card-link btn btn-danger mr-4"&gt;&lt;i class="far fa-trash-alt"&gt;&lt;/i&gt; Delete&lt;/button&gt;
+                {{/if}}
+              {{/if}}
+  
+              {{!-- Ako Nije Ulogovan Izbaci Mu Modal --}}
+  
+              {{#unless loggedInUser}}
+                &lt;button data-toggle="modal" data-target="#likeModal" class="card-link btn btn-outline-danger" style="display: block;"&gt;&lt;i class="fa fa-heart"&gt;&lt;/i&gt; Like&lt;/button&gt;
+              {{/unless}}
+  
+              {{#if loggedInUser}}
+  
+                {{#if alreadyLiked}}
+                  &lt;form action="/movie/{{movie._id}}/likes/delete/{{likeID}}" method="POST" style="display: inline-block;"&gt;
+                    &lt;button type="submit" class="card-link btn btn-danger"&gt;&lt;i class="fa fa-heart"&gt;&lt;/i&gt; Liked&lt;/button&gt;
+                  &lt;/form&gt;
+                {{else}}
+                  &lt;form action="/movie/{{movie._id}}/likes/create" method="POST" style="display: inline-block;"&gt;
+                    &lt;button type="submit" class="card-link btn btn-outline-danger"&gt;&lt;i class="fa fa-heart"&gt;&lt;/i&gt; Like&lt;/button&gt;
+                  &lt;/form&gt;
+                {{/if}}
+  
+              {{/if}}
+            &lt;/div&gt;
+  
+            &lt;div class="card-footer text-muted" id="dateID"&gt;
+              &lt;strong&gt;Created At: &lt;/strong&gt; {{date}}
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+  
+    &lt;/div&gt;
+  &lt;/div&gt; 
+  
+  &lt;div class="modal" id="deleteModal"&gt;
+    &lt;div class="modal-dialog" role="document"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;h5 class="modal-title"&gt;Are You Sure That You Want To Delete Movie &lt;strong&gt;"{{movie.name}}"&lt;/strong&gt;&lt;/h5&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;
+            &lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;
+          &lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-footer"&gt;
+          &lt;form action="/movie/delete/{{movie._id}}" method="POST"&gt;
+            &lt;button type="submit" class="card-link btn btn-danger"&gt;Yes&lt;/button&gt;
+          &lt;/form&gt; 
+          &lt;button type="button" class="btn btn-secondary" data-dismiss="modal"&gt;No&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  
+  &lt;div class="modal" id="likeModal"&gt;
+    &lt;div class="modal-dialog" role="document"&gt;
+      &lt;div class="modal-content"&gt;
+        &lt;div class="modal-header"&gt;
+          &lt;h5 class="modal-title"&gt;You Need To Login To Be Able To Like Movies&lt;/strong&gt;&lt;/h5&gt;
+          &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;
+            &lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;
+          &lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class="modal-footer"&gt;
+          &lt;a href="/login"&gt;&lt;button type="submit" class="card-link btn btn-primary"&gt;Login&lt;/button&gt;&lt;/a&gt;
+          &lt;a href="/register"&gt;&lt;button type="button" class="btn btn-outline-primary"&gt;Register&lt;/button&gt;&lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  
+  
+  &lt;div class="container"&gt;
+    &lt;h2 class="text-center"&gt;COMMENTS&lt;/h2&gt;
+  
+    {{#each movie.comments}}
+    
+      &lt;div class="card" id="{{this._id}}"&gt;
+          &lt;div class="card-body"&gt;
+              &lt;div class="row"&gt;
+                  &lt;div class="col-md-2"&gt;
+                      &lt;img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded img-fluid"/&gt;
+                      &lt;p class="text-secondary text-center"&gt;15 Minutes Ago&lt;/p&gt;
+                  &lt;/div&gt;
+                  &lt;div class="col-md-10"&gt;
+                      &lt;p style="margin-bottom: 2rem;"&gt;
+                          &lt;a class="float-left" href="/users/{{this.author._id}}" style="text-decoration: none;"&gt;&lt;i class="far fa-user"&gt;&lt;/i&gt; &lt;strong&gt;{{this.author.username}}&lt;/strong&gt;&lt;/a&gt;
+                          &lt;hr&gt;
+                    &lt;/p&gt;
+                    &lt;div class="clearfix"&gt;&lt;/div&gt;
+                      &lt;p&gt;{{this.body}}&lt;/p&gt;
+                      &lt;p&gt;
+                        {{#if ../loggedInUser}}
+                          {{#ifEqualsString ../loggedInUser._id this.author._id}}
+                          &lt;a class="float-right btn text-white btn-danger btn-sm" data-target="#deleteCommentModal{{../this._id}}" data-toggle="modal"&gt;&lt;i class="far fa-trash-alt"&gt;&lt;/i&gt; Delete&lt;/a&gt;
+                          &lt;a class="float-right btn text-white btn-warning btn-sm mr-2" name="{{../this._id}}" role="button" data-toggle="collapse" href="#collapseEdit{{../this._id}}" aria-expanded="false" aria-controls="collapse{{../this._id}}"&gt;&lt;i class="far fa-edit"&gt;&lt;/i&gt; Edit&lt;/a&gt; 
+                          {{/ifEqualsString}}
+                        {{/if}}
+                        {{!-- &lt;a class="float-right btn text-white btn-danger btn-sm mr-2"&gt;&lt;i class="fa fa-heart"&gt;&lt;/i&gt; Like&lt;/a&gt; --}}
+                    &lt;/p&gt;
+                  &lt;/div&gt;
+              &lt;/div&gt;
+          &lt;/div&gt;
+      &lt;/div&gt;
+  
+      {{#if ../loggedInUser}}
+  
+      &lt;!--Edit comment form--&gt;
+        &lt;div class="collapse" id="collapseEdit{{this._id}}"&gt;
+          &lt;div class="well well-edit"&gt;
+            &lt;h4&gt;Edit your comment &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
+            &lt;form id="edit-comment-form{{this._id}}" name="{{this._id}}" action="/comments/update/{{this._id}}" method="POST" onsubmit="return validateEditCommentForm(this);"&gt;
+              &lt;div class="form-group"&gt;
+                &lt;input class="form-control" type="text" disabled value="User: {{this.author.username}}"&gt;
+              &lt;/div&gt;
+              &lt;div class="form-group"&gt;
+                &lt;div class="error-input" id="missing-edit-comment-error{{this._id}}"&gt;&lt;/div&gt;
+                &lt;textarea class="form-control" id="commentBodyEditID{{this._id}}" name="commentBodyEdit" placeholder="Your comment text..." form="edit-comment-form{{this._id}}" rows="5" cols="70"&gt;{{this.body}}&lt;/textarea&gt;
+              &lt;/div&gt;
+              &lt;input type="hidden" name="movieID" value="{{movie._id}}"&gt;
+              &lt;div class="form-group"&gt;
+                &lt;button type="submit" class="btn btn-warning" style="width: 100%;"&gt;Edit comment &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/form&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+  
+        &lt;!-- Modal to delete comment --&gt;
+        &lt;div class="modal fade" id="deleteCommentModal{{this._id}}"&gt;
+          &lt;div class="modal-dialog" role="document"&gt;
+            &lt;div class="modal-content"&gt;
+              &lt;div class="modal-header"&gt;
+                &lt;h5 class="modal-title"&gt;Are You Sure That You Want To Delete Comment &lt;strong&gt;"{{this.body}}"&lt;/strong&gt;&lt;/h5&gt;
+                &lt;button type="button" class="close" data-dismiss="modal" aria-label="Close"&gt;
+                  &lt;span aria-hidden="true"&gt;&amp;times;&lt;/span&gt;
+                &lt;/button&gt;
+              &lt;/div&gt;
+              &lt;div class="modal-footer"&gt;
+                &lt;form action="/comments/delete/{{this._id}}" method="POST"&gt;
+                  &lt;input type="hidden" name="movieID" value="{{movie._id}}"&gt;
+                  &lt;button type="submit" class="card-link btn btn-danger"&gt;Yes&lt;/button&gt;
+                &lt;/form&gt; 
+                &lt;button type="button" class="btn btn-secondary" data-dismiss="modal"&gt;No&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+  
+      {{/if}}
+  
+    {{/each}}
+  
+    &lt;div class="container" style="text-align: center;"&gt;
+      &lt;a class="btn btn-success pull-right" id="add-new-comment-btn" role="button" data-toggle="collapse" href="#collapseComment" aria-expanded="false" aria-controls="collapseComment"&gt;
+        &lt;i class="fas fa-plus"&gt;&lt;/i&gt; Add new comment
+      &lt;/a&gt;
+    &lt;/div&gt;
+  
+  &lt;!--Collapse Add a comment form START--&gt;
+    &lt;div class="collapse" id="collapseComment"&gt;
+      &lt;div class="well"&gt;
+        {{#unless loggedInUser}}
+          &lt;!--If the user is not logged in, direct him to the login page--&gt;
+          &lt;h5 style="text-align: center;"&gt;You need to login before you can comment. &lt;a href="/login"&gt;Click here&lt;/a&gt; to go to the login page.&lt;/h5&gt;
+        {{/unless}}
+        {{#if loggedInUser}}
+          &lt;!--If the user is logged in, show the new comment form--&gt;
+          &lt;h4&gt;Write your comment &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
+          &lt;form action="/comments/create" id="add-new-comment-form" onsubmit="return validateNewCommentForm();" method="POST"&gt;
+            &lt;div class="form-group"&gt;
+              &lt;input class="form-control" type="text" disabled value="User: {{loggedInUser.username}}"&gt;
+            &lt;/div&gt;
+            &lt;div class="form-group"&gt;
+              &lt;div class="error-input" id="missing-comment-error"&gt;&lt;/div&gt;
+              &lt;textarea class="form-control" name="commentBody" id="commentBodyID" placeholder="Write your comment..." rows="5" cols="70"&gt;&lt;/textarea&gt;
+            &lt;/div&gt;
+            &lt;input type="hidden" name="movieID" value="{{movie._id}}"&gt;
+            &lt;div class="form-group"&gt;
+              &lt;button type="submit" class="btn btn-success" style="width: 100%;"&gt;Submit &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/form&gt;
+        {{/if}}
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;!--Collapse Add a comment form END--&gt;
+  &lt;/div&gt;
+  
+  &lt;br&gt;&lt;br&gt;&lt;br&gt;
+</pre>
+
+
+
+<p class="font-weight-bold text-success">
+  Main Layout - DFD.
+  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+</p>
+<hr>
+<pre class="collapse" id="collapseExampleJS1">
+  &lt;!DOCTYPE html&gt;
+  &lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;meta http-equiv="X-UA-Compatible" content="ie=edge"&gt;
+    &lt;title&gt;DFD Movies&lt;/title&gt;
+    &lt;link rel="stylesheet" href="https://bootswatch.com/4/sketchy/bootstrap.min.css"&gt;
+    &lt;script src="https://kit.fontawesome.com/5c5689b7a2.js"&gt;&lt;/script&gt;
+    &lt;link rel="stylesheet" href="css/styles.css"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    
+  &lt;nav class="navbar navbar-expand-lg navbar-dark bg-primary"&gt;
+    &lt;a class="navbar-brand" href="/"&gt;DFD Movies&lt;/a&gt;
+    &lt;button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation"&gt;
+      &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+  
+    &lt;div class="collapse navbar-collapse" id="navbarColor01"&gt;
+      &lt;ul class="navbar-nav mr-auto"&gt;
+        {{#if userLel}}
+          &lt;li class="nav-item"&gt;
+            &lt;a class="nav-link" href="/movie/create"&gt;Suggest New&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li class="nav-item"&gt;
+            &lt;a class="nav-link" href="/users/{{userLel._id}}"&gt;Logged In As "{{userLel.username}}"&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li class="nav-item"&gt;
+            &lt;a class="nav-link" href="/logout"&gt;Logout&lt;/a&gt;
+          &lt;/li&gt;
+        {{/if}}  
+        {{#if loggedInUser}}
+        &lt;li class="nav-item"&gt;
+          &lt;a class="nav-link" href="/movie/create"&gt;Suggest New&lt;/a&gt;
+        &lt;/li&gt;
+          &lt;li class="nav-item"&gt;
+            &lt;a class="nav-link" href="/users/{{loggedInUser._id}}"&gt;Logged In As "{{loggedInUser.username}}"&lt;/a&gt;
+          &lt;/li&gt;
+          &lt;li class="nav-item"&gt;
+            &lt;a class="nav-link" href="/logout"&gt;Logout&lt;/a&gt;
+          &lt;/li&gt;
+        {{else}}
+          {{#unless userLel}}
+            &lt;li class="nav-item"&gt;
+              &lt;a class="nav-link" href="/login"&gt;Login&lt;/a&gt;
+            &lt;/li&gt;
+            &lt;li class="nav-item"&gt;
+              &lt;a class="nav-link" href="/register"&gt;Register&lt;/a&gt;
+            &lt;/li&gt;
+          {{/unless}}
+        {{/if}}
+      &lt;/ul&gt;
+      &lt;form class="form-inline my-2 my-lg-0"&gt;
+        &lt;input class="form-control mr-sm-2" type="text" placeholder="Search"&gt;
+        {{!-- &lt;button class="btn btn-secondary my-2 my-sm-0" type="submit"&gt;Search&lt;/button&gt; --}}
+        &lt;button type="button" class="btn btn-secondary tooltip2"&gt;&lt;span class="tooltiptext2"&gt;Search Currently Disabled&lt;/span&gt;Search&lt;/button&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  &lt;/nav&gt;
+    
+    {{{body}}}
+  
+  &lt;script src="https://code.jquery.com/jquery-3.4.1.min.js"&gt;&lt;/script&gt;
+  &lt;script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"&gt;&lt;/script&gt;
+  &lt;script src="js/script.js"&gt;&lt;/script&gt;
+  
+  &lt;/body&gt;
+  &lt;/html&gt;
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         </div>
         <!-- ---------- NODEJS ---------- -->
 
@@ -975,6 +2962,35 @@ if(isset($_POST['prijava'])){
   buttons[i].dataset.target = "#collapseExample" + i; // If attr is data-index-here-comes in JS it will return dataset.indexHereComes
   buttons[i].setAttribute("aria-controls", "collapseExample" + i);
 </pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            Scroll To (jquery) - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  let pathname = window.location.pathname; // Returns path only (/path/example.html)
+  let url      = window.location.href;     // Returns full URL (https://example.com/path/example.html)
+  let origin   = window.location.origin;   // Returns base URL (https://example.com)
+  
+  let res = pathname.split("/");
+  let commentID = res[4];
+  // alert(res[4]);
+  // alert(pathname)
+  if(commentID){
+    $('html, body').animate({
+      scrollTop: $("#" + commentID).offset().top
+    }, 1000);
+  
+    $("#" + commentID).css({"border": "2px solid black"});
+  }  
+</pre>
+
+
+
+
 
 
 
