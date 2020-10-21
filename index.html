@@ -2914,6 +2914,266 @@ if(isset($_POST['prijava'])){
 
 
 
+            <p class="font-weight-bold text-success">
+              Exports, Imports - RMTSlagalica.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  module.exports = {
+    userJoins,
+    getCurrentUser,
+    userLeaves,
+    getJoinedUsers,
+    updateAllUsers,
+    getAllUsers,
+  }
+  exports.words = words;
+  module.exports = formatMessage;
+
+  const {userJoins, getCurrentUser, userLeaves, getJoinedUsers, updateAllUsers} = require('./utils/users'); // Users methods
+  let words = require('./utils/words').words; // Why u do dis
+  const formatMessage = require('./utils/messages'); // Messages
+
+</pre>
+
+
+
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              APP.JS (Handlebars helpers, Sockets, Add Zero On Dates) - RMTSlagalica.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  /* ********** DEPENDENCIES ********** */
+
+  const socketio = require('socket.io'); // SocketIO
+  const http = require('http'); // HTTP
+  const path = require('path'); // PATH
+    
+  /* ********** INITIALIZE EXPRESS APP ********** */
+  
+  const app = express();
+  const server = http.createServer(app);
+  const io = socketio(server);
+  
+  /* ********** APP SET ********** */
+  
+  app.set('views', path.join(__dirname, '/views/'));
+  app.engine('.hbs', expressHandlebars({
+    extname: '.hbs',
+    // defaultLayout: 'mainLayout',
+    layoutsDir: __dirname + '/views/layouts',
+    helpers: {
+      ifEqualsString: (arg1, arg2, options) => {
+        return (String(arg1) == String(arg2)) ? options.fn(this) : options.inverse(this);
+      },
+      counter: (index) => {
+        return index + 1;
+      },
+      for: (from, to, incr, block) => {
+        var accum = '';
+        for(var i = from; i < to; i += incr)
+            accum += block.fn(i);
+        return accum;
+      } 
+    }
+  }));
+  app.set('view engine', '.hbs');
+  // app.set('views', path.join(__dirname, 'views'));
+  
+  /* ********** SOCKET COMMUNICATION ********** */
+  
+  io.on('connection', (socket) => { // Socket connected on server
+    console.log("New Socket Connection.");
+  
+    let object = { // Object that holds all users when new user connects and hold info if the game already started
+      users: getJoinedUsers(),
+      gameInProgress: gameInProgress
+    }
+  
+    io.emit('userJoinedOnServer', object);
+    socket.on('userJoinedInGame', (username) => {
+      userJoinedGame(username, socket);
+    });
+  
+    socket.on('userReady', userReady); // User clicked ready btn
+    socket.on('userNotReady', userNotReady);
+  
+    socket.on('timeIsUp', (currentGame) => {
+      socket.emit('timeIsUp' + currentGame); // Time is up for specific game
+    });
+  
+    socket.on('finishedSlagalicaGiveDataForSpojnice', (word) => {
+      finishedSlagalicaGiveDataForSpojnice(word, socket);
+    });
+    socket.on('finishedSpojniceGiveDataForSkocko', (correctAnswers) => {
+      finishedSpojniceGiveDataForSkocko(correctAnswers, socket);
+    });
+    socket.on('finishedSkockoGiveDataForKoZnaZna', (info) => {
+      finishedSkockoGiveDataForKoZnaZna(info, socket);
+    });
+    socket.on('finishedKoZnaZna', (infoKoZnaZna) => {
+      finishedKoZnaZna(infoKoZnaZna, socket);
+    });
+    socket.on('finishedAsocijacije', (points) => {
+      finishedAsocijacije(points, socket);
+    });
+  
+    // Listen for chatMessage
+    socket.on('chatMessage', (msg) => {
+        const user = getCurrentUser(socket.id);
+  
+        io.emit('message', formatMessage(user.username, msg));
+    });
+  
+    // Runs when client disconnects
+    socket.on('disconnect', () => {
+        console.log("Socket disconnects.");
+  
+        const user = userLeaves(socket.id, gameInProgress); // Find user that left
+  
+        if(user){
+            io.emit('message', formatMessage('Admin', `${user.username} se diskonektovao.`)); // Tell other users who left
+  
+            // If everyone disconnected tell that to cliends on main page
+            if(getJoinedUsers() == 0){
+              io.emit('allUsersDisconnected');
+  
+              if(gameInProgress){
+                finished_at = new Date();
+                finished_at = `${addZero(finished_at.getMonth() + 1)}.${addZero(finished_at.getDate())}.${finished_at.getFullYear()}.  ${addZero(finished_at.getHours())}:${addZero(finished_at.getMinutes())}h`;
+                require('./utils/addGameToDB').saveGame(started_at, finished_at);
+              }
+  
+              gameInProgress = false;
+            }
+        
+            // Send users and room info
+            io.emit('usersInfoAfterDisconnect', {
+              users: getJoinedUsers(),
+              user: user
+            });
+        }
+    });
+  });
+  
+  
+  
+  /* ********** FUNCTIONS ********** */
+  
+  function userJoinedGame(username, socket){
+    const user = userJoins(socket.id, username); // Add user to users array
+  
+      // If game is in progress and user joins server redirect him and return
+      if(gameInProgress){
+        let redirectInfo = {
+          username: username,
+          destination: '/'
+        }
+  
+        io.emit('redirect', redirectInfo);
+  
+        return;
+      }
+  
+      // Welcome current user
+      socket.emit('message', formatMessage('Admin', 'Uspešno ste se konektovali.'));
+  
+      // Broadcast when user connects
+      socket.broadcast.emit('message', formatMessage('Admin', `${user.username} se konektovao.`));
+  
+      // Send users and room info
+      io.emit('connectedUsersInfo', getJoinedUsers());
+  }
+  
+  function userNotReady(id){
+    let users = getJoinedUsers();
+    let user = users.find(user => user.id === id);
+    user.ready = false;
+    io.emit("userNotReady", user);
+  }
+  
+  
+  function finishedAsocijacije(points, socket){
+    let user = getCurrentUser(socket.id);
+    let users = getJoinedUsers();
+    let everyoneFinished = true;
+    
+    if(!user){
+      return;
+    }
+  
+    user.pointsAsocijacije += points;
+    user.points += user.pointsAsocijacije;
+  
+    io.emit('updateAsocijacijePoints', user);
+    user.finishedGame = true;
+    user.ready = false;
+  
+    // Find if everyone finished
+    for(let i = 0; i < users.length; i++){
+      if(!users[i].finishedGame){
+        everyoneFinished = false;
+  
+        break;
+      }
+    }
+  
+    // If everyone finished game is over, find winner
+    if(everyoneFinished){
+      let winner = users[0];
+      let draw = false;
+      gameInProgress = false;
+  
+      for(let i = 1; i < users.length; i++){
+        if(users[i].points > winner.points){
+          winner = users[i];
+        }
+      }
+  
+      for(let i = 1; i < users.length; i++){
+        if(users[i] != winner && users[i].points == winner.points){
+          draw = true;
+  
+          winner = undefined;
+        }
+      }
+  
+      finished_at = new Date();
+      finished_at = `${addZero(finished_at.getMonth() + 1)}.${addZero(finished_at.getDate())}.${finished_at.getFullYear()}.  ${addZero(finished_at.getHours())}:${addZero(finished_at.getMinutes())}h`;
+      require('./utils/addGameToDB').saveGame(started_at, finished_at);
+  
+      io.emit('gameOverForMain'); // On page main now we can allow other users to join game if there is space
+      io.emit('gameOver', winner); // Tell to clients who is winner and that game is over
+    }
+  }
+  
+  // Adding zero on dates to show 00:22h instead of 0:22h
+  function addZero(i) {
+    if (i < 10) {
+      i = "0" + i;
+    }
+  
+    return i;
+  }
+</pre>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2966,7 +3226,7 @@ if(isset($_POST['prijava'])){
 
 
           <p class="font-weight-bold text-success">
-            Scroll To (jquery) - DFD.
+            Scroll To (jquery), URL, Path - DFD.
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
@@ -2993,6 +3253,205 @@ if(isset($_POST['prijava'])){
 
 
 
+
+            <p class="font-weight-bold text-success">
+              Sockets - RMTSlagalica.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  const socket = io(origin); // Client Socket
+  const socket = io(origin + '/'); // Client socket
+
+  socket.on('gameOverForMain', () => {
+    joinButton.disabled = false;
+    pInfo.innerHTML = pInfo.innerHTML.substring(0, pInfo.innerHTML.length - 17);
+  });
+
+  socket.emit('userJoinedInGame', username.value);
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Form Validation - RMTSlagalica.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  function cleanInput(input){
+    // Create a new div element
+    let temporalDivElement = document.createElement("div");
+    // Set the HTML content with the providen
+    temporalDivElement.innerHTML = input;
+
+    // Retrieve the text property of the element (cross-browser support)
+    return temporalDivElement.textContent || temporalDivElement.innerText || "";
+  }
+
+
+
+  function checkNicknameForm(){
+    const lengthError = document.getElementById('length-error'); // Lenght error div
+    const takenNicknameError = document.getElementById('taken-nickname-error'); // Taken error div
+    const hasSpacesNicknameError = document.getElementById('has-spaces-nickname-error'); // Spaces error div
+  
+    // Removes html code from input and scripts
+  
+    // Create a new div element
+    let temporalDivElement = document.createElement("div");
+    let nickname = document.getElementById('nickname');
+    // Set the HTML content with the providen
+    temporalDivElement.innerHTML = nickname.value;
+  
+    nickname.value = temporalDivElement.textContent || temporalDivElement.innerText || "";
+  
+    if(hasSpaces(nickname.value)){ // If there are spaces in name show only spaces error and return false
+      nickname.classList.add('is-invalid');
+      hasSpacesNicknameError.style.display = "block";
+      lengthError.style.display = "none";
+      takenNicknameError.style.display = "none";
+  
+      return false;
+    }else{
+      if(isValidNicknameLength(nickname.value)){ // If lenght is not valid
+  
+        if(nicknameTaken(nickname.value)){ // If nickname is taken 
+          nickname.classList.add('is-invalid');
+    
+          lengthError.style.display = "none";
+          hasSpacesNicknameError.style.display = "none";
+          takenNicknameError.style.display = "block";
+    
+          return false;
+        }
+    
+        return true;
+      }else{
+        nickname.classList.add('is-invalid');
+    
+        lengthError.style.display = "block";
+        hasSpacesNicknameError.style.display = "none";
+        takenNicknameError.style.display = "none";
+    
+        return false;
+      }
+    }
+  }
+  
+  function hasSpaces(nickname){
+  
+  // https://stackoverflow.com/questions/17616624/detect-if-string-contains-any-spaces
+  
+    if (/\s/.test(nickname)) {
+      // It has any kind of whitespace
+  
+      return true;
+    }
+  
+    return false;
+  }
+  
+  function nicknameTaken(nickname){
+    for(let i = 0; i < usersFront.length; i++){
+      if(usersFront[i].username == nickname){
+        return true;
+      }
+    }
+  
+    // YOU CAN'T BREAK FOREACH LOOP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+    return false;
+  }
+  
+  function isValidNicknameLength(nickname){
+    return nickname.length <= 20 ? true : false;
+  }
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                Redirect - RMTSlagalica.
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  window.location.href = redirectInfo.destination;
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <p class="font-weight-bold text-success">
+              ParentNode, appendChild, childNodes - RMTSlagalica.
+              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            </p>
+            <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  td.parentNode.removeChild(td);
+  userList.appendChild(li);
+  scoreboardUsers.childNodes.forEach((childNode) => {});
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              <p class="font-weight-bold text-success">
+                Clicked Letter, Disable, Style - RMTSlagalica.
+                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+              </p>
+              <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  letters.forEach((letter) => {
+    letter.addEventListener('click', (event) => {
+        wordInput.value += event.target.value / innerHTML; // Add letter to the word input
+        letter.disabled = true;
+    });
+  });
+
+  spojniceBtns[counter].style.backgroundColor = "#333";
+  spojniceBtns[counter].style.color = "#fff";
+</pre>
 
 
 
