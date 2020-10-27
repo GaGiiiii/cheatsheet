@@ -418,6 +418,7 @@ if(isset($_POST['prijava'])){
   $email = ocisti($_POST['email']);
   $trenutnaGodina = $_POST['trenutna_godina'];
   $zeliObavestenja = $_POST['zeli_obavestenja'];
+  $bioRanije = $_POST['bio_ranije'] ?? null;
 
   $greske = array();
   $fail = false;
@@ -430,6 +431,10 @@ if(isset($_POST['prijava'])){
           $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Invalid Email Format.&lt;/label&gt;&lt;/p&gt;';
           $fail = true;
       }
+  }
+
+  if(!isset($bioRanije)){
+    $greske['bio_ranije'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas izaberite DA ili NE.&lt;/label&gt;&lt;/p&gt;';
   }
 
   if(count($greske) == 0){
@@ -506,6 +511,25 @@ if(isset($_POST['prijava'])){
                   &lt;option value="4"&gt;4&lt;/option&gt;
                 &lt;/select&gt;
               &lt;/div&gt;
+
+              &lt;!-- UCESTVOVAO RANIJE --&gt;
+              &lt;fieldset class="form-group"&gt;
+                &lt;label class="text-left font-size-17 mb-0"&gt;Da li ste ranije učestvovali na S2S-u ? &lt;span class="orange-star"&gt;*&lt;/span&gt;&lt;/label&gt;
+                &lt;?php echo $greske['bio_ranije'] ?? ""; ?&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input font-size-15" name="bio_ranije" value="DA" &lt;?php if(isset($bioRanije) &amp;&amp; $bioRanije == "DA") echo "CHECKED"; ?&gt;&gt;
+                    DA
+                  &lt;/label&gt;
+                &lt;/div&gt;
+                &lt;div class="form-check"&gt;
+                  &lt;label class="form-check-label"&gt;
+                    &lt;input type="radio" class="form-check-input font-size-15" name="bio_ranije" value="NE" &lt;?php if(isset($bioRanije) &amp;&amp; $bioRanije == "NE") echo "CHECKED"; ?&gt;&gt;
+                    Ne
+                  &lt;/label&gt;
+                &lt;/div&gt;
+              &lt;/fieldset&gt;
+              &lt;!-- UCESTVOVAO RANIJE --&gt;
 
               &lt;fieldset class="form-group"&gt;
                 &lt;legend class="text-left"&gt;Da li želite da dobijate obaveštenja o FONISovim projektima ?&lt;/legend&gt;
@@ -3201,6 +3225,23 @@ if(isset($_POST['prijava'])){
         <!-- ---------- JS ---------- -->
         <div id="JS" class="mb-5">
           <h1 class="mb-5"><u>JS</u></h1>
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Display, Disabled, Checked - S2s.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleJS1">
+  zastoHocePanelDiv.style.display = "block";
+  event.target.disabled
+  event.target.checked
+</pre>
+
 
 
 
