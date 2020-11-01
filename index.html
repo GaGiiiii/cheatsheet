@@ -23,10 +23,11 @@
 
           <p class="font-weight-bold text-success">
             Header Already Sent Information - E-commerce 2020.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample2">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExample2">
+          <pre class="collapse" id="collapseExample2">
   ob_start();
 </pre>
 
@@ -34,10 +35,11 @@
 
           <p class="font-weight-bold text-success">
             Session Already Exists - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample3" aria-expanded="false" aria-controls="collapseExample3">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample3" aria-expanded="false" aria-controls="collapseExample3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExample3">
+          <pre class="collapse" id="collapseExample3">
   if (session_status() == PHP_SESSION_NONE) {
     session_start();
   }
@@ -46,10 +48,11 @@
 
           <p class="font-weight-bold text-success">
             Database Class - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExample4">
+          <pre class="collapse" id="collapseExample4">
   if (session_status() == PHP_SESSION_NONE) {
       session_start();
   }
@@ -83,12 +86,628 @@
 
 
 
+
+
+
+
           <p class="font-weight-bold text-success">
-            Film / Knjiga Class - Cinematic, Neda
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP1" aria-expanded="false" aria-controls="collapseExampleP1">+</button>
+            Database Class (PDO) - Moviex
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP1">
+          <pre class="collapse" id="collapseExample4">
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
+
+class Database{
+  private $host = "localhost"; // Host
+  private $db_name = "moviex"; // DB Name
+  private $username = "root"; // DB Username
+  private $password = ""; // DB Password
+
+  private static $instance = null; // Instanca klase
+  public $connection = null; // Konekcija
+
+  private function __construct(){    
+    $this->connection = new PDO('mysql:host=' . $this->host . ';dbname=' . $this->db_name . ';charset=utf8mb4', $this->username, $this->password);
+    $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // $this->connection = mysqli_connect($this->host, $this->username, $this->password, $this->db_name);
+  }
+
+  public function getConnection(){
+      return $this->connection;
+  }
+  
+  public static function getInstance(){
+      if(!isset(self::$instance)){
+          self::$instance = new Database();
+      }
+
+      return self::$instance;
+  }   
+}
+</pre>
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Movie Class - Moviex
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExample4">
+  require_once 'Database.php'; // Pozivanje fajla gde je Database
+
+  class Movie {
+  
+    public static function add($data) {
+      try {
+        $data = (object) $data;
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO movie (title, img, genre, price, length, trailer, director, actors, publish_date, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $result = $query-&gt;execute([
+          $data-&gt;movie_title_add,
+          $data-&gt;movie_img_add,
+          $data-&gt;movie_genre_add,
+          $data-&gt;movie_price_add,
+          $data-&gt;movie_length_add,
+          $data-&gt;movie_trailer_add,
+          $data-&gt;movie_director_add,
+          $data-&gt;movie_actors_add,
+          $data-&gt;movie_date_add,
+          $data-&gt;movie_description_add
+        ]);
+  
+        return $result;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+        echo $e-&gt;getLine();
+        // echo $e-&gt;getFile();
+  
+        return false;
+      }
+    }
+  
+    public static function getAll() {
+      try {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie");
+        $query-&gt;execute();
+        $movies = $query-&gt;fetchAll();
+  
+        return $movies;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return [];
+      }
+    }
+  
+    public static function sortByDate() {
+      try {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie ORDER BY publish_date DESC");
+        $query-&gt;execute();
+        $movies = $query-&gt;fetchAll();
+  
+        return $movies;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return [];
+      }
+    }
+  
+    public static function sortByRating() {
+      try {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT m.*, AVG(r.rating) AS rating FROM movie m
+        JOIN rating r ON m.id = r.movie_id
+        GROUP BY r.movie_id
+        ORDER BY rating DESC");
+        $query-&gt;execute();
+        $movies = $query-&gt;fetchAll();
+  
+        return $movies;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return [];
+      }
+    }
+  
+    public static function update($movieID, $data) {
+      try {
+        $data = (object) $data;
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE movie SET title = :title, genre = :genre, price = :price, director = :director, actors = :actors, length = :length, img = :img, trailer = :trailer, description = :description, publish_date = :date WHERE id = :id LIMIT 1");
+  
+        $result = $query-&gt;execute(array(
+          ':title' =&gt; $data-&gt;movie_title_update,
+          ':genre' =&gt; $data-&gt;movie_genre_update,
+          ':price' =&gt; $data-&gt;movie_price_update,
+          ':director' =&gt; $data-&gt;movie_director_update,
+          ':actors' =&gt; $data-&gt;movie_actors_update,
+          ':length' =&gt; $data-&gt;movie_length_update,
+          ':img' =&gt; $data-&gt;movie_img_update,
+          ':trailer' =&gt; $data-&gt;movie_trailer_update,
+          ':description' =&gt; $data-&gt;movie_description_update,
+          ':date' =&gt; $data-&gt;movie_date_update,
+          ':id' =&gt; $movieID,
+        ));
+  
+        return $result;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return false;
+      }
+    }
+  
+    public static function delete($movieID) {
+      try {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM movie WHERE id = :id LIMIT 1");
+        $result = $query-&gt;execute(array(':id' =&gt; $movieID));
+  
+        return $result;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return false;
+      }
+    }
+  
+    public static function sort($sortType) {
+      try {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie ORDER BY $sortType DESC");
+        $query-&gt;execute();
+        $movies = $query-&gt;fetchAll();
+  
+        return $movies;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return [];
+      }
+    }
+  
+    public static function search($searchText) {
+      try {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie WHERE title LIKE '%" . $searchText . "%'");
+        $query-&gt;execute();
+        $movies = $query-&gt;fetchAll();
+  
+        return $movies;
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return [];
+      }
+    }
+  
+    public static function getRating($movieID) {
+      try {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT rating FROM rating WHERE movie_id = :movieID");
+        $query-&gt;execute(array(
+          ':movieID' =&gt; $movieID,
+        ));
+        $ratings = $query-&gt;fetchAll();
+  
+        $ratingR = 0.0;
+  
+        foreach ($ratings as $rating) {
+          $ratingR += $rating['rating'];
+        }
+  
+        return sizeof($ratings) == 0 ? 0.0 : round($ratingR / sizeof($ratings), 2);
+      } catch (PDOException $e) {
+        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  
+        return 0.0;
+      }
+    }
+  }
+</pre>
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            User Class - Moviex
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExample4">
+            require_once 'Database.php'; // Pozivanje fajla gde je Database
+
+            class User {
+            
+              public static function register($data) {
+                try {
+                  $data = (object) $data;
+                  $data-&gt;password = md5(md5($data-&gt;password)); // Hashovanje sifre sa md5
+                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user (email, password, username) VALUES (?, ?, ?)");
+                  $result = $query-&gt;execute([
+                    $data-&gt;email,
+                    $data-&gt;password,
+                    $data-&gt;username,
+                  ]);
+            
+                  $data-&gt;id = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
+            
+                  if ($result) { // Ukoliko je query uspesan pravimo sesiju i vracamo true
+                    self::createSession($data);
+            
+                    return true;
+                  }
+            
+                  return false;
+                } catch (PDOException $e) {
+                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+            
+                  return false;
+                }
+              }
+            
+              public static function takenEmail($email) {
+                try {
+                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT email FROM user WHERE email = :email");
+                  $query-&gt;execute(array(
+                    ':email' =&gt; $email,
+                  ));
+            
+                  $user = $query-&gt;fetch();
+            
+                  if ($user) {
+                    return true;
+                  }
+            
+                  return false;
+                } catch (PDOException $e) {
+                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+            
+                  return false;
+                }
+              }
+            
+              public static function takenUsername($username) {
+                try {
+                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT username FROM user WHERE username = :username");
+                  $query-&gt;execute(array(
+                    ':username' =&gt; $username,
+                  ));
+            
+                  $user = $query-&gt;fetch();
+            
+                  if ($user) {
+                    return true;
+                  }
+            
+                  return false;
+                } catch (PDOException $e) {
+                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+            
+                  return false;
+                }
+              }
+            
+              public static function login($data) {
+                try {
+                  $data = (object) $data;
+                  $data-&gt;password = md5(md5($data-&gt;password));
+                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT id, email, username, is_admin FROM user WHERE username = :username AND password = :password");
+                  $query-&gt;execute(array(
+                    ':username' =&gt; $data-&gt;username,
+                    ':password' =&gt; $data-&gt;password,
+                  ));
+            
+                  $user = $query-&gt;fetch();
+            
+                  if ($user) {
+                    $user = (object) $user;
+                    self::createSession($user);
+            
+                    return true;
+                  }
+            
+                  return false;
+                } catch (PDOException $e) {
+                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+            
+                  return false;
+                }
+              }
+            
+              public static function createSession($user) {
+                $_SESSION['user'] = [
+                  'id' =&gt; $user-&gt;id,
+                  'email' =&gt; $user-&gt;email,
+                  'username' =&gt; $user-&gt;username,
+                  'is_admin' =&gt; $user-&gt;is_admin,
+                ];
+              }
+            
+              public static function logout() {
+                // Gasimo i unistavamo sesiju nakon logout
+                //   session_unset();
+                //   session_destroy();
+                unset($_SESSION['user']);
+              }
+            
+              public static function isLoggedIn() {
+                // Ako je sesija aktivna znaci da je korisnik ulogovan i dalje.
+                if (isset($_SESSION['user'])) {
+                  return true;
+                }
+            
+                return false;
+              }
+            }
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            login.php - Moviex
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExample4">
+
+            &lt;?php
+
+            include 'includes/functions.php';
+            include 'classes/User.php';
+            
+            if(User::isLoggedIn()){
+              header("Location: index");
+            }
+            
+            
+            if(isset($_POST['login'])){  
+              $username = clean($_POST['username']);
+              $password = clean($_POST['password']);
+            
+              $errors = array();
+            
+              if(empty($password)){
+                $errors['password'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Passowrd.&lt;/label&gt;&lt;/p&gt;';
+              }
+            
+              if(empty($username)){
+                $errors['username'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Email.&lt;/label&gt;&lt;/p&gt;';
+              }
+            
+              if(count($errors) == 0){
+                $data = array(
+                  "password" =&gt; $password,
+                  "username" =&gt; $username,
+                );
+            
+                if(User::login($data)){
+                  $_SESSION['login_success_message'] = "Logged In Successfully";
+                  header("Location: index");
+            
+                  exit;
+                }else{
+                  $errors['wrong_combination'] = '&lt;div class="alert alert-dismissible alert-danger"&gt;
+                  &lt;button type="button" class="close" data-dismiss="alert"&gt;&amp;times;&lt;/button&gt;
+                  Username And Password Do Not Match.
+                &lt;/div&gt;';
+                }
+            
+              } // COUNT errors CLOSE
+            } // POST REQ CLOSE
+            ?&gt;
+            
+            &lt;?php include 'includes/header.php'; ?&gt;
+            
+            &lt;!-- -------- PRIJAVE ---------- --&gt;
+              &lt;section id="prijave"&gt;
+                &lt;div class="container"&gt;
+                  &lt;div class="row justify-content-center"&gt;
+                    &lt;div class="col-md-6 col-sm-8 col-8"&gt;
+                      &lt;h1 class="mt-5"&gt;LOGIN&lt;/h1&gt;
+            
+                      &lt;?php echo $errors['wrong_combination'] ?? ""; ?&gt;
+            
+                      &lt;form method="POST" class="mb-5"&gt;
+                        &lt;fieldset&gt;
+            
+                          &lt;div class="form-group"&gt;
+                            &lt;label for="username"&gt;Username&lt;/label&gt;
+                            &lt;input type="username" name="username" class="form-control" id="username" placeholder="Unesite username" value="&lt;?php echo $username ?? ""; ?&gt;"&gt;             
+                            &lt;?php echo $errors['username'] ?? ""; ?&gt;
+                          &lt;/div&gt;
+            
+                          &lt;div class="form-group"&gt;
+                            &lt;label for="password"&gt;Passowrd&lt;/label&gt;
+                            &lt;input type="password" name="password" class="form-control" id="password" placeholder="Enter password" value="&lt;?php echo $password ?? ""; ?&gt;"&gt;             
+                            &lt;?php echo $errors['password'] ?? ""; ?&gt;
+                          &lt;/div&gt;
+            
+                          &lt;button id="login-btn" type="submit" name="login" class="btn btn-primary d-block w-100"&gt;LOGIN&lt;/button&gt;
+                        &lt;/fieldset&gt;
+                      &lt;/form&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/section&gt;
+              &lt;!-- -------- PRIJAVE ---------- --&gt;
+            
+              &lt;?php include 'includes/footer.php'; ?&gt;
+</pre>
+
+
+
+
+
+
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            register.php - Moviex
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExample4">
+            &lt;?php
+
+            include 'includes/functions.php';
+            include 'classes/User.php';
+            
+            if(User::isLoggedIn()){
+              header("Location: index");
+            }
+            
+            if(isset($_POST['register'])){  
+              $email = clean($_POST['email']);
+              $password = clean($_POST['password']);
+              $password2 = clean($_POST['password2']);
+              $username = clean($_POST['username']);
+            
+              $errors = array();
+            
+              if(empty($email)){
+                $errors['email'] = '&lt;p class="mb-0"&gt;&lt;label class="text-danger font-weight-bold text-uppercase mb-0"&gt;Please Enter Email.&lt;/label&gt;&lt;/p&gt;';
+              }else{
+                  if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+                      $errors['email'] = '&lt;p class="mb-0"&gt;&lt;label class="text-danger font-weight-bold text-uppercase mb-0"&gt;Invalid Email Format.&lt;/label&gt;&lt;/p&gt;';
+                  }
+              }
+            
+              if(empty($password)){
+                $errors['password'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Passowrd.&lt;/label&gt;&lt;/p&gt;';
+              }else{
+                if($password != $password2){
+                  $errors['password_confirm'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Passwords Do Not Match.&lt;/label&gt;&lt;/p&gt;';
+                }
+              }
+            
+              if(empty($password2)){
+                $errors['password2'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Confirm Password.&lt;/label&gt;&lt;/p&gt;';
+              }
+            
+              if(empty($username)){
+                $errors['username'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Email.&lt;/label&gt;&lt;/p&gt;';
+              }
+            
+              if(count($errors) == 0){
+                $data = array(
+                  "email" =&gt; $email,
+                  "password" =&gt; $password,
+                  "username" =&gt; $username,
+                );
+            
+                if(User::takenEmail($email)){
+                  $errors['taken_email'] = '&lt;div class="alert alert-dismissible alert-danger"&gt;
+                  &lt;button type="button" class="close" data-dismiss="alert"&gt;&amp;times;&lt;/button&gt;
+                  E-mail already in use.
+                &lt;/div&gt;';
+                }else if(User::takenUsername($username)){
+                  $errors['taken_username'] = '&lt;div class="alert alert-dismissible alert-danger"&gt;
+                  &lt;button type="button" class="close" data-dismiss="alert"&gt;&amp;times;&lt;/button&gt;
+                  Username already in use.
+                &lt;/div&gt;';
+                }else if(User::register($data)){
+                  $_SESSION['register_success_message'] = "Successfully Registerd";
+                  header("Location: index");
+            
+                  exit;
+                }
+            
+              } // COUNT errors CLOSE
+            } // POST REQ CLOSE
+            ?&gt;
+            
+            &lt;?php include 'includes/header.php'; ?&gt;
+            
+            &lt;!-- -------- PRIJAVE ---------- --&gt;
+              &lt;section id="prijave"&gt;
+                &lt;div class="container"&gt;
+                  &lt;div class="row justify-content-center"&gt;
+                    &lt;div class="col-md-6 col-sm-8 col-8"&gt;
+                      &lt;h1 class="mt-5"&gt;REGISTER&lt;/h1&gt;
+            
+                      &lt;?php echo $errors['taken_email'] ?? ""; ?&gt;
+                      &lt;?php echo $errors['taken_username'] ?? ""; ?&gt;
+            
+                      &lt;form method="POST" class="mb-5"&gt;
+                        &lt;fieldset&gt;
+            
+                          &lt;div class="form-group"&gt;
+                            &lt;label for="email"&gt;E-mail&lt;/label&gt;
+                            &lt;input type="email" name="email" class="form-control" id="email" placeholder="Enter e-mail" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;       
+                            &lt;?php echo $errors['email'] ?? ""; ?&gt;      
+                            &lt;small id='emailHelp' class='form-text text-left text-black mt-0'&gt;We'll never share your email with anyone else.&lt;/small&gt;
+                          &lt;/div&gt;
+            
+                          &lt;div class="form-group"&gt;
+                            &lt;label for="password"&gt;Passowrd&lt;/label&gt;
+                            &lt;input type="password" name="password" class="form-control" id="password" placeholder="Enter password" value="&lt;?php echo $password ?? ""; ?&gt;"&gt;             
+                            &lt;?php echo $errors['password'] ?? ""; ?&gt;
+                            &lt;?php echo $errors['password_confirm'] ?? ""; ?&gt;
+                          &lt;/div&gt;
+            
+                          &lt;div class="form-group"&gt;
+                            &lt;label for="password2"&gt;Confirm Password&lt;/label&gt;
+                            &lt;input type="password" name="password2" class="form-control" id="password2" placeholder="Confirm password" value=""&gt;             
+                            &lt;?php echo $errors['password2'] ?? ""; ?&gt;
+                          &lt;/div&gt;
+            
+                          &lt;div class="form-group"&gt;
+                            &lt;label for="username"&gt;Username&lt;/label&gt;
+                            &lt;input type="username" name="username" class="form-control" id="username" placeholder="Unesite username" value="&lt;?php echo $username ?? ""; ?&gt;"&gt;             
+                            &lt;?php echo $errors['username'] ?? ""; ?&gt;
+                          &lt;/div&gt;
+            
+            
+                          &lt;button id="register-btn" type="submit" name="register" class="btn btn-primary d-block w-100"&gt;REGISTER&lt;/button&gt;
+                        &lt;/fieldset&gt;
+                      &lt;/form&gt;
+                    &lt;/div&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+              &lt;/section&gt;
+              &lt;!-- -------- PRIJAVE ---------- --&gt;
+            
+              &lt;?php include 'includes/footer.php'; ?&gt;
+</pre>
+
+
+
+
+
+          <p class="font-weight-bold text-success">
+            Film / Knjiga Class - Cinematic, Neda
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP1" aria-expanded="false" aria-controls="collapseExampleP1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleP1">
   require_once 'Database.php';
 
   class Film{
@@ -188,12 +807,13 @@
 
 
 
-            <p class="font-weight-bold text-success">
-              Korisnik Class - Cinematic
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP2" aria-expanded="false" aria-controls="collapseExampleP2">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleP2">
+          <p class="font-weight-bold text-success">
+            Korisnik Class - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP2" aria-expanded="false" aria-controls="collapseExampleP2">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleP2">
   require_once 'Database.php'; // Pozivanje fajla gde je Database
 
   class Korisnik{
@@ -283,10 +903,11 @@
 
           <p class="font-weight-bold text-success">
             Header - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP3" aria-expanded="false" aria-controls="collapseExampleP3">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP3" aria-expanded="false" aria-controls="collapseExampleP3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP3">
+          <pre class="collapse" id="collapseExampleP3">
   &lt;?php require_once "classes/Korisnik.php"; ?&gt;
   &lt;?php 
     $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/')); //  /prijava /registracija /index.php
@@ -361,10 +982,11 @@
 
           <p class="font-weight-bold text-success">
             Footer - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP4" aria-expanded="false" aria-controls="collapseExampleP4">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP4" aria-expanded="false" aria-controls="collapseExampleP4">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP4">
+          <pre class="collapse" id="collapseExampleP4">
     &lt;br&gt;&lt;br&gt;&lt;br&gt;
 
     &lt;script src="https://code.jquery.com/jquery-3.4.1.min.js"&gt;&lt;/script&gt;
@@ -383,10 +1005,11 @@
 
           <p class="font-weight-bold text-success">
             Is Admin - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <pre class="collapse" id="collapseExampleP5">
   require_once 'classes/Korisnik.php';
 
   if(!Korisnik::ulogovan() || (Korisnik::ulogovan() && !$_SESSION['korisnik']['isAdmin'])){
@@ -399,11 +1022,12 @@
 
 
           <p class="font-weight-bold text-success">
-            Insert / Form With Validation (Select, Radio Buttons) <br> Flash Messages  - S2S 2020, Cinematic.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
+            Insert / Form With Validation (Select, Radio Buttons) <br> Flash Messages - S2S 2020, Cinematic.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExample1">
+          <pre class="collapse" id="collapseExample1">
 function ocisti($input){
   $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
   $input = trim($input);
@@ -559,12 +1183,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              GET - Cinematic
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <p class="font-weight-bold text-success">
+            GET - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleP5">
   $filmID = $_GET['id'];
   $film = Film::vratiPoID($filmID);
 </pre>
@@ -576,10 +1201,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Update / Delete - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <pre class="collapse" id="collapseExampleP5">
   if(isset($_POST['izbrisi_rezervaciju'])){
     $rezervacijaID = $_POST['rezervacijaID'];
     if(Rezervacija::izbrisi($rezervacijaID)){
@@ -600,10 +1226,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Foreach Index - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <pre class="collapse" id="collapseExampleP5">
   &lt;?php foreach($karte as $key=&gt;$karta): ?&gt;
 
   &lt;?php if($key % 2 == 0){ ?&gt;
@@ -615,10 +1242,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Odjava / Logout - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <pre class="collapse" id="collapseExampleP5">
   &lt;?php
 
     require_once 'classes/Korisnik.php';
@@ -635,12 +1263,13 @@ if(isset($_POST['prijava'])){
 
 
 
-              <p class="font-weight-bold text-success">
-                Email Validation - Cinematic
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <p class="font-weight-bold text-success">
+            Email Validation - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleP5">
   if(empty($email)){
     $poruka['email'] = '&lt;p class="error-p"&gt;&lt;label class="text-danger error"&gt;Molimo Vas unesite email.&lt;/label&gt;&lt;/p&gt;';
   }else{
@@ -658,10 +1287,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Username / Email Exists - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <pre class="collapse" id="collapseExampleP5">
   if(count($poruka) == 0){
     if(Korisnik::zauzetEmail($email)){
         $poruka['email'] = '&lt;p class="error-p"&gt;&lt;label class="text-dange errorr"&gt;Email zauzet.&lt;/label&gt;&lt;/p&gt;';
@@ -687,12 +1317,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              Search - Neda
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <p class="font-weight-bold text-success">
+            Search - Neda
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleP5">
   &lt;?php
 
   require_once 'classes/Knjiga.php';
@@ -787,12 +1418,13 @@ if(isset($_POST['prijava'])){
 
 
 
-              <p class="font-weight-bold text-success">
-                Sort - Neda
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleP5">
+          <p class="font-weight-bold text-success">
+            Sort - Neda
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleP5">
   &lt;?php
 
   require_once 'classes/Knjiga.php';
@@ -961,10 +1593,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Nodemon - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   npm i nodemon --save
 
   "scripts": {
@@ -981,10 +1614,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Database Config - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   /* ********** DB CONFIG ********** */
 
   module.exports = {
@@ -999,12 +1633,13 @@ if(isset($_POST['prijava'])){
 
 
 
-              <p class="font-weight-bold text-success">
-                Passport Config - DFD.
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Passport Config - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   const LocalStrategy = require('passport-local').Strategy;
   const UserModel = require('../models/user.model');
   const config = require('../config/database');
@@ -1069,10 +1704,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Comment Controller (async, await) - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   /* ********** MODELS ********** */
 
   const CommentModel = require('../models/comment.model');
@@ -1192,12 +1828,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              Like Controller - DFD.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Like Controller - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   /* ********** MODELS ********** */
 
   const MovieModel = require('../models/movie.model');
@@ -1312,10 +1949,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             User Controller Populate Chain - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   /* ********** MODELS ********** */
 
   const UserModel = require('../models/user.model');
@@ -1494,10 +2132,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Movie Controller - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   /* ********** MODELS ********** */
 
   const MovieModel = require('../models/movie.model');
@@ -1941,10 +2580,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Comment Model - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
   
@@ -1979,10 +2619,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Movie Model - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
   
@@ -2034,10 +2675,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Database Config - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
   
@@ -2093,12 +2735,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              User Model - DFD.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            User Model - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
   
@@ -2162,12 +2805,13 @@ if(isset($_POST['prijava'])){
 
 
 
-              <p class="font-weight-bold text-success">
-                User Routes - DFD.
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            User Routes - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   const express = require('express');
   const router = express.Router();
   
@@ -2220,10 +2864,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Movie Routes - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   const express = require('express');
   const router = express.Router();
   
@@ -2273,12 +2918,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              HELP (Flash Messages, Handlebars Nesting) - DFD.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            HELP (Flash Messages, Handlebars Nesting) - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   https://gist.github.com/brianmacarthur/a4e3e0093d368aa8e423
 
 
@@ -2318,12 +2964,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              APP JS - DFD.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            APP JS - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   /* ********** DEPENDENCIES ********** */
 
   const express = require('express');
@@ -2427,12 +3074,13 @@ if(isset($_POST['prijava'])){
 
 
 
-        <p class="font-weight-bold text-success">
-          Index View - DFD.
-          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-        </p>
-        <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Index View - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   {{#if message}}
   &lt;div class="container-fluid mt-5"&gt;
     &lt;div class="alert alert-success"&gt;{{message}}&lt;/div&gt;
@@ -2489,14 +3137,15 @@ if(isset($_POST['prijava'])){
 
 
 
-        <p class="font-weight-bold text-success">
-          Profile View - DFD.
-          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-        </p>
-        <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Profile View - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
 
-  
+
   &lt;div class="row"&gt;
     &lt;div class="col-md-8 offset-md-2" id="body-container"&gt;
 
@@ -2544,10 +3193,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Register / Login View - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   &lt;div class="row"&gt;
     &lt;div class="col-md-8 offset-md-2" id="body-container"&gt;
 
@@ -2616,12 +3266,13 @@ if(isset($_POST['prijava'])){
 
 
 
-              <p class="font-weight-bold text-success">
-                Read Movie - DFD.
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Read Movie - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   {{!-- {{log commentID}} --}}
 
   &lt;div class="container-fluid container-max-width mt-5"&gt;
@@ -2865,12 +3516,13 @@ if(isset($_POST['prijava'])){
 
 
 
-<p class="font-weight-bold text-success">
-  Main Layout - DFD.
-  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-</p>
-<hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Main Layout - DFD.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -2951,12 +3603,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              Exports, Imports - RMTSlagalica.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Exports, Imports - RMTSlagalica.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   module.exports = {
     userJoins,
     getCurrentUser,
@@ -2982,12 +3635,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              APP.JS (Handlebars helpers, Sockets, Add Zero On Dates) - RMTSlagalica.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            APP.JS (Handlebars helpers, Sockets, Add Zero On Dates) - RMTSlagalica.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   /* ********** DEPENDENCIES ********** */
 
   const socketio = require('socket.io'); // SocketIO
@@ -3220,7 +3874,7 @@ if(isset($_POST['prijava'])){
         <!-- ---------- NODEJS ---------- -->
 
 
-        
+
 
         <!-- ---------- JS ---------- -->
         <div id="JS" class="mb-5">
@@ -3233,10 +3887,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Display, Disabled, Checked - S2s.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   zastoHocePanelDiv.style.display = "block";
   event.target.disabled
   event.target.checked
@@ -3247,10 +3902,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Animate Logo - Cinematic.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   let logo = document.querySelector('a.navbar-brand');
 
   setInterval(() => {
@@ -3267,12 +3923,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              Get / Change Data Or Any Other Attribute - CheatSheet.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Get / Change Data Or Any Other Attribute - CheatSheet.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   buttons[i].dataset.target = "#collapseExample" + i; // If attr is data-index-here-comes in JS it will return dataset.indexHereComes
   buttons[i].setAttribute("aria-controls", "collapseExample" + i);
   event.target.getAttribute('data-value');
@@ -3282,10 +3939,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Scroll To (jquery), URL, Path - DFD.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   let pathname = window.location.pathname; // Returns path only (/path/example.html)
   let url      = window.location.href;     // Returns full URL (https://example.com/path/example.html)
   let origin   = window.location.origin;   // Returns base URL (https://example.com)
@@ -3309,12 +3967,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              Sockets - RMTSlagalica.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Sockets - RMTSlagalica.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   const socket = io(origin); // Client Socket
   const socket = io(origin + '/'); // Client socket
 
@@ -3338,10 +3997,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Form Validation - RMTSlagalica.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <pre class="collapse" id="collapseExampleJS1">
   function cleanInput(input){
     // Create a new div element
     let temporalDivElement = document.createElement("div");
@@ -3446,12 +4106,13 @@ if(isset($_POST['prijava'])){
 
 
 
-              <p class="font-weight-bold text-success">
-                Redirect - RMTSlagalica.
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Redirect - RMTSlagalica.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   window.location.href = redirectInfo.destination;
 </pre>
 
@@ -3467,12 +4128,13 @@ if(isset($_POST['prijava'])){
 
 
 
-            <p class="font-weight-bold text-success">
-              ParentNode, appendChild, childNodes - RMTSlagalica.
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            ParentNode, appendChild, childNodes - RMTSlagalica.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   td.parentNode.removeChild(td);
   userList.appendChild(li);
   scoreboardUsers.childNodes.forEach((childNode) => {});
@@ -3491,12 +4153,13 @@ if(isset($_POST['prijava'])){
 
 
 
-              <p class="font-weight-bold text-success">
-                Clicked Letter, Disable, Style - RMTSlagalica.
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleJS1">
+          <p class="font-weight-bold text-success">
+            Clicked Letter, Disable, Style - RMTSlagalica.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleJS1">
   letters.forEach((letter) => {
     letter.addEventListener('click', (event) => {
         wordInput.value += event.target.value / innerHTML; // Add letter to the word input
@@ -3520,10 +4183,11 @@ if(isset($_POST['prijava'])){
           <h1 class="mb-5"><u>HTML</u></h1>
           <p class="font-weight-bold text-success">
             Input With Pattern - S2S 2020.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExample5">
+          <pre class="collapse" id="collapseExample5">
   &lt;input type="tel" name="broj_telefona" class="form-control" id="broj-telefona" placeholder="Format: +381-XXXXXXX" value="&lt;?php echo $brojTelefona ?? ''; ?&gt;" pattern="\+[0-9]{3}-[0-9]{8,9}"&gt;
 </pre>
 
@@ -3531,10 +4195,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             Send Form To JS - Cvećara Mirković.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExample6" aria-expanded="false" aria-controls="collapseExample6">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample6" aria-expanded="false" aria-controls="collapseExample6">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExample6">
+          <pre class="collapse" id="collapseExample6">
   &lt;form onsubmit="return validateForm(this)"&gt;&lt;/form&gt;
 </pre>
 
@@ -3543,16 +4208,62 @@ if(isset($_POST['prijava'])){
         </div>
         <!-- ---------- HTML ---------- -->
 
+
+
+
+        <!-- ---------- CSS ---------- -->
+        <div id="html" class="mb-5">
+          <h1 class="mb-5"><u>CSS</u></h1>
+          <p class="font-weight-bold text-success">
+            Animate Message - Moviex.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExample5">
+            .success-message-custom{
+              position: fixed;
+              animation-name: example;
+              animation-duration: 12s;
+              top: 75px;
+              right: -1000px;
+              width: 600px;
+              z-index: 1000;
+            }
+            
+            @media only screen and (max-width: 769px){
+              .success-message-custom{
+                width: 300px;
+              }
+            }
+            
+            
+            @keyframes example {
+              0% { right: -1000;}
+              20%{ right : 10px;}
+              75% {right: 10px;}
+              100%{ right: -1000;}
+            }
+</pre>
+
+
+        </div>
+        <!-- ---------- CSS ---------- -->
+
+
+
+
         <!-- ---------- OWL CAROUSEL ---------- -->
         <div id="OWL" class="mb-5">
           <h1 class="mb-5"><u>OWL CAROUSEL</u></h1>
 
           <p class="font-weight-bold text-success">
             HTML
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!-- OWL CAROSEL --&gt;
   &lt;section id="banner-area"&gt;
       &lt;div class="owl-carousel owl-theme"&gt;
@@ -3570,10 +4281,11 @@ if(isset($_POST['prijava'])){
 
           <p class="font-weight-bold text-success">
             CSS
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC1" aria-expanded="false" aria-controls="collapseExampleOC1">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC1" aria-expanded="false" aria-controls="collapseExampleOC1">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC1">
+          <pre class="collapse" id="collapseExampleOC1">
   #banner-area img{
     max-height: 700px;
   }
@@ -3581,12 +4293,13 @@ if(isset($_POST['prijava'])){
 
 
 
-        <p class="font-weight-bold text-success">
-          JS
-          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC2" aria-expanded="false" aria-controls="collapseExampleOC2">+</button>
-        </p>
-        <hr>
-<pre class="collapse" id="collapseExampleOC2">
+          <p class="font-weight-bold text-success">
+            JS
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC2" aria-expanded="false" aria-controls="collapseExampleOC2">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC2">
 // BANNER OWL CAROUSEL
 $("#banner-area .owl-carousel").owlCarousel({
   dots: true,
@@ -3675,21 +4388,22 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-          <!-- ---------- AJAX ---------- -->
-          <div id="OWL" class="mb-5">
-            <h1 class="mb-5"><u>AJAX / .htaccess</u></h1>
+        <!-- ---------- AJAX ---------- -->
+        <div id="OWL" class="mb-5">
+          <h1 class="mb-5"><u>AJAX / .htaccess</u></h1>
 
 
 
 
 
 
-            <p class="font-weight-bold text-success">
-              .htaccess - Traversy Ajax
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            .htaccess - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   ## SOURCE: http://www.developphp.com/video/Miscellaneous/Semantic-URL-htaccess-Tutorial-SEO-Friendly-and-Clean-Links
 
   # Turn Rewrite Engine On
@@ -3704,7 +4418,8 @@ $("#blogs .owl-carousel").owlCarousel({
   # L makes this the last rule that this specific condition will match
   # $ in the regular expression makes the matching stop so that "customblah" will not work
   
-  
+  # RewriteCond %{REQUEST_FILENAME} !-f
+  # RewriteRule ^([^\.]+)$ $1.php [NC,L]
   
   # Rewrite for article.php?id=1&title=Title-Goes-Here
   # RewriteRule ^article/([0-9]+)/([0-9a-zA-Z_-]+)$ article.php?id=$1&title=$2 [NC,L]
@@ -3717,12 +4432,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-            <p class="font-weight-bold text-success">
-              SQL FILE - Traversy Ajax
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            SQL FILE - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   -- phpMyAdmin SQL Dump
   -- version 5.0.2
   -- https://www.phpmyadmin.net/
@@ -3801,24 +4517,26 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-                <p class="font-weight-bold text-success">
-                  sample.txt - Traversy Ajax
-                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                </p>
-                <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            sample.txt - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum dignissimos cum nam temporibus, itaque vitae maxime enim iste magni perspiciatis illo animi quae accusamus quasi maiores aspernatur qui perferendis? Ullam, quia. Magni laudantium accusantium exercitationem itaque, facilis quia nam, sint est illo sequi quod rerum aliquid doloribus? Numquam, est assumenda.
 </pre>
 
 
 
 
-                  <p class="font-weight-bold text-success">
-                    user.json - Traversy Ajax
-                    <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                  </p>
-                  <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            user.json - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   {
     "id": 1,
     "name": "Dzadzi",
@@ -3833,12 +4551,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-                    <p class="font-weight-bold text-success">
-                      users.json - Traversy Ajax
-                      <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                    </p>
-                    <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            users.json - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
 [
   {
       "id": 1,
@@ -3863,12 +4582,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-                <p class="font-weight-bold text-success">
-                  user.php - Traversy Ajax
-                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                </p>
-                <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            user.php - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;?php
 
   if(isset($_GET['id'])){
@@ -3891,12 +4611,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-                <p class="font-weight-bold text-success">
-                  users.php - Traversy Ajax
-                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                </p>
-                <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            users.php - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;?php
 
   $connection = mysqli_connect('localhost', 'root', '', 'ajax');
@@ -3914,12 +4635,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-              <p class="font-weight-bold text-success">
-                proccess.php - Traversy Ajax
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            proccess.php - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;?php
 
   $connection = mysqli_connect('localhost', 'root', '', 'ajax');
@@ -3990,10 +4712,11 @@ $("#blogs .owl-carousel").owlCarousel({
 
           <p class="font-weight-bold text-success">
             XHR File - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -4050,12 +4773,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-                <p class="font-weight-bold text-success">
-                  XHR JSON - Traversy Ajax
-                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                </p>
-                <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            XHR JSON - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -4131,12 +4855,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-            <p class="font-weight-bold text-success">
-              XHR GITHUB API - Traversy Ajax
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            XHR GITHUB API - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -4186,12 +4911,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-                    <p class="font-weight-bold text-success">
-                      XHR PHP FORMS - Traversy Ajax
-                      <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                    </p>
-                    <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            XHR PHP FORMS - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -4313,12 +5039,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-              <p class="font-weight-bold text-success">
-                XHR GET DATA FROM DATABASE - Traversy Ajax
-                <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-              </p>
-              <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            XHR GET DATA FROM DATABASE - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -4367,12 +5094,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-                <p class="font-weight-bold text-success">
-                  FETCH - Traversy Ajax
-                  <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-                </p>
-                <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <p class="font-weight-bold text-success">
+            FETCH - Traversy Ajax
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
   &lt;head&gt;
@@ -4436,7 +5164,6 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-  
 
 
 
@@ -4447,13 +5174,15 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-  
-            <p class="font-weight-bold text-success">
-              Sort / Search - Neda
-              <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            </p>
-            <hr>
-<pre class="collapse" id="collapseExampleOC3">
+
+
+          <p class="font-weight-bold text-success">
+            Sort / Search - Neda
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   const form = document.getElementById('sortiraj-forma');
   const select = document.getElementById('sortiraj-select');
   
@@ -4500,12 +5229,12 @@ $("#blogs .owl-carousel").owlCarousel({
       });
   });
 </pre>
-  
-  
-  
-  
-          </div>
-          <!-- ---------- AJAX ---------- -->
+
+
+
+
+        </div>
+        <!-- ---------- AJAX ---------- -->
 
 
 
@@ -4515,15 +5244,16 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-          <!-- ---------- AXIOS ---------- -->
+        <!-- ---------- AXIOS ---------- -->
         <div id="OWL" class="mb-5">
           <h1 class="mb-5"><u>AXIOS</u></h1>
           <p class="font-weight-bold text-success">
             HTML
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
     &lt;head&gt;
@@ -4574,12 +5304,13 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-        <p class="font-weight-bold text-success">
-          JS
-          <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse" data-target="#collapseExampleOC2" aria-expanded="false" aria-controls="collapseExampleOC2">+</button>
-        </p>
-        <hr>
-<pre class="collapse" id="collapseExampleOC2">
+          <p class="font-weight-bold text-success">
+            JS
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC2" aria-expanded="false" aria-controls="collapseExampleOC2">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC2">
   // AXIOS GLOBALS
 
   axios.defaults.headers.common['X-Auth-Token'] = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
