@@ -22,16 +22,21 @@
       box-sizing: border-box;
     }
 
-    .list-group-item:hover{
+    .list-group-item:hover {
+      transition: .4s background-color linear;
+    }
+
+    .list-group-item:hover {
       background-color: #007bff;
       color: white;
     }
 
     @media only screen and (max-width: 768px) {
-      #menu-container{
+      #menu-container {
         display: none;
       }
-      #col-right{
+
+      #col-right {
         padding-left: 1rem;
         padding-right: 1rem !important;
       }
@@ -52,10 +57,11 @@
           <a class="list-group-item list-group-item-action" data-menu-item="js" href="#js">JS</a>
           <a class="list-group-item list-group-item-action" data-menu-item="html" href="#html">HTML</a>
           <a class="list-group-item list-group-item-action" data-menu-item="css" href="#css">CSS</a>
-          <a class="list-group-item list-group-item-action" data-menu-item="owl-carousel" href="#owl-carousel">OWL
-            CAROUSEL</a>
-          <a class="list-group-item list-group-item-action" data-menu-item="ajax" href="#ajax">AJAX</a>
-          <a class="list-group-item list-group-item-action" data-menu-item="axios" href="#axios">AXIOS</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="owl-carousel" href="#owl-carousel">Owl
+            Carousel</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="ajax" href="#ajax">Ajax</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="axios" href="#axios">Axios</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="java" href="#java">Java</a>
         </div>
       </div>
 
@@ -5565,7 +5571,452 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
         </div>
-        <!-- ---------- OWL CAROUSEL ---------- -->
+        <!-- ---------- AXIOS ---------- -->
+
+
+
+
+
+
+
+
+
+
+
+        <!-- ---------- JAVA ---------- -->
+        <div id="java" class="mb-5">
+          <h1 class="mb-5"><u>JAVA</u></h1>
+
+
+
+          <p class="font-weight-bold text-success">
+            Code Structure (img)
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
+  <img src="Screenshot_1.png" alt="">
+</pre>
+
+          <p class="font-weight-bold text-success">
+            Controller
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
+  public class Controller {
+
+    private static Controller instance;
+
+    private IDatabase memoryAdmin;
+    private IDatabase databaseStudio;
+    private IDatabase databaseShow;
+    private IDatabase databaseProp;
+    private IDatabase databaseShow_Prop;
+
+    private Controller() {
+        memoryAdmin = new MemoryAdmin();
+        databaseStudio = new DatabaseStudio();
+        databaseShow = new DatabaseShow();
+        databaseProp = new DatabaseProp();
+        databaseShow_Prop = new DatabaseShow_Prop();
+    }
+
+    public static Controller getInstance() {
+        if (instance == null) {
+            instance = new Controller();
+        }
+
+        return instance;
+    }
+
+    public List&lt;Admin&gt; getAllAdmins() {
+        return memoryAdmin.getAll();
+    }
+
+    public List&lt;Studio&gt; getAllStudios() {
+        return databaseStudio.getAll();
+    }
+
+    public List&lt;Show&gt; getAllShows() {
+        return databaseShow.getAll();
+    }
+
+    public Show insertShow(Show s) {
+        return (Show) databaseShow.insert(s);
+    }
+
+    public Studio getStudio(Long id) {
+        return (Studio) databaseStudio.get(id);
+    }
+
+    public List&lt;Prop&gt; getAllProps() {
+        return databaseProp.getAll();
+    }
+
+    public Show_Prop insertShow_Prop(Show_Prop sp) {
+        return (Show_Prop) databaseShow_Prop.insert(sp);
+    }
+
+    public Prop updateProp(Prop p) {
+        return (Prop) databaseProp.update(p);
+    }
+
+}
+</pre>
+
+          <p class="font-weight-bold text-success">
+            Database Singleton
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  public class Database {
+
+    private static Database instance;
+    private Connection connection;
+
+    private Database() {
+
+    }
+
+    public static Database getInstance() {
+        if (instance == null) {
+            instance = new Database();
+        }
+
+        return instance;
+    }
+
+    public Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            String url = "jdbc:mysql://localhost:3306/prviklkprimerig3";
+            String user = "root";
+            String password = "";
+
+            connection = DriverManager.getConnection(url, user, password);
+        }
+        
+        return connection;
+    }
+}
+          
+</pre>
+
+          <p class="font-weight-bold text-success">
+            Database Interface
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  public interface IDatabase&lt;T, K&gt; {
+
+    public T insert(T t);
+
+    public T get(K k);
+
+    public List&lt;T&gt; getAll();
+
+    public T update(T t);
+
+    public T delete(T t);
+  }
+</pre>
+
+          <p class="font-weight-bold text-success">
+            Database - insert
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  try {
+    String query = "INSERT INTO `show` (naziv, opis, trajanje, godina_proizvodnje, datum_pocetka, tip, studio_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    Connection connection = Database.getInstance().getConnection();
+    PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+    statement.setString(1, s.getNaziv());
+    statement.setString(2, s.getOpis());
+    statement.setInt(3, s.getTrajanje());
+    statement.setInt(4, s.getGodina());
+    statement.setDate(5, new java.sql.Date(s.getDatumPocetka().getTime()));
+    statement.setString(6, String.valueOf(s.getTip()));
+    statement.setLong(7, s.getStudio().getId());
+    statement.executeUpdate();
+
+    ResultSet rs = statement.getGeneratedKeys();
+    
+    if(rs.next()){
+        s.setId(rs.getLong(1));
+    }
+
+  } catch (Exception e) {
+      e.printStackTrace();
+  }
+
+  return s;
+</pre>
+
+          <p class="font-weight-bold text-success">
+            Database - getAll
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  List&lt;Show&gt; shows = new ArrayList&lt;&gt;();
+
+  try {
+      String query = "SELECT * FROM `show`";
+      Connection connection = Database.getInstance().getConnection();
+      Statement statement = connection.createStatement();
+      ResultSet rs = statement.executeQuery(query);
+
+      while (rs.next()) {
+          Studio studio = Controller.getInstance().getStudio(rs.getLong("studio_id"));
+          Show s = new Show(rs.getLong(1), rs.getString("naziv"), rs.getString("opis"), rs.getInt("trajanje"), rs.getInt("godina_proizvodnje"),
+                  new java.util.Date(rs.getDate("datum_pocetka").getTime()), ShowType.valueOf(rs.getString("tip")), studio);
+          shows.add(s);
+      }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return shows;
+</pre>
+
+          <p class="font-weight-bold text-success">
+            Database - get
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  Studio s = null;
+
+  try {
+      Connection connection = Database.getInstance().getConnection();
+      String query = "SELECT * FROM studio s WHERE id = ?";
+      PreparedStatement statement = connection.prepareStatement(query);
+      statement.setLong(1, k);
+
+      ResultSet rs = statement.executeQuery();
+
+      if (rs.next()) {
+          s = new Studio(rs.getLong(1), rs.getString(2));
+      }
+  } catch (Exception e) {
+      e.printStackTrace();
+  }
+
+  return s;
+</pre>
+
+
+          <p class="font-weight-bold text-success">
+            Database - update
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  try {
+    String query = "UPDATE `prop` SET zalihe = zalihe - 1 WHERE id = ?";
+    Connection connection = Database.getInstance().getConnection();
+    PreparedStatement statement = connection.prepareStatement(query);
+    statement.setLong(1, p.getId());
+
+    statement.executeUpdate();
+  } catch (Exception e) {
+      e.printStackTrace();
+  }
+
+  return p;
+</pre>
+
+
+          <p class="font-weight-bold text-success">
+            Database Interface
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  public interface IDatabase&lt;T, K&gt; {
+
+    public T insert(T t);
+
+    public T get(K k);
+
+    public List&lt;T&gt; getAll();
+
+    public T update(T t);
+
+    public T delete(T t);
+  }
+</pre>
+
+
+
+          <p class="font-weight-bold text-success">
+            Memory Class
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  public class MemoryAdmin implements IDatabase&lt;Admin, Long&gt; {
+
+    private List&lt;Admin&gt; admins;
+
+    public MemoryAdmin() {
+        Admin a = new Admin("Dragoslav", "Jankovic", "gagi", "gagi", 1l);
+        Admin a2 = new Admin("Dragoslav2", "Jankovic2", "gagi2", "gagi2", 2l);
+
+        admins = new ArrayList&lt;&gt;();
+        admins.add(a);
+        admins.add(a2);
+    }
+
+    @Override
+    public Admin insert(Admin t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Admin get(Long k) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List&lt;Admin&gt; getAll() {
+        return admins;
+    }
+
+    @Override
+    public Admin update(Admin t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Admin delete(Admin t) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+  }
+</pre>
+
+
+          <p class="font-weight-bold text-success">
+            ViewController
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  public class ViewController {
+    
+    private static ViewController instance;
+    
+    private JFrame loginForm;
+    private JFrame mainForm;
+    private JDialog newShowForm;
+    private JDialog propsForm = null;
+    
+    private ViewController(){
+        
+    }
+    
+    public static ViewController getInstance(){
+        if(instance == null){
+            instance = new ViewController();
+        }
+        
+        return instance;
+    }
+    
+    public void openLoginForm(){
+        loginForm = new LoginForm();
+        loginForm.setVisible(true);
+    }
+    
+    public void openMainForm(Admin admin){
+        mainForm = new MainForm(admin);
+        mainForm.setVisible(true);
+    }
+    
+    public void openNewShowForm(){
+        newShowForm = new NewShowForm(mainForm, true);
+        newShowForm.setVisible(true);
+    }
+    
+    public void openPropsForm(JLabel selectedProps){
+        propsForm = new PropsForm(mainForm, true, selectedProps, newShowForm);
+        propsForm.setVisible(true);
+    }   
+    
+  }
+</pre>
+
+
+          <p class="font-weight-bold text-success">
+            Database Interface
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  public interface IDatabase&lt;T, K&gt; {
+
+    public T insert(T t);
+
+    public T get(K k);
+
+    public List&lt;T&gt; getAll();
+
+    public T update(T t);
+
+    public T delete(T t);
+  }
+</pre>
+
+
+          <p class="font-weight-bold text-success">
+            Database Interface
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+<pre class="collapse" id="collapseExampleOC3">
+  public interface IDatabase&lt;T, K&gt; {
+
+    public T insert(T t);
+
+    public T get(K k);
+
+    public List&lt;T&gt; getAll();
+
+    public T update(T t);
+
+    public T delete(T t);
+  }
+</pre>
+
+
+
+
+
+
+
+
+
+
+        </div>
+        <!-- ---------- JAVA ---------- -->
+
 
       </div>
     </div>
