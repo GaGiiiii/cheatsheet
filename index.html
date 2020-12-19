@@ -14,7 +14,22 @@
     #menu {
       position: fixed;
       left: 25px;
-      width: 175px;
+      top: 25px;
+      /* width: 175px; */
+    }
+
+    #col-right {
+      box-sizing: border-box;
+    }
+
+    @media only screen and (max-width: 768px) {
+      #menu-container{
+        display: none;
+      }
+      #col-right{
+        padding-left: 1rem;
+        padding-right: 1rem !important;
+      }
     }
   </style>
 </head>
@@ -25,23 +40,24 @@
   <div class="container-fluid">
     <div class="row">
 
-      <div class="col my-5" id="menu-container">
+      <div class="col-lg-2 col-md-3 my-5" id="menu-container">
         <div id="menu" class="list-group">
           <a class="list-group-item list-group-item-action" data-menu-item="php" href="#php">PHP</a>
           <a class="list-group-item list-group-item-action" data-menu-item="nodejs" href="#nodejs">NodeJS</a>
           <a class="list-group-item list-group-item-action" data-menu-item="js" href="#js">JS</a>
           <a class="list-group-item list-group-item-action" data-menu-item="html" href="#html">HTML</a>
           <a class="list-group-item list-group-item-action" data-menu-item="css" href="#css">CSS</a>
-          <a class="list-group-item list-group-item-action" data-menu-item="owl-carousel" href="#owl-carousel">OWL CAROUSEL</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="owl-carousel" href="#owl-carousel">OWL
+            CAROUSEL</a>
           <a class="list-group-item list-group-item-action" data-menu-item="ajax" href="#ajax">AJAX</a>
           <a class="list-group-item list-group-item-action" data-menu-item="axios" href="#axios">AXIOS</a>
         </div>
       </div>
 
-      <div class="col-9 cl-sm-12 mr-5">
+      <div id="col-right" class="col-lg-10 col-md-9 col-sm-12 mb-5 mt-3 pr-5">
         <!-- ---------- PHP ---------- -->
         <div id="php">
-          <h1 class="mb-5 mt-5"><u>PHP</u></h1>
+          <h1 class="mb-5"><u>PHP</u></h1>
 
 
 
