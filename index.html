@@ -2,18 +2,43 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GaGi'S CheatSheet</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <link rel="stylesheet" href="style.css">
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    #menu {
+      position: fixed;
+      left: 25px;
+      width: 175px;
+    }
+  </style>
 </head>
 
-<body>
+<body data-spy="scroll" data-offset="100" data-target="#menu">
 
-  <div class="container">
+
+  <div class="container-fluid">
     <div class="row">
-      <div class="col">
+
+      <div class="col my-5" id="menu-container">
+        <div id="menu" class="list-group">
+          <a class="list-group-item list-group-item-action" data-menu-item="php" href="#php">PHP</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="nodejs" href="#nodejs">NodeJS</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="js" href="#js">JS</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="html" href="#html">HTML</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="css" href="#css">CSS</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="owl-carousel" href="#owl-carousel">OWL CAROUSEL</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="ajax" href="#ajax">AJAX</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="axios" href="#axios">AXIOS</a>
+        </div>
+      </div>
+
+      <div class="col-9 cl-sm-12 mr-5">
         <!-- ---------- PHP ---------- -->
         <div id="php">
           <h1 class="mb-5 mt-5"><u>PHP</u></h1>
@@ -1586,7 +1611,7 @@ if(isset($_POST['prijava'])){
 
 
         <!-- ---------- NODEJS ---------- -->
-        <div id="NODEJS" class="mb-5">
+        <div id="nodejs" class="mb-5">
           <h1 class="mb-5"><u>NODEJS</u></h1>
 
 
@@ -3877,7 +3902,7 @@ if(isset($_POST['prijava'])){
 
 
         <!-- ---------- JS ---------- -->
-        <div id="JS" class="mb-5">
+        <div id="js" class="mb-5">
           <h1 class="mb-5"><u>JS</u></h1>
 
 
@@ -4212,7 +4237,7 @@ if(isset($_POST['prijava'])){
 
 
         <!-- ---------- CSS ---------- -->
-        <div id="html" class="mb-5">
+        <div id="css" class="mb-5">
           <h1 class="mb-5"><u>CSS</u></h1>
           <p class="font-weight-bold text-success">
             Animate Message - Moviex.
@@ -4254,7 +4279,7 @@ if(isset($_POST['prijava'])){
 
 
         <!-- ---------- OWL CAROUSEL ---------- -->
-        <div id="OWL" class="mb-5">
+        <div id="owl-carousel" class="mb-5">
           <h1 class="mb-5"><u>OWL CAROUSEL</u></h1>
 
           <p class="font-weight-bold text-success">
@@ -4389,7 +4414,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
         <!-- ---------- AJAX ---------- -->
-        <div id="OWL" class="mb-5">
+        <div id="ajax" class="mb-5">
           <h1 class="mb-5"><u>AJAX / .htaccess</u></h1>
 
 
@@ -5245,7 +5270,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
         <!-- ---------- AXIOS ---------- -->
-        <div id="OWL" class="mb-5">
+        <div id="axios" class="mb-5">
           <h1 class="mb-5"><u>AXIOS</u></h1>
           <p class="font-weight-bold text-success">
             HTML
