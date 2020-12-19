@@ -5673,7 +5673,7 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   public class Database {
 
     private static Database instance;
@@ -5712,7 +5712,7 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   public interface IDatabase&lt;T, K&gt; {
 
     public T insert(T t);
@@ -5733,7 +5733,7 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   try {
     String query = "INSERT INTO `show` (naziv, opis, trajanje, godina_proizvodnje, datum_pocetka, tip, studio_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
     Connection connection = Database.getInstance().getConnection();
@@ -5766,7 +5766,7 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   List&lt;Show&gt; shows = new ArrayList&lt;&gt;();
 
   try {
@@ -5794,7 +5794,7 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   Studio s = null;
 
   try {
@@ -5822,7 +5822,7 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   try {
     String query = "UPDATE `prop` SET zalihe = zalihe - 1 WHERE id = ?";
     Connection connection = Database.getInstance().getConnection();
@@ -5839,35 +5839,12 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <p class="font-weight-bold text-success">
-            Database Interface
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-          </p>
-          <hr>
-<pre class="collapse" id="collapseExampleOC3">
-  public interface IDatabase&lt;T, K&gt; {
-
-    public T insert(T t);
-
-    public T get(K k);
-
-    public List&lt;T&gt; getAll();
-
-    public T update(T t);
-
-    public T delete(T t);
-  }
-</pre>
-
-
-
-          <p class="font-weight-bold text-success">
             Memory Class
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   public class MemoryAdmin implements IDatabase&lt;Admin, Long&gt; {
 
     private List&lt;Admin&gt; admins;
@@ -5916,7 +5893,7 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
   public class ViewController {
     
     private static ViewController instance;
@@ -5968,7 +5945,29 @@ $("#blogs .owl-carousel").owlCarousel({
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
+          <pre class="collapse" id="collapseExampleOC3">
+  public interface IDatabase&lt;T, K&gt; {
+
+    public T insert(T t);
+
+    public T get(K k);
+
+    public List&lt;T&gt; getAll();
+
+    public T update(T t);
+
+    public T delete(T t);
+  }
+</pre>
+
+
+          <p class="font-weight-bold text-success">
+            Database Interface
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
   public interface IDatabase&lt;T, K&gt; {
 
     public T insert(T t);
@@ -6004,7 +6003,6 @@ $("#blogs .owl-carousel").owlCarousel({
     public T delete(T t);
   }
 </pre>
-
 
 
 
