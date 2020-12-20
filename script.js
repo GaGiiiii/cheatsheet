@@ -1,12 +1,15 @@
-let pres = document.querySelectorAll("pre.collapse");
+let pres = document.querySelectorAll("div.collapse");
 // console.log(pres);
 let buttons = document.querySelectorAll(".cBTN");
+let buttonsClose = document.querySelectorAll(".cBTN-close");
 // console.log(buttons);
 
 for (let i = 0; i < pres.length; i++) {
   pres[i].id = "collapseExample" + i;
   buttons[i].dataset.target = "#collapseExample" + i;
+  buttonsClose[i].dataset.target = "#collapseExample" + i;
   buttons[i].setAttribute("aria-controls", "collapseExample" + i);
+  buttonsClose[i].setAttribute("aria-controls", "collapseExample" + i);
 }
 
 
