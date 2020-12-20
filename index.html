@@ -5940,68 +5940,293 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <p class="font-weight-bold text-success">
-            Database Interface
+            Login Form
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
           <pre class="collapse" id="collapseExampleOC3">
-  public interface IDatabase&lt;T, K&gt; {
 
-    public T insert(T t);
+  private final int MAX_BROJ_POKUSAJA = 3;
+  private int pokusaj = 1;
 
-    public T get(K k);
+  private void LoginBtnActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    emptyErrors();
+    String username = this.username.getText().trim();
+    String password = String.valueOf(this.password.getPassword());
+    boolean hasError = false;
 
-    public List&lt;T&gt; getAll();
+    if (username.isEmpty()) {
+        usernameError.setText("Username is required.");
+        hasError = true;
+    }
 
-    public T update(T t);
+    if (password.isEmpty()) {
+        passwordError.setText("Password is required.");
+        hasError = true;
+    }
 
-    public T delete(T t);
+    if (hasError) {
+        if (pokusaj++ == MAX_BROJ_POKUSAJA) {
+            LoginBtn.setEnabled(false);
+        }
+
+        brojPokusajaPreostalo.setText(String.valueOf(MAX_BROJ_POKUSAJA - (pokusaj - 1)));
+
+        return;
+    }
+
+    List&lt;Admin&gt; admins = Controller.getInstance().getAllAdmins();
+
+    for (Admin admin : admins) {
+        if (admin.getUsername().equals(username)) {
+            if (admin.getPassword().equals(password)) {
+                ViewController.getInstance().openMainForm(admin);
+                this.dispose();
+            } else {
+                wrongCombinationError.setText("Wrong combination.");
+                hasError = true;
+            }
+        }
+    }
+
+    if (!hasError) {
+        wrongCombinationError.setText("Username doesn't exist.");
+    }
+
+    if (pokusaj++ == MAX_BROJ_POKUSAJA) {
+        LoginBtn.setEnabled(false);
+    }
+
+    brojPokusajaPreostalo.setText(String.valueOf(MAX_BROJ_POKUSAJA - (pokusaj - 1)));
+  } 
+
+  private void init() {
+    this.setLocationRelativeTo(null);
+    this.setTitle("Login");
+    emptyErrors();
+    this.setExtendedState(MAXIMIZED_BOTH);
   }
+
+  private void emptyErrors() {
+    usernameError.setText("");
+    passwordError.setText("");
+    wrongCombinationError.setText("");
+  }  
 </pre>
 
 
           <p class="font-weight-bold text-success">
-            Database Interface
+            New Show Form
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
           <pre class="collapse" id="collapseExampleOC3">
-  public interface IDatabase&lt;T, K&gt; {
+  private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {                                        
+    try {
+        boolean hasError = false;
+        errors.setText("");
+        String naziv = this.naziv.getText().trim();
+        String opis = this.opis.getText().trim();
+        String trajanjeString = this.trajanje.getText().trim();
+        int godina = (int) godinaProizvodnje.getSelectedItem();
+        String formDate = datumPocetka.getText();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date date = sdf.parse(formDate);
 
-    public T insert(T t);
+        if (!formDate.equals(sdf.format(new Date())) &amp;&amp; date.before(new Date())) {
+            throw new Exception("Date can't be in the past.");
+        }
 
-    public T get(K k);
+        ShowType type = ShowType.valueOf((String) tip.getSelectedItem());
+        Studio s = (Studio) studio.getSelectedItem();
 
-    public List&lt;T&gt; getAll();
+        List&lt;Show&gt; shows = Controller.getInstance().getAllShows();
 
-    public T update(T t);
+        for (Show showw : shows) {
+            if (showw.getStudio().equals(s)) {
+                throw new Exception("Studio taken.");
+            }
+        }
 
-    public T delete(T t);
+        String selectedPropsString = this.selectedProps.getText().trim();
+
+        if (selectedPropsString.isEmpty()) {
+            throw new Exception("Please select props.");
+        }
+
+        if (naziv.isEmpty() || opis.isEmpty() || trajanjeString.isEmpty()) {
+            hasError = true;
+        }
+
+        if (hasError) {
+            errors.setText("All fields are required.");
+
+            return;
+        }
+
+        int trajanje = Integer.parseInt(trajanjeString);
+
+        Show show = new Show(Long.MIN_VALUE, naziv, opis, trajanje, godina, date, type, s);
+        show = Controller.getInstance().insertShow(show);
+        
+        for (Prop p : selectedPropsList) {
+            Show_Prop sp = new Show_Prop(Long.MIN_VALUE, show, p);
+            Controller.getInstance().insertShow_Prop(sp);
+            Controller.getInstance().updateProp(p);
+        }
+
+        JOptionPane.showMessageDialog(this, "Successfully added show.", "Success", JOptionPane.INFORMATION_MESSAGE);
+    } catch (Exception ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Failed inserting show.\n" + ex.getMessage(), "Fail", JOptionPane.ERROR_MESSAGE);
+    }
+  } 
+  
+  private void setGodinaProizvodnje() {
+    godinaProizvodnje.removeAllItems();
+    for (int i = 2020; i &gt;= 1900; i--) {
+        godinaProizvodnje.addItem(i);
+    }
+  }
+
+  private void setTip() {
+      tip.removeAllItems();
+      ShowType[] showTypes = ShowType.values();
+      for (int i = 0; i &lt; showTypes.length; i++) {
+          tip.addItem(String.valueOf(showTypes[i]));
+      }
+  }
+
+  private void setStudio() {
+      List&lt;Studio&gt; studios = Controller.getInstance().getAllStudios();
+      studio.removeAllItems();
+
+      for (Studio s : studios) {
+          studio.addItem(s);
+      }
+  }
+
+  private void setDate() {
+      SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+      Date date = new Date();
+      datumPocetka.setText(sdf.format(date));
   }
 </pre>
 
 
           <p class="font-weight-bold text-success">
-            Database Interface
+            Props Form
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
           </p>
           <hr>
-<pre class="collapse" id="collapseExampleOC3">
-  public interface IDatabase&lt;T, K&gt; {
+          <pre class="collapse" id="collapseExampleOC3">
+  private void selectBtnActionPerformed(java.awt.event.ActionEvent evt) {                                          
+    List&lt;Prop&gt; props = new ArrayList&lt;&gt;();
+    int[] selectedRows = propsTable.getSelectedRows();
+    String query = "";
+    for (int i = 0; i &lt; selectedRows.length; i++) {
+        PropsTableModel model = (PropsTableModel) propsTable.getModel();
+        query += model.getValueAtRow(selectedRows[i]).toString() + " ";
+        props.add((Prop) model.getValueAtRow(selectedRows[i]));
+    }
+    
+    NewShowForm nsf2 = (NewShowForm) nsf;
+    
+    nsf2.setSelectedPropsList(props);
 
-    public T insert(T t);
+    selectedPropsLabel.setText(query);
+    this.dispose();
+  }  
 
-    public T get(K k);
-
-    public List&lt;T&gt; getAll();
-
-    public T update(T t);
-
-    public T delete(T t);
+  private void populateTable() {
+    try {
+        List&lt;Prop&gt; props = Controller.getInstance().getAllProps();
+        PropsTableModel model = new PropsTableModel(props);
+        propsTable.setModel(model);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
   }
+</pre>
+
+          <p class="font-weight-bold text-success">
+            Props Table Model
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+          </p>
+          <hr>
+          <pre class="collapse" id="collapseExampleOC3">
+public class PropsTableModel extends AbstractTableModel {
+
+  private final List&lt;Prop&gt; props;
+  private String[] columnNames = new String[]{"NAZIV", "ZALIHE"};
+  private Class[] columnClasses = new Class[]{String.class, Integer.class};
+
+  public PropsTableModel(List&lt;Prop&gt; props) {
+      this.props = props;
+  }
+
+  @Override
+  public int getRowCount() {
+      return props == null ? 0 : props.size();
+  }
+
+  @Override
+  public int getColumnCount() {
+      return columnNames.length;
+  }
+
+  @Override
+  public Object getValueAt(int rowIndex, int columnIndex) {
+      Prop prop = props.get(rowIndex);
+
+      switch (columnIndex) {
+          case 0:
+              return prop.getNaziv();
+          case 1:
+              return prop.getZalihe();
+          default:
+              return null;
+      }
+  }
+
+  public Object getValueAtRow(int rowIndex) {
+      return props.get(rowIndex);
+  }
+
+  @Override
+  public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+      Prop prop = props.get(rowIndex);
+
+      switch (columnIndex) {
+          case 0:
+              prop.setNaziv((String) aValue);
+              break;
+          case 1:
+              prop.setZalihe((Integer) aValue);
+              break;
+      }
+  }
+
+  @Override
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+      return false;
+  }
+
+  @Override
+  public Class&lt;?&gt; getColumnClass(int columnIndex) {
+      return columnClasses[columnIndex];
+  }
+
+  @Override
+  public String getColumnName(int column) {
+      return columnNames[column];
+  }
+
+}
 </pre>
 
 
