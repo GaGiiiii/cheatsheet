@@ -4302,100 +4302,100 @@ if(isset($_POST['prijava'])){
           <hr>
           <div class="collapse" id="collapseExampleOC3">
             <pre>
-  function cleanInput(input){
-    // Create a new div element
-    let temporalDivElement = document.createElement("div");
-    // Set the HTML content with the providen
-    temporalDivElement.innerHTML = input;
+function cleanInput(input){
+  // Create a new div element
+  let temporalDivElement = document.createElement("div");
+  // Set the HTML content with the providen
+  temporalDivElement.innerHTML = input;
 
-    // Retrieve the text property of the element (cross-browser support)
-    return temporalDivElement.textContent || temporalDivElement.innerText || "";
-  }
+  // Retrieve the text property of the element (cross-browser support)
+  return temporalDivElement.textContent || temporalDivElement.innerText || "";
+}
 
 
 
-  function checkNicknameForm(){
-    const lengthError = document.getElementById('length-error'); // Lenght error div
-    const takenNicknameError = document.getElementById('taken-nickname-error'); // Taken error div
-    const hasSpacesNicknameError = document.getElementById('has-spaces-nickname-error'); // Spaces error div
+function checkNicknameForm(){
+  const lengthError = document.getElementById('length-error'); // Lenght error div
+  const takenNicknameError = document.getElementById('taken-nickname-error'); // Taken error div
+  const hasSpacesNicknameError = document.getElementById('has-spaces-nickname-error'); // Spaces error div
+
+  // Removes html code from input and scripts
+
+  // Create a new div element
+  let temporalDivElement = document.createElement("div");
+  let nickname = document.getElementById('nickname');
+  // Set the HTML content with the providen
+  temporalDivElement.innerHTML = nickname.value;
+
+  nickname.value = temporalDivElement.textContent || temporalDivElement.innerText || "";
+
+  if(hasSpaces(nickname.value)){ // If there are spaces in name show only spaces error and return false
+    nickname.classList.add('is-invalid');
+    hasSpacesNicknameError.style.display = "block";
+    lengthError.style.display = "none";
+    takenNicknameError.style.display = "none";
+
+    return false;
+  }else{
+    if(isValidNicknameLength(nickname.value)){ // If lenght is not valid
+
+      if(nicknameTaken(nickname.value)){ // If nickname is taken 
+        nickname.classList.add('is-invalid');
   
-    // Removes html code from input and scripts
+        lengthError.style.display = "none";
+        hasSpacesNicknameError.style.display = "none";
+        takenNicknameError.style.display = "block";
   
-    // Create a new div element
-    let temporalDivElement = document.createElement("div");
-    let nickname = document.getElementById('nickname');
-    // Set the HTML content with the providen
-    temporalDivElement.innerHTML = nickname.value;
+        return false;
+      }
   
-    nickname.value = temporalDivElement.textContent || temporalDivElement.innerText || "";
-  
-    if(hasSpaces(nickname.value)){ // If there are spaces in name show only spaces error and return false
+      return true;
+    }else{
       nickname.classList.add('is-invalid');
-      hasSpacesNicknameError.style.display = "block";
-      lengthError.style.display = "none";
+  
+      lengthError.style.display = "block";
+      hasSpacesNicknameError.style.display = "none";
       takenNicknameError.style.display = "none";
   
       return false;
-    }else{
-      if(isValidNicknameLength(nickname.value)){ // If lenght is not valid
-  
-        if(nicknameTaken(nickname.value)){ // If nickname is taken 
-          nickname.classList.add('is-invalid');
-    
-          lengthError.style.display = "none";
-          hasSpacesNicknameError.style.display = "none";
-          takenNicknameError.style.display = "block";
-    
-          return false;
-        }
-    
-        return true;
-      }else{
-        nickname.classList.add('is-invalid');
-    
-        lengthError.style.display = "block";
-        hasSpacesNicknameError.style.display = "none";
-        takenNicknameError.style.display = "none";
-    
-        return false;
-      }
     }
   }
-  
-  function hasSpaces(nickname){
-  
-  // https://stackoverflow.com/questions/17616624/detect-if-string-contains-any-spaces
-  
-    if (/\s/.test(nickname)) {
-      // It has any kind of whitespace
-  
-      return true;
-    }
-  
-    return false;
-  }
-  
-  function nicknameTaken(nickname){
-    for(let i = 0; i < usersFront.length; i++){
-      if(usersFront[i].username == nickname){
-        return true;
-      }
-    }
-  
-    // YOU CAN'T BREAK FOREACH LOOP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  
-    return false;
-  }
-  
-  function isValidNicknameLength(nickname){
-    return nickname.length <= 20 ? true : false;
+}
+
+function hasSpaces(nickname){
+
+// https://stackoverflow.com/questions/17616624/detect-if-string-contains-any-spaces
+
+  if (/\s/.test(nickname)) {
+    // It has any kind of whitespace
+
+    return true;
   }
 
-  function validateEmail(email) {
-    const re = /^(([^&lt;&gt;()\[\]\\.,;:\s@"]+(\.[^&lt;&gt;()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  
-    return re.test(String(email).toLowerCase());
+  return false;
+}
+
+function nicknameTaken(nickname){
+  for(let i = 0; i &lt; usersFront.length; i++){
+    if(usersFront[i].username == nickname){
+      return true;
+    }
   }
+
+  // YOU CAN'T BREAK FOREACH LOOP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  return false;
+}
+
+function isValidNicknameLength(nickname){
+  return nickname.length &lt;= 20 ? true : false;
+}
+
+function validateEmail(email) {
+  const re = /^(([^&amp;lt;&amp;gt;()\[\]\\.,;:\s@"]+(\.[^&amp;lt;&amp;gt;()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+  return re.test(String(email).toLowerCase());
+}
 </pre>
 
             <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
@@ -4598,7 +4598,9 @@ window.addEventListener('resize', () => {
 
         <!-- ---------- HTML ---------- -->
         <div id="html" class="mb-5">
-          <!-- SECTION START<h1 class="mb-5"><u>HTML</u></h1> -->
+          <h1 class="mb-5"><u>HTML</u></h1>
+
+          <!-- SECTION START -->
           <p class="font-weight-bold text-success">
             Input With Pattern - S2S 2020.
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
@@ -4641,7 +4643,15 @@ window.addEventListener('resize', () => {
 
         <!-- ---------- CSS ---------- -->
         <div id="css" class="mb-5">
-          <!-- SECTION START<h1 class="mb-5"><u>CSS</u></h1> -->
+          <h1 class="mb-5"><u>CSS</u></h1>
+
+
+
+
+
+
+          
+          <!-- SECTION START -->
           <p class="font-weight-bold text-success">
             Animate Message - Moviex.
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
@@ -5769,7 +5779,10 @@ $("#blogs .owl-carousel").owlCarousel({
 
         <!-- ---------- AXIOS ---------- -->
         <div id="axios" class="mb-5">
-          <!-- SECTION START<h1 class="mb-5"><u>AXIOS</u></h1> -->
+          <h1 class="mb-5"><u>AXIOS</u></h1>
+
+
+          <!-- SECTION START -->
           <p class="font-weight-bold text-success">
             HTML
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
