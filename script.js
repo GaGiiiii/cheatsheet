@@ -44,6 +44,9 @@ copyBtns.forEach((copyBtn, index) => {
     document.body.append(textArea);
     textArea.select();
     document.execCommand("copy");
+    // Delete created textarea
+    textArea.parentNode.removeChild(textArea);
+    // Change btn text and revert it back after 1 sec
     copyBtn.innerHTML = "Copied";
     setInterval(() => {
       copyBtn.innerHTML = "Copy";
