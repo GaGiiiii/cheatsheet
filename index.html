@@ -4057,7 +4057,7 @@ function printFlashMessage($sessionName){
         if(user){
             io.emit('message', formatMessage('Admin', `${user.username} se diskonektovao.`)); // Tell other users who left
   
-            // If everyone disconnected tell that to cliends on main page
+            // If everyone disconnected tell that to clients on main page
             if(getJoinedUsers() == 0){
               io.emit('allUsersDisconnected');
   
@@ -7158,7 +7158,7 @@ public class StartServer extends Thread {
 
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark">
-            CommunicationWithCliend (Thread) - Server
+            CommunicationWithClient (Thread) - Server
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
