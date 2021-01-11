@@ -63,6 +63,7 @@
           <a class="list-group-item list-group-item-action" data-menu-item="axios" href="#axios">Axios</a>
           <a class="list-group-item list-group-item-action" data-menu-item="java" href="#java">Java</a>
           <a class="list-group-item list-group-item-action" data-menu-item="java-2" href="#java-2">Java 2</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="joni" href="#joni">Joni</a>
         </div>
       </div>
 
@@ -7446,6 +7447,378 @@ public class CommunicationWithServer implements Serializable{
 
 
         </div>
+        <!-- JAVA 2 END -->
+
+
+
+        <!-- ---------- JONI START ---------- -->
+        <div id="joni" class="mb-5">
+          <h1 class="mb-5"><u>Joni</u></h1>
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            ServerNit
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+public class ServerNit extends Thread{
+
+  List&lt;Korisnik&gt; korisnici;
+  List&lt;Re&gt; reci;
+  List&lt;EngleskoZnacenje&gt; konji;
+  List&lt;EngleskoZnacenje&gt; profesori;
+  ServerSocket server;
+  Socket socket;
+  ObjectOutputStream out;
+  FrmServer frmServer;
+  boolean kraj = false;
+  
+  public ServerNit(FrmServer frmServer) {
+      this.frmServer = frmServer;
+      
+      try {
+          server = new ServerSocket(8888);
+      } catch (IOException ex) {
+          Logger.getLogger(ServerNit.class.getName()).log(Level.SEVERE, null, ex);
+      }
+      
+      korisnici = new ArrayList&lt;&gt;();
+      korisnici.add(new Korisnik("mirkopedere", "Mirko", "Zecic"));
+      korisnici.add(new Korisnik("pavlebilder", "Pavle", "Jacovic"));
+      korisnici.add(new Korisnik("jonisisa", "Nikola", "Djordjevic"));
+      korisnici.add(new Korisnik("milans", "Milan", "Stefanovic"));
+      korisnici.add(new Korisnik("markos", "Marko", "Djordjevic"));
+      
+      reci = new ArrayList&lt;&gt;();
+      konji = new ArrayList&lt;&gt;();
+      konji.add(new EngleskoZnacenje("horse", "server"));
+      konji.add(new EngleskoZnacenje("equine", "server"));
+      reci.add(new Re("konj", konji));
+      
+      profesori = new ArrayList&lt;&gt;();
+      profesori.add(new EngleskoZnacenje("professor", "server"));
+      profesori.add(new EngleskoZnacenje("academic", "server"));
+      
+      reci.add(new Re("profesor", profesori));
+  }
+
+  @Override
+  public void run() {
+      while(!server.isClosed()){
+              
+          try {
+              System.out.println("Waiting for connection...");
+              
+              socket = server.accept(); 
+              System.out.println("Linguist connected!");
+              ServerWrite sw = new ServerWrite(socket);
+              ServerReadThread serverReadThread = new ServerReadThread(socket, this, frmServer, sw, korisnici, reci);
+          }catch (SocketException ex) {
+              System.out.println("");
+          } 
+          catch (IOException ex) {
+              Logger.getLogger(ServerNit.class.getName()).log(Level.SEVERE, null, ex);
+          }
+              
+      }
+  }
+
+  void zaustavi() {
+      try {
+          server.close();
+      } catch (IOException ex) {
+          Logger.getLogger(ServerNit.class.getName()).log(Level.SEVERE, null, ex);
+      }
+  }
+  
+  public List&lt;Re&gt; vratiListuReci(){
+      return reci;
+  }
+}
+
+class ServerWrite {
+  Socket socket;
+  ObjectOutputStream out;
+
+  public ServerWrite(Socket socket) {
+      this.socket = socket;
+      
+      try {
+          out = new ObjectOutputStream(this.socket.getOutputStream());
+      } catch (IOException ex) {
+          Logger.getLogger(ServerWrite.class.getName()).log(Level.SEVERE, null, ex);
+      }
+  }
+  
+  public void posalji(Object object) throws IOException{
+      out.writeObject(object);
+  }
+}
+
+class ServerReadThread extends Thread{
+  ObjectInputStream in; 
+  Socket socket;
+  ServerNit serverNit;
+  FrmServer frmServer;
+  ServerWrite sw;
+  List&lt;Korisnik&gt; korisnici;
+  List&lt;Re&gt; reci;
+  String trazenaRec = "";
+  String korisnickoIme = null;
+  
+  public ServerReadThread(Socket socket, ServerNit serverNit, FrmServer frmServer,
+          ServerWrite sw, List&lt;Korisnik&gt; korisnici, List&lt;Re&gt; reci) {
+      this.socket = socket;
+      this.serverNit = serverNit;
+      this.frmServer = frmServer;
+      this.korisnici = korisnici;
+      this.reci = reci;
+      this.sw = sw;
+      
+      
+      try {
+          in = new ObjectInputStream(socket.getInputStream());
+      } catch (IOException ex) {
+          Logger.getLogger(ServerReadThread.class.getName()).log(Level.SEVERE, null, ex);
+      }
+      
+      start();
+  }
+
+  @Override
+  public void run() {
+      while(true){
+          try {
+              Object objekat = in.readObject();
+              if(objekat instanceof String){
+                  String objekatKast = (String)objekat;
+                  String[] elementi = objekatKast.split("~");
+                  switch(elementi[0]){
+                      case "login": 
+                          if(postoji(elementi[1])){
+                              korisnickoIme = elementi[1];
+                              sw.posalji("uspesanLogin~"+elementi[1]);
+                          } else 
+                              sw.posalji("neuspesanLogin~");
+                      break;
+                      case "rec":
+                          
+                          break;
+                      case "trazenaRec":
+                          uspesnoNadjenaRec(elementi[1]);
+                          if(!trazenaRec.isEmpty()){
+                              System.out.println(trazenaRec);
+                              sw.posalji("uspesnoNadjenjaRec~"+trazenaRec);
+                          } else {
+                              sw.posalji("neuspesnoNadjenjaRec~");
+                          }
+                          break;
+                  }
+              }
+          } catch (IOException ex) {
+              Logger.getLogger(ServerReadThread.class.getName()).log(Level.SEVERE, null, ex);
+          } catch (ClassNotFoundException ex) {
+              Logger.getLogger(ServerReadThread.class.getName()).log(Level.SEVERE, null, ex);
+          }
+      }
+  }
+}
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            ClientNit
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+public class ClientNit {
+
+  String korisnickoIme;
+  Socket socket;
+  ObjectOutputStream out;
+  FrmLogin frmClientLogin;
+
+  public ClientNit(FrmLogin frmClientLogin) {
+        
+      this.frmClientLogin = frmClientLogin;
+      
+      try {
+          socket = new Socket("localhost", 8888);
+          
+          out = new ObjectOutputStream(socket.getOutputStream());
+          
+          ClientReadThread clientReadThread = new ClientReadThread(socket, this.frmClientLogin, this);
+          clientReadThread.start();
+      } catch (IOException ex) {
+          Logger.getLogger(ClientNit.class.getName()).log(Level.SEVERE, null, ex);
+      }
+  }
+
+  void prijaviSe(String korisnickoIme) {
+      this.korisnickoIme = korisnickoIme;
+      try {
+          out.writeObject("login~"+korisnickoIme);
+      } catch (IOException ex) {
+          Logger.getLogger(ClientNit.class.getName()).log(Level.SEVERE, null, ex);
+      }
+  }
+
+  void posaljiRec(String srpska, String engleska, String korisnik) {
+      try {
+          out.writeObject("rec~" + srpska + "/" + engleska + "/" + korisnik);
+      } catch (IOException ex) {
+          Logger.getLogger(ClientNit.class.getName()).log(Level.SEVERE, null, ex);
+      }
+  }
+
+  void pretraziRec(String jezik, String trazenaRec) {
+      try {
+          out.writeObject("trazenaRec~" + jezik + "/" + trazenaRec);
+      } catch (IOException ex) {
+          Logger.getLogger(ClientNit.class.getName()).log(Level.SEVERE, null, ex);
+      }
+  }
+}
+
+class ClientReadThread extends Thread{
+  Socket socket;
+  ClientNit cn;
+  FrmLogin frmLogin;
+  FrmMain frmMain;
+  ObjectInputStream in;
+
+  public ClientReadThread(Socket socket,FrmLogin frmLogin, ClientNit cn) {
+      this.socket = socket;
+      this.cn = cn;
+      this.frmLogin = frmLogin;
+      
+      try {
+          in = new ObjectInputStream(this.socket.getInputStream());
+      } catch (IOException ex) {
+          Logger.getLogger(ClientReadThread.class.getName()).log(Level.SEVERE, null, ex);
+      }
+      frmMain = new FrmMain(cn);
+  }      
+
+  @Override
+  public void run() {
+      while(true){
+          try {
+              Object objekat = in.readObject();
+              if(objekat instanceof String) {
+                  String linija = (String) objekat;
+                  String[] elementi = linija.split("~");
+                  switch(elementi[0]){
+                      case "uspesanLogin":
+                          JOptionPane.showMessageDialog(frmLogin, "Dobrodosli u recnik!" +elementi[1] +"");
+                          frmLogin.dispose();
+                          frmMain.setVisible(true);
+                          frmMain.getTxtUlogovaniKorisnik().setText(elementi[1]);
+                          break;
+                      case "neuspesanLogin":
+                          JOptionPane.showMessageDialog(frmLogin, "Korisnik sa tom email adresom ne postoji!");
+                          break;
+                      case "uspesnoRec":
+                          JOptionPane.showMessageDialog(frmMain, "Uspesno ste dodali rec!");
+                          break;
+                      case "neuspesnoRec":
+                          JOptionPane.showMessageDialog(frmMain, "Sistem nije dodao rec!");
+                          break;
+                      case "uspesnoNadjenjaRec":
+                          frmMain.getTxtTrazenaRec().setText(elementi[1]);
+                          break;
+                      case "neuspesnoNadjenjaRec":
+                          JOptionPane.showMessageDialog(frmMain, "Sistem nije nasao rec!");
+                          break;
+                  }
+              }
+          } catch (IOException ex) {
+              Logger.getLogger(ClientReadThread.class.getName()).log(Level.SEVERE, null, ex);
+          } catch (ClassNotFoundException ex) {
+              Logger.getLogger(ClientReadThread.class.getName()).log(Level.SEVERE, null, ex);
+          }
+      }
+  }
+}
+          </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            TimeNit
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+public class TimeThread extends Thread{
+  SimpleDateFormat sdfTrenutnoVreme; 
+  SimpleDateFormat sdfStart;
+  FrmServerStart frmServerStart;
+  Date vremePokretranjaServera;
+
+  public TimeThread(FrmServerStart frmServerStart, Date vremePokretranjaServera) {
+      sdfTrenutnoVreme = new SimpleDateFormat("hh:mm:ss"); 
+      sdfStart = new SimpleDateFormat("hh:mm");
+      this.frmServerStart = frmServerStart;
+      this.vremePokretranjaServera = vremePokretranjaServera;
+      
+      start();
+  }
+
+  @Override
+  public void run() {
+      frmServerStart.getTxtVremePokretanjaServera().setText(sdfStart.format(vremePokretranjaServera));
+      while(true){
+          frmServerStart.getTxtTrenutnoVreme().setText(sdfTrenutnoVreme.format(new Date()));
+          try {
+              sleep(1000);
+          } catch (InterruptedException ex) {
+              Logger.getLogger(TimeThread.class.getName()).log(Level.SEVERE, null, ex);
+          }
+      }
+  }
+  
+  
+}
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+
+        </div>
+        <!-- ---------- JONI END ---------- -->
 
 
 
