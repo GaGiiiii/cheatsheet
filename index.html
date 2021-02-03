@@ -11,6 +11,10 @@
       scroll-behavior: smooth;
     }
 
+    .important-color {
+      color: #e61d02 !important;
+    }
+
     #menu {
       position: fixed;
       left: 25px;
@@ -72,6 +76,1399 @@
         <div id="php">
           <h1 class="mb-5"><u>PHP</u></h1>
 
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold important-color">
+            Database Class (PDO) - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
+
+if (session_status() == PHP_SESSION_NONE) {
+  session_start();
+}
+
+class Database {
+  private $host; // Host
+  private $db_name; // DB Name
+  private $username; // DB Username
+  private $password; // DB Password
+
+
+  private static $instance = null; // Instanca klase
+  public $connection = null; // Konekcija
+
+  private function __construct() {
+    if ($_SERVER['SERVER_NAME'] == "localhost") {
+      $this-&gt;host = "localhost"; // Host
+      $this-&gt;db_name = "karagaca"; // DB Name
+      $this-&gt;username = "root"; // DB Username
+      $this-&gt;password = ""; // DB Password
+    } else {
+      $this-&gt;host = "localhost"; // Host
+      $this-&gt;db_name = "tatamatars_main"; // DB Name
+      $this-&gt;username = "tatamatars_admin"; // DB Username
+      $this-&gt;password = "enterpwhere"; // DB Password
+    }
+    try {
+      $this-&gt;connection = new PDO('mysql:host=' . $this-&gt;host . ';dbname=' . $this-&gt;db_name . ';charset=utf8', $this-&gt;username, $this-&gt;password);
+      $this-&gt;connection-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit();
+    }
+
+    // $this-&gt;connection = mysqli_connect($this-&gt;host, $this-&gt;username, $this-&gt;password, $this-&gt;db_name);
+  }
+
+  public function getConnection() {
+    return $this-&gt;connection;
+  }
+
+  public static function getInstance() {
+    if (!isset(self::$instance)) {
+      self::$instance = new Database();
+    }
+
+    return self::$instance;
+  }
+
+  public function takenEmail($email) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT email FROM user WHERE email = :email");
+      $query-&gt;execute(array(
+        ':email' =&gt; $email,
+      ));
+
+      $user = $query-&gt;fetch();
+
+      if ($user) {
+        return true;
+      }
+
+      return false;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function takenUsername($username) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT username FROM user WHERE username = :username");
+      $query-&gt;execute(array(
+        ':username' =&gt; $username,
+      ));
+
+      $user = $query-&gt;fetch();
+
+      if ($user) {
+        return true;
+      }
+
+      return false;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function registerUser($data) {
+    try {
+      $data = (object) $data;
+      $data-&gt;password = md5(md5($data-&gt;password)); // Hashovanje sifre sa md5
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user (email, password, firstname, lastname, phone_number, grade, country) VALUES (?, ?, ?, ?, ?, ?, ?)");
+      $result = $query-&gt;execute([
+        $data-&gt;email,
+        $data-&gt;password,
+        $data-&gt;firstname,
+        $data-&gt;lastname,
+        $data-&gt;phone_number,
+        $data-&gt;grade,
+        $data-&gt;country,
+      ]);
+
+      $data-&gt;id = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
+      $data-&gt;is_admin = false;
+
+      if ($result) { // Ukoliko je query uspesan pravimo sesiju i vracamo true
+        $_SESSION['user'] = $data;
+
+        return true;
+      }
+
+      return false;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function warnUser($user_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET warned = 1 WHERE id = ?");
+      $result = $query-&gt;execute([$user_id]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function loginUser($data) {
+    try {
+      $data = (object) $data;
+      $data-&gt;password = md5(md5($data-&gt;password));
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user WHERE email = :email AND password = :password");
+      $query-&gt;execute(array(
+        ':email' =&gt; $data-&gt;email,
+        ':password' =&gt; $data-&gt;password,
+      ));
+
+      $user = $query-&gt;fetch();
+
+      if ($user) {
+        $user = (object) $user;
+        $_SESSION['user'] = $user;
+        Database::getInstance()-&gt;insertLoginDetails($data, $user-&gt;id);
+
+        return true;
+      }
+
+      return false;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function isUserLoggedIn() {
+    if (isset($_SESSION['user'])) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public function logoutUser() {
+    unset($_SESSION['user']);
+  }
+
+  public function getUserByID($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user WHERE id = :id");
+      $query-&gt;execute(array(
+        ':id' =&gt; $id,
+      ));
+
+      $user = $query-&gt;fetch();
+
+      return $user;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function getUserByEmail($email) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user WHERE email = :email");
+      $query-&gt;execute(array(
+        ':email' =&gt; $email,
+      ));
+
+      $user = $query-&gt;fetch();
+
+      return $user;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function getPasswordForUser($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT password FROM user WHERE id = :id");
+      $query-&gt;execute(array(
+        ':id' =&gt; $id,
+      ));
+
+      $password = $query-&gt;fetch()['password'];
+
+      return $password;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function updateUserPassword($id, $password) {
+    try {
+      $password = md5(md5($password)); // Hashovanje sifre sa md5
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET password = :password WHERE id = :id");
+      $result = $query-&gt;execute([
+        ':password' =&gt; $password,
+        ':id' =&gt; $id,
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function getAllUsers() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user");
+      $query-&gt;execute();
+      $users = $query-&gt;fetchAll();
+
+      return $users;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  // COURESES =====================================================================================================================================
+
+  public function addCourse($data) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO course (name, description, price, course_grade_id, img) VALUES (?, ?, ?, ?, ?)");
+      $result = $query-&gt;execute([
+        $data-&gt;name,
+        $data-&gt;description,
+        $data-&gt;price,
+        $data-&gt;grade_id,
+        $data-&gt;img,
+      ]);
+
+      $lastInsertedID = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO chapter (name, course_id, number) VALUES ('_global', $lastInsertedID, -1)");
+      $result = $query-&gt;execute();
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function updateCourse($data, $id) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `course` SET name = :name, description = :description, price = :price, course_grade_id = :grade_id, img = :img WHERE id = :id");
+      $result = $query-&gt;execute([
+        ':name' =&gt; $data-&gt;name_edit,
+        ':description' =&gt; $data-&gt;description_edit,
+        ':price' =&gt; $data-&gt;price_edit,
+        ':id' =&gt; $id,
+        ':grade_id' =&gt; $data-&gt;grade_id_edit,
+        ':img' =&gt; $data-&gt;img_edit,
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function deleteCourse($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM course WHERE id = :id LIMIT 1");
+      $result = $query-&gt;execute(array(':id' =&gt; $id));
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM user_course WHERE course_id = :id");
+      $result = $query-&gt;execute(array(':id' =&gt; $id));
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `clip` WHERE course_id = :id");
+      $result = $query-&gt;execute(array(':id' =&gt; $id));
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `chapter` WHERE course_id = :id");
+      $result = $query-&gt;execute(array(':id' =&gt; $id));
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function getAllCourses() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM course c JOIN grade g ON c.course_grade_id = g.grade_id");
+      $query-&gt;execute();
+      $courses = $query-&gt;fetchAll();
+
+      return $courses;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function getCourse($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM course c JOIN grade g ON g.grade_id = c.course_grade_id WHERE id = :id");
+      $query-&gt;execute(array(
+        ':id' =&gt; $id,
+      ));
+
+      $course = $query-&gt;fetch();
+
+      return $course;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return null;
+    }
+  }
+
+  public function buyCourse($data) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user_course (user_id, course_id) VALUES (?, ?)");
+      $result = $query-&gt;execute([
+        $data-&gt;user_id,
+        $data-&gt;course_id,
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function getUser_Course($user_id, $course_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user_course WHERE user_id = :user_id AND course_id = :course_id");
+      $query-&gt;execute(array(
+        ':user_id' =&gt; $user_id,
+        ':course_id' =&gt; $course_id,
+      ));
+
+      $course = $query-&gt;fetch();
+
+      return $course;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return null;
+    }
+  }
+
+  // USER_COURSE =================================================================================================================================================
+
+  public function getAllUser_Courses() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.name AS course_name, u.id AS user_id, uc.id AS uc_id, uc.created_at as uc_created_at FROM user_course uc JOIN user u ON u.id = uc.user_id JOIN course c ON c.id = uc.course_id");
+      $query-&gt;execute();
+      $courses = $query-&gt;fetchAll();
+
+      return $courses;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function getAllCoursesForUser($user_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.id AS course_id, uc.id AS uc_id, c.name AS course_name FROM user_course uc JOIN user u ON u.id = uc.user_id JOIN course c ON c.id = uc.course_id WHERE user_id = :user_id ORDER BY confirmed DESC");
+      $query-&gt;execute(array(
+        ':user_id' =&gt; $user_id,
+      ));
+      $courses = $query-&gt;fetchAll();
+
+      return $courses;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function insertUserCourseConfirmed($data) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user_course (user_id, course_id, confirmed) VALUES (?, ?, ?)");
+      $result = $query-&gt;execute([
+        $data-&gt;user_id,
+        $data-&gt;course_id,
+        1
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function userCourseExists($data) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user_course WHERE user_id = ? AND course_id = ?");
+      $result = $query-&gt;execute([
+        $data-&gt;user_id,
+        $data-&gt;course_id,
+      ]);
+
+      $userCourse = $query-&gt;fetch();
+
+      if ($userCourse) {
+        return true;
+      }
+
+      return false;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function confirmCoursePurchase($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user_course` SET confirmed = 1 WHERE id = :id");
+      $result = $query-&gt;execute(array(
+        ':id' =&gt; $id,
+      ));
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function unconfirmCourse($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user_course` SET confirmed = 0 WHERE id = :id");
+      $result = $query-&gt;execute(array(
+        ':id' =&gt; $id,
+      ));
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function deleteCoursePurchase($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `user_course` WHERE id = :id LIMIT 1");
+      $result = $query-&gt;execute(array(
+        ':id' =&gt; $id,
+      ));
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  // CLIPS ===========================================================================================================================
+
+  public function addClip($data) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO `clip` (name, number, description, link, course_id, chapter_id) VALUES (?, ?, ?, ?, ?, ?)");
+      $result = $query-&gt;execute([
+        $data-&gt;name,
+        $data-&gt;number,
+        $data-&gt;description,
+        $data-&gt;link,
+        $data-&gt;course_id,
+        $data-&gt;chapter_id,
+      ]);
+
+      $lastInsertedID = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
+
+      if ($result) {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number + 1 WHERE number &gt;= $data-&gt;number AND id != $lastInsertedID AND course_id = $data-&gt;course_id AND chapter_id = $data-&gt;chapter_id");
+        $result = $query-&gt;execute();
+      }
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function getAllClips() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id ORDER BY cu.name, ch.name DESC, c.number");
+      $query-&gt;execute();
+      $clips = $query-&gt;fetchAll();
+
+      return $clips;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function getAllClipsForChapterAndCourse($chapter_id, $course_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id WHERE c.chapter_id = $chapter_id AND c.course_id = $course_id ORDER BY cu.name, ch.name DESC, c.number");
+      $query-&gt;execute();
+      $clips = $query-&gt;fetchAll();
+
+      return $clips;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function updateClip($data, $id) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number FROM `clip` WHERE id = :id");
+      $query-&gt;execute([
+        ':id' =&gt; $id,
+      ]);
+
+      $oldNumber = $query-&gt;fetch()['number'];
+
+
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET course_id = :course_id, chapter_id = :chapter_id, name = :name, link = :link, description = :description, number = :number WHERE id = :id");
+      $result = $query-&gt;execute([
+        ':course_id' =&gt; $data-&gt;course_id_edit,
+        ':chapter_id' =&gt; $data-&gt;chapter_id_edit,
+        ':name' =&gt; $data-&gt;name_edit,
+        ':link' =&gt; $data-&gt;link_edit,
+        ':description' =&gt; $data-&gt;description_edit,
+        ':number' =&gt; $data-&gt;number_edit,
+        ':id' =&gt; $id,
+      ]);
+
+      if ($oldNumber &gt; $data-&gt;number_edit) {
+        if ($result) {
+          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number + 1 WHERE number &gt;= $data-&gt;number_edit AND number &lt; $oldNumber + 1 AND id != $id AND course_id = $data-&gt;course_id_edit AND chapter_id = $data-&gt;chapter_id_edit");
+          $result = $query-&gt;execute();
+        }
+      } else {
+        if ($result) {
+          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number - 1 WHERE number &gt;= $oldNumber AND number &lt; $data-&gt;number_edit + 1 AND id != $id AND course_id = $data-&gt;course_id_edit AND chapter_id = $data-&gt;chapter_id_edit");
+          $result = $query-&gt;execute();
+        }
+      }
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function deleteClip($id) {
+    try {
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number, course_id FROM `clip` WHERE id = :id");
+      $query-&gt;execute([
+        ':id' =&gt; $id,
+      ]);
+
+      $row = $query-&gt;fetch();
+      $oldNumber = $row['number'];
+      $course_id = $row['course_id'];
+      $chapter_id = $row['course_id'];
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `clip` WHERE id = :id LIMIT 1");
+      $result = $query-&gt;execute(array(':id' =&gt; $id));
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number -1  WHERE number &gt; $oldNumber AND course_id = $course_id AND chapter_id = $chapter_id");
+      $result = $query-&gt;execute();
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  // CHAPTERS ===========================================================================================================================
+
+  public function addChapter($data) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO `chapter` (name, number, course_id) VALUES (?, ?, ?)");
+      $result = $query-&gt;execute([
+        $data-&gt;name,
+        $data-&gt;number,
+        $data-&gt;course_id,
+      ]);
+
+      $lastInsertedID = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
+
+      if ($result) {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number + 1 WHERE number &gt;= $data-&gt;number AND id != $lastInsertedID AND course_id = $data-&gt;course_id");
+        $result = $query-&gt;execute();
+      }
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function getAllChapters() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.name AS chapter_name, c.number AS chapter_number, c.id AS chapter_id FROM `chapter` c JOIN course cu ON cu.id = c.course_id ORDER BY cu.name, c.number");
+      $query-&gt;execute();
+      $chapters = $query-&gt;fetchAll();
+
+      return $chapters;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function getAllChaptersForCourse($course_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.name AS chapter_name, c.number AS chapter_number, c.id AS chapter_id FROM `chapter` c JOIN course cu ON cu.id = c.course_id WHERE c.course_id = $course_id ORDER BY cu.name, c.number");
+      $query-&gt;execute();
+      $chapters = $query-&gt;fetchAll();
+
+      return $chapters;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function updateChapter($data, $id) {
+    try {
+      $data = (object) $data;
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number FROM `chapter` WHERE id = :id");
+      $query-&gt;execute([
+        ':id' =&gt; $id,
+      ]);
+
+      $oldNumber = $query-&gt;fetch()['number'];
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET course_id = :course_id, name = :name, number = :number WHERE id = :id");
+      $result = $query-&gt;execute([
+        ':course_id' =&gt; $data-&gt;course_id_edit,
+        ':name' =&gt; $data-&gt;name_edit,
+        ':number' =&gt; $data-&gt;number_edit,
+        ':id' =&gt; $id,
+      ]);
+
+      if ($oldNumber &gt; $data-&gt;number_edit) {
+        if ($result) {
+          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number + 1 WHERE number &gt;= $data-&gt;number_edit AND number &lt; $oldNumber + 1 AND id != $id AND course_id = $data-&gt;course_id_edit");
+          $result = $query-&gt;execute();
+        }
+      } else {
+        if ($result) {
+          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number - 1 WHERE number &gt;= $oldNumber AND number &lt; $data-&gt;number_edit + 1 AND id != $id AND course_id = $data-&gt;course_id_edit");
+          $result = $query-&gt;execute();
+        }
+      }
+
+
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  public function deleteChapter($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number, course_id FROM `chapter` WHERE id = :id");
+      $query-&gt;execute([
+        ':id' =&gt; $id,
+      ]);
+
+      $row = $query-&gt;fetch();
+      $oldNumber = $row['number'];
+      $course_id = $row['course_id'];
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `chapter` WHERE id = :id LIMIT 1");
+      $result = $query-&gt;execute(array(':id' =&gt; $id));
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number - 1 WHERE number &gt; $oldNumber AND course_id = $course_id");
+      $result = $query-&gt;execute();
+
+      // DELETE ALL CLIPS FOR THAT CHAPTER
+
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `clip` WHERE chapter_id = :id");
+      $result = $query-&gt;execute(array(':id' =&gt; $id));
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      exit;
+    }
+  }
+
+  // PASSWORD RESET ================================================================================================================================================
+
+  public function getPasswordReset($selector, $expires) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM `password_reset` WHERE selector = :selector AND expires &gt;= :expires");
+      $query-&gt;execute([
+        ":selector" =&gt; $selector,
+        ":expires" =&gt; $expires
+      ]);
+
+      $password_reset = $query-&gt;fetch();
+
+      return $password_reset;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      die();
+    }
+  }
+
+  public function deletePasswordReset($email) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM password_reset WHERE email = :email");
+      $result = $query-&gt;execute([
+        ':email' =&gt; $email,
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+      echo $e-&gt;getLine();
+
+      exit;
+    }
+  }
+
+  public function insertPasswordReset($data) {
+    try {
+      $data = (object) $data;
+      $hashedToken = password_hash($data-&gt;token, PASSWORD_DEFAULT);
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO password_reset (email, selector, token, expires) VALUES (?, ?, ?, ?)");
+      $result = $query-&gt;execute([
+        $data-&gt;email,
+        $data-&gt;selector,
+        $hashedToken,
+        $data-&gt;expires,
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+      echo $e-&gt;getLine();
+
+      exit;
+    }
+  }
+
+  // LOGIN DETAILS ================================================================================================================================================
+
+  public function getAllLoginDetails() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, u.id AS user_id, ld.id AS ld_id FROM `login_details` ld JOIN user u ON u.id = ld.user_id");
+      $query-&gt;execute();
+
+      $login_details = $query-&gt;fetchAll();
+
+      return $login_details;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      die();
+    }
+  }
+
+  public function getAllLoginDetailsSortedByUsers() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, u.id AS user_id, ld.id AS ld_id FROM `login_details` ld JOIN user u ON u.id = ld.user_id ORDER BY u.firstname, u.lastname, ld.date DESC");
+      $query-&gt;execute();
+
+      $login_details = $query-&gt;fetchAll();
+
+      return $login_details;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      die();
+    }
+  }
+
+  public function getAllLoginDetailsSortedByDate() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, u.id AS user_id, ld.id AS ld_id FROM `login_details` ld JOIN user u ON u.id = ld.user_id ORDER BY ld.date DESC");
+      $query-&gt;execute();
+
+      $login_details = $query-&gt;fetchAll();
+
+      return $login_details;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      die();
+    }
+  }
+
+  // public function deletePasswordReset($email) {
+  //   try {
+  //     $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM password_reset WHERE email = :email");
+  //     $result = $query-&gt;execute([
+  //       ':email' =&gt; $email,
+  //     ]);
+
+  //     return $result;
+  //   } catch (PDOException $e) {
+  //     echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+  //     echo $e-&gt;getLine();
+
+  //     exit;
+  //   }
+  // }
+
+  public function insertLoginDetails($data, $user_id) {
+    try {
+      $data = (object) $data;
+      if ($data-&gt;cookies_enabled == 'true') {
+        $data-&gt;cookies_enabled = 1;
+      }
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO login_details (user_id, gpu, ram, cpu_cores, os, screen_resolution, timezone, color_depth, cookies_enabled, fonts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      $result = $query-&gt;execute([
+        $user_id,
+        $data-&gt;gpu,
+        $data-&gt;ram,
+        $data-&gt;cpu_cores,
+        $data-&gt;os,
+        $data-&gt;screen_resolution,
+        $data-&gt;timezone,
+        $data-&gt;color_depth,
+        $data-&gt;cookies_enabled,
+        $data-&gt;fonts,
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+      echo $e-&gt;getLine();
+
+      exit;
+    }
+  }
+
+  public function getLoginInfoForUser($user_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM `login_details` WHERE user_id = ? ORDER BY date DESC");
+      $result = $query-&gt;execute([
+        $user_id,
+      ]);
+
+      $login_details = $query-&gt;fetchAll();
+
+      return $login_details;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+      echo $e-&gt;getLine();
+
+      exit;
+    }
+  }
+
+  public function deleteLoginInfo($id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `login_details` WHERE id= ?");
+      $result = $query-&gt;execute([
+        $id,
+      ]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+      echo $e-&gt;getLine();
+
+      exit;
+    }
+  }
+
+  // GRADES ========================================================================================================================================================
+
+  public function getAllGrades() {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM `grade` ORDER BY grade_name DESC");
+      $query-&gt;execute();
+
+      $grades = $query-&gt;fetchAll();
+
+      return $grades;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      die();
+    }
+  }
+}              
+          </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Header - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP3" aria-expanded="false" aria-controls="collapseExampleP3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php require_once "classes/Database.php"; ?&gt;
+&lt;?php require_once "includes/config.php"; ?&gt;
+&lt;?php
+$currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/')); //  /prijava /registracija /index.php
+// echo $currentPage;
+?&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;?php if ($currentPage != '/kupovina-kursa.php') { ?&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;?php } ?&gt;
+  &lt;meta http-equiv="X-UA-Compatible" content="ie=edge"&gt;
+  &lt;title&gt;TataMata&lt;/title&gt;
+  &lt;!-- BOOTSTRAP --&gt;
+  &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous"&gt;
+  &lt;!-- CUSTOM CSS --&gt;
+  &lt;link rel="stylesheet" href="&lt;?php echo BASE_URL . "public/css/styles.css" ?&gt;"&gt; &lt;!-- Ovde treba putanja kao da smo u index.php fajlu a ne u header.php --&gt;
+  &lt;!-- FONT AWESOME --&gt;
+  &lt;script src="https://kit.fontawesome.com/5c5689b7a2.js"&gt;&lt;/script&gt;
+  &lt;!-- PLAYER --&gt;
+  &lt;link rel="stylesheet" href="https://cdn.plyr.io/3.6.4/plyr.css"&gt;
+
+  &lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"&gt;&lt;/script&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"&gt;&lt;/script&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous"&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+
+  &lt;button id="scroll-to-top" style="display: none" class="btn btn-primary"&gt;&lt;i class="fas fa-angle-double-up"&gt;&lt;/i&gt;&lt;/button&gt;
+
+  &lt;div id="body-container" class="&lt;?php if ($currentPage == '/index.php') echo "home"; ?&gt;"&gt;
+
+    &lt;?php if ($currentPage == '/index.php') { ?&gt;
+      &lt;div class="max-width-90"&gt;
+      &lt;?php } ?&gt;
+
+      &lt;?php if ($currentPage != '/prijava.php' &amp;&amp; $currentPage != '/registracija.php' &amp;&amp; $currentPage != '/zaboravljena-lozinka.php' &amp;&amp; $currentPage != '/kreiraj-novu-sifru.php') { ?&gt;
+        &lt;!-- NAVBAR --&gt;
+        &lt;nav class="navbar navbar-expand-lg navbar-light"&gt;
+          &lt;div class="container-fluid navbar-container"&gt;
+            &lt;a class="navbar-brand scale-btn-2" href="&lt;?php echo BASE_URL . "pocetna"; ?&gt;"&gt;&lt;img src="&lt;?php echo BASE_URL . 'public/images/LOGO_VEKTOR.svg' ?&gt;" alt=""&gt;&lt;/a&gt;
+            &lt;div class="mobile-nav-container d-flex justify-content-between"&gt;
+              &lt;a class="brand-mobile" href="&lt;?php echo BASE_URL . "pocetna"; ?&gt;"&gt;&lt;img src="&lt;?php echo BASE_URL . 'public/images/LOGO_VEKTOR.svg' ?&gt;" alt=""&gt;&lt;/a&gt;
+              &lt;button class="navbar-toggler custom-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"&gt;
+                &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+              &lt;/button&gt;
+            &lt;/div&gt;
+            &lt;div class="collapse navbar-collapse" id="navbarSupportedContent"&gt;
+
+              &lt;ul class="navbar-nav left-nav ms-auto mb-2 mb-lg-0"&gt;
+                &lt;?php if (Database::getInstance()-&gt;isUserLoggedIn()) { ?&gt;
+                  &lt;li class="nav-item"&gt;
+                    &lt;a class="nav-link me-4 moji-kursevi scale-btn-2" href="&lt;?php echo BASE_URL . "mojikursevi"; ?&gt;"&gt;MOJI KURSEVI&lt;/a&gt;
+                  &lt;/li&gt;
+                &lt;?php } ?&gt;
+                &lt;li class="nav-item"&gt;
+                  &lt;a class="nav-link active scale-btn-2" href="&lt;?php echo BASE_URL . "kursevi"; ?&gt;"&gt;KURSEVI&lt;/a&gt;
+                &lt;/li&gt;
+              &lt;/ul&gt;
+
+              &lt;ul class="navbar-nav left-nav mx-auto mb-2 mb-lg-0"&gt;
+                &lt;li class="nav-item"&gt;
+                  &lt;a class="nav-link middle-nav ms-0" href="&lt;?php echo BASE_URL . "pocetna#o-meni"; ?&gt;"&gt;BREND&lt;/a&gt;
+                &lt;/li&gt;
+                &lt;li class="nav-item ms-0"&gt;
+                  &lt;a class="nav-link middle-nav" href="&lt;?php echo BASE_URL . "pocetna#usluge"; ?&gt;"&gt;USLUGE&lt;/a&gt;
+                &lt;/li&gt;
+                &lt;li class="nav-item"&gt;
+                  &lt;a class="nav-link middle-nav" href="&lt;?php echo BASE_URL . "pocetna#najcesca-pitanja"; ?&gt;"&gt;NAJČEŠĆA PITANJA&lt;/a&gt;
+                &lt;/li&gt;
+                &lt;li class="nav-item"&gt;
+                  &lt;a class="nav-link middle-nav" href="&lt;?php echo BASE_URL . "pocetna#kontakt"; ?&gt;"&gt;KONTAKT&lt;/a&gt;
+                &lt;/li&gt;
+              &lt;/ul&gt;
+
+              &lt;ul class="navbar-nav mb-2 mb-lg-0"&gt;
+                &lt;?php if (!Database::getInstance()-&gt;isUserLoggedIn()) { ?&gt;
+                  &lt;li class="nav-item"&gt;
+                    &lt;a class="nav-link prijava-nav" href="&lt;?php echo BASE_URL . "prijava"; ?&gt;"&gt;PRIJAVI SE&lt;/a&gt;
+                  &lt;/li&gt;
+                  &lt;li class="nav-item"&gt;
+                    &lt;a class="nav-link registracija-nav scale-btn-2" href="&lt;?php echo BASE_URL . "registracija"; ?&gt;"&gt;REGISTRACIJA&lt;/a&gt;
+                  &lt;/li&gt;
+                &lt;?php } else { ?&gt;
+                  &lt;li class="nav-item dropdown"&gt;
+                    &lt;a class="nav-link logged-in-as&lt;?php if (isset($currentPage) &amp;&amp; $currentPage == '/profil.php') echo ' active'; ?&gt; dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"&gt;
+                      &lt;i class="far fa-user"&gt;&lt;/i&gt;&amp;nbsp; &lt;?php echo $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname; ?&gt;
+                      &lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill rotate" viewBox="0 0 16 16"&gt;
+                        &lt;path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" /&gt;
+                      &lt;/svg&gt;
+                    &lt;/a&gt;
+                    &lt;ul class="dropdown-menu" aria-labelledby="navbarDropdown"&gt;
+                      &lt;li&gt;
+                        &lt;a class="dropdown-item" href="&lt;?php echo BASE_URL . "profil"; ?&gt;"&gt;
+                          &lt;div class="row"&gt;
+                            &lt;div class="col"&gt;Profil&lt;/div&gt;
+                            &lt;div class="col text-right" style="text-align: right;"&gt;&lt;i class="far fa-user"&gt;&lt;/i&gt;&lt;/div&gt;
+                          &lt;/div&gt;
+                        &lt;/a&gt;
+                      &lt;/li&gt;
+                      &lt;li&gt;
+                        &lt;hr class="dropdown-divider"&gt;
+                      &lt;/li&gt;
+                      &lt;?php if ($_SESSION['user']-&gt;is_admin) { ?&gt;
+                        &lt;li&gt;
+                          &lt;a class="dropdown-item" href="&lt;?php echo BASE_URL . "admin/overview"; ?&gt;"&gt;
+                            &lt;div class="row"&gt;
+                              &lt;div class="col"&gt;Admin&lt;/div&gt;
+                              &lt;div class="col" style="text-align: right;"&gt;
+                                &lt;i class="fas fa-crown"&gt;&lt;/i&gt;
+                              &lt;/div&gt;
+                            &lt;/div&gt;
+                          &lt;/a&gt;
+                        &lt;/li&gt;
+                        &lt;li&gt;
+                          &lt;hr class="dropdown-divider"&gt;
+                        &lt;/li&gt;
+                      &lt;?php } ?&gt;
+                      &lt;li&gt;
+                        &lt;a class="dropdown-item" href="&lt;?php echo BASE_URL . "odjava"; ?&gt;"&gt;
+                          &lt;div class="row"&gt;
+                            &lt;div class="col"&gt;Odjavi se&lt;/div&gt;
+                            &lt;div class="col text-right" style="text-align: right;"&gt;
+                              &lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-left" viewBox="0 0 16 16"&gt;
+                                &lt;path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z" /&gt;
+                                &lt;path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z" /&gt;
+                              &lt;/svg&gt;
+                            &lt;/div&gt;
+                          &lt;/div&gt;
+                        &lt;/a&gt;
+                      &lt;/li&gt;
+                    &lt;/ul&gt;
+                  &lt;/li&gt;
+                &lt;?php } ?&gt;
+              &lt;/ul&gt;
+
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/nav&gt;
+        &lt;!-- NAVBAR --&gt;
+      &lt;?php } ?&gt;
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Footer - Cinematic
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP4" aria-expanded="false" aria-controls="collapseExampleP4">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+  &lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+  &lt;script src="https://code.jquery.com/jquery-3.4.1.min.js"&gt;&lt;/script&gt;
+  &lt;script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"&gt;&lt;/script&gt;
+  &lt;!-- OWL CAROUSEL --&gt;
+  &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous"&gt;&lt;/script&gt;
+  &lt;script src="public/scripts/script.js"&gt;&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+          </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Is Admin - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php require_once "../classes/Database.php"; ?&gt;
+&lt;?php require_once "../includes/config.php"; ?&gt;
+&lt;?php require_once "../includes/functions.php"; ?&gt;
+&lt;?php
+
+$loggedIn = Database::getInstance()-&gt;isUserLoggedIn();
+
+if (!$loggedIn || ($loggedIn &amp;&amp; !$_SESSION['user']-&gt;is_admin)) {
+  $_SESSION['unauthorized_access'] = '&lt;div class="container-fluid"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+      &lt;div class="alert alert-danger alert-dismissible fade show" role="alert"&gt;
+        &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;';
+  header("Location: " . BASE_URL . "pocetna");
+
+  exit;
+}
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Odjava / Logout - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
+
+require_once 'classes/Database.php';
+
+if (!Database::getInstance()-&gt;isUserLoggedIn()) {
+  $_SESSION['unauthorized_access'] = '&lt;div class="container-fluid"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+      &lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+        &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;';
+  header("Location: pocetna");
+
+  exit;
+}
+
+$leavingUN = $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname;
+
+Database::getInstance()-&gt;logoutUser();
+$_SESSION['logout_success_message'] = '&lt;div class="container-fluid"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+      &lt;div class="alert alert-warning alert-dismissible show" role="alert"&gt;
+        &lt;strong&gt;Odjava uspešna! &lt;i class="fas fa-check"&gt;&lt;/i&gt;&lt;/strong&gt; Vidimo se opet uskoro ' . $leavingUN .
+      '. &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt;&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;';
+header("Location: prijava");
+
+exit;              
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            fuctions.php (clean, flashMessages, lettersOnly) - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+function clean($input) {
+  $input = trim($input);
+  $input = str_replace('"', "", $input);
+  $input = str_replace("'", "", $input);
+  $input = htmlspecialchars($input); // Mora ispod str_replace jer htmlspecialchars pretvara " u &amp;nesto; i onda ga str_replace ne nadje
+  // $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
+
+  return $input;
+}
+
+function isLettersOnly($text) {
+  if (preg_match('/^[a-zA-ZšđčćžŠĐČĆŽ]+$/', $text)) {
+    return true;
+  }
+
+  return false;
+}
+
+function printFormatedFlashMessage($sessionName) {
+  if (isset($_SESSION[$sessionName])) {
+    echo $_SESSION[$sessionName];
+    unset($_SESSION[$sessionName]);
+  }
+}
+
+function printFlashMessage($sessionName) {
+  if (isset($_SESSION[$sessionName])) {
+    echo "&lt;div class='container-fluid text-uppercase success-message-custom'&gt;
+            &lt;div class='row'&gt;
+                &lt;div class='col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5'&gt;
+                    &lt;div class='alert alert-success alert-dismissible fade show' role='alert'&gt;
+                      &lt;button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'&gt;&lt;/button&gt;
+                      &lt;strong&gt;" . $_SESSION[$sessionName] . " &lt;i class='fas fa-check'&gt;&lt;/i&gt;&lt;/strong&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;";
+    unset($_SESSION[$sessionName]);
+  }
+}
+          </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            .htaccess - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+## SOURCE: http://www.developphp.com/video/Miscellaneous/Semantic-URL-htaccess-Tutorial-SEO-Friendly-and-Clean-Links
+
+# Turn Rewrite Engine On
+
+RewriteEngine on  
+
+# NC makes the rule non case sensitive
+# L makes this the last rule that this specific condition will match
+# $ in the regular expression makes the matching stop so that "customblah" will not work
+
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^([^\.]+)$ $1.php [NC,L]
+
+
+# RewriteRule ^(registracija|prijava|odjava|kursevi|profil)$ $1.php [NC,L]
+
+  RewriteRule ^kupovina-kursa/([0-9]+)$ kupovina-kursa.php?id=$1 [NC,L]
+
+  RewriteRule ^admin/user/([a-zA-Z0-9šđčćž]+)$ admin/user.php?id=$1 [NC,L]
+  RewriteRule ^admin/userslogs/([0-9]+)$ admin/userslogs.php?page=$1 [NC,L]
+  RewriteRule ^([^\.0-9]+)$ $1.php [NC,L]
+  RewriteRule pocetna index.php [NC,L]
+  RewriteRule ^kurs/([0-9]+)$ kurs.php?id=$1 [NC,L]
+
+
+
+
+#^((?!\/profile\/[a-zA-Z0-9]+).)*$
+#^([^\.0-9]+)|^((?!\/profile\/[a-zA-Z0-9]+).)*$
+
+# Rewrite for article.php?id=1&amp;title=Title-Goes-Here
+# RewriteRule ^article/([0-9]+)/([0-9a-zA-Z_-]+)$ article.php?id=$1&amp;title=$2 [NC,L]
+
+
+#RewriteCond %{HTTP_REFERER} !^http://localhost/karagaca/videos/.*$ [NC]
+#RewriteCond %{HTTP_REFERER} !^http://www.localhost/karagaca/videos/.*$ [NC]
+#RewriteRule .(mp4|mp3|avi)$ - [F]
+
+
+## https://stackoverflow.com/a/43953920/9522864 ##
+
+RewriteCond %{REQUEST_URI} \.(mp4|mp3|avi)$ [NC]
+RewriteCond %{HTTP_REFERER} !^http://localhost/karagaca/.*$ [NC]
+RewriteCond %{HTTP_REFERER} !^http://www.localhost/karagaca/.*$ [NC]
+RewriteCond %{HTTP_REFERER} !^https://tatamata.rs/.*$ [NC]
+RewriteCond %{HTTP_REFERER} !^https://www.tatamata.rs/.*$ [NC]
+RewriteRule ^.* - [F,L]
+          </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
 
 
           <!-- SECTION START -->
@@ -160,411 +1557,6 @@
               aria-expanded="false" aria-controls="collapseExample3">-</button>
           </div>
           <!-- SECTION END -->
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Database Class (PDO) - Moviex
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-&lt;?php 
-
-if (session_status() == PHP_SESSION_NONE) {
-  session_start();
-}
-
-class Database{
-  private $host = "localhost"; // Host
-  private $db_name = "moviex"; // DB Name
-  private $username = "root"; // DB Username
-  private $password = ""; // DB Password
-
-  private static $instance = null; // Instanca klase
-  public $connection = null; // Konekcija
-
-  private function __construct() {
-    try {
-      $this-&gt;connection = new PDO('mysql:host=' . $this-&gt;host . ';dbname=' . $this-&gt;db_name . ';charset=utf8mb4', $this-&gt;username, $this-&gt;password);
-      $this-&gt;connection-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit();
-    }
-
-    // $this-&gt;connection = mysqli_connect($this-&gt;host, $this-&gt;username, $this-&gt;password, $this-&gt;db_name);
-  }
-
-  public function getConnection(){
-      return $this->connection;
-  }
-  
-  public static function getInstance(){
-      if(!isset(self::$instance)){
-          self::$instance = new Database();
-      }
-
-      return self::$instance;
-  }   
-}
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Movie Class - Moviex
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  require_once 'Database.php'; // Pozivanje fajla gde je Database
-
-  class Movie {
-  
-    public static function add($data) {
-      try {
-        $data = (object) $data;
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO movie (title, img, genre, price, length, trailer, director, actors, publish_date, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $result = $query-&gt;execute([
-          $data-&gt;movie_title_add,
-          $data-&gt;movie_img_add,
-          $data-&gt;movie_genre_add,
-          $data-&gt;movie_price_add,
-          $data-&gt;movie_length_add,
-          $data-&gt;movie_trailer_add,
-          $data-&gt;movie_director_add,
-          $data-&gt;movie_actors_add,
-          $data-&gt;movie_date_add,
-          $data-&gt;movie_description_add
-        ]);
-  
-        return $result;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-        echo $e-&gt;getLine();
-        // echo $e-&gt;getFile();
-  
-        exit;
-      }
-    }
-  
-    public static function getAll() {
-      try {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie");
-        $query-&gt;execute();
-        $movies = $query-&gt;fetchAll();
-  
-        return $movies;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        return [];
-      }
-    }
-  
-    public static function sortByDate() {
-      try {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie ORDER BY publish_date DESC");
-        $query-&gt;execute();
-        $movies = $query-&gt;fetchAll();
-  
-        return $movies;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        return [];
-      }
-    }
-  
-    public static function sortByRating() {
-      try {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT m.*, AVG(r.rating) AS rating FROM movie m
-        JOIN rating r ON m.id = r.movie_id
-        GROUP BY r.movie_id
-        ORDER BY rating DESC");
-        $query-&gt;execute();
-        $movies = $query-&gt;fetchAll();
-  
-        return $movies;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        return [];
-      }
-    }
-  
-    public static function update($movieID, $data) {
-      try {
-        $data = (object) $data;
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE movie SET title = :title, genre = :genre, price = :price, director = :director, actors = :actors, length = :length, img = :img, trailer = :trailer, description = :description, publish_date = :date WHERE id = :id LIMIT 1");
-  
-        $result = $query-&gt;execute(array(
-          ':title' =&gt; $data-&gt;movie_title_update,
-          ':genre' =&gt; $data-&gt;movie_genre_update,
-          ':price' =&gt; $data-&gt;movie_price_update,
-          ':director' =&gt; $data-&gt;movie_director_update,
-          ':actors' =&gt; $data-&gt;movie_actors_update,
-          ':length' =&gt; $data-&gt;movie_length_update,
-          ':img' =&gt; $data-&gt;movie_img_update,
-          ':trailer' =&gt; $data-&gt;movie_trailer_update,
-          ':description' =&gt; $data-&gt;movie_description_update,
-          ':date' =&gt; $data-&gt;movie_date_update,
-          ':id' =&gt; $movieID,
-        ));
-  
-        return $result;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        exit;
-      }
-    }
-  
-    public static function delete($movieID) {
-      try {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM movie WHERE id = :id LIMIT 1");
-        $result = $query-&gt;execute(array(':id' =&gt; $movieID));
-  
-        return $result;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        exit;
-      }
-    }
-  
-    public static function sort($sortType) {
-      try {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie ORDER BY $sortType DESC");
-        $query-&gt;execute();
-        $movies = $query-&gt;fetchAll();
-  
-        return $movies;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        return [];
-      }
-    }
-  
-    public static function search($searchText) {
-      try {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM movie WHERE title LIKE '%" . $searchText . "%'");
-        $query-&gt;execute();
-        $movies = $query-&gt;fetchAll();
-  
-        return $movies;
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        return [];
-      }
-    }
-  
-    public static function getRating($movieID) {
-      try {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT rating FROM rating WHERE movie_id = :movieID");
-        $query-&gt;execute(array(
-          ':movieID' =&gt; $movieID,
-        ));
-        $ratings = $query-&gt;fetchAll();
-  
-        $ratingR = 0.0;
-  
-        foreach ($ratings as $rating) {
-          $ratingR += $rating['rating'];
-        }
-  
-        return sizeof($ratings) == 0 ? 0.0 : round($ratingR / sizeof($ratings), 2);
-      } catch (PDOException $e) {
-        echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  
-        return 0.0;
-      }
-    }
-  }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            User Class - Moviex
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-            require_once 'Database.php'; // Pozivanje fajla gde je Database
-
-            class User {
-            
-              public static function register($data) {
-                try {
-                  $data = (object) $data;
-                  $data-&gt;password = md5(md5($data-&gt;password)); // Hashovanje sifre sa md5
-                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user (email, password, username) VALUES (?, ?, ?)");
-                  $result = $query-&gt;execute([
-                    $data-&gt;email,
-                    $data-&gt;password,
-                    $data-&gt;username,
-                  ]);
-            
-                  $data-&gt;id = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
-            
-                  if ($result) { // Ukoliko je query uspesan pravimo sesiju i vracamo true
-                    self::createSession($data);
-            
-                    return true;
-                  }
-            
-                  return false;
-                } catch (PDOException $e) {
-                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-            
-                  exit;
-                }
-              }
-            
-              public static function takenEmail($email) {
-                try {
-                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT email FROM user WHERE email = :email");
-                  $query-&gt;execute(array(
-                    ':email' =&gt; $email,
-                  ));
-            
-                  $user = $query-&gt;fetch();
-            
-                  if ($user) {
-                    return true;
-                  }
-            
-                  return false;
-                } catch (PDOException $e) {
-                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-            
-                  exit;
-                }
-              }
-            
-              public static function takenUsername($username) {
-                try {
-                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT username FROM user WHERE username = :username");
-                  $query-&gt;execute(array(
-                    ':username' =&gt; $username,
-                  ));
-            
-                  $user = $query-&gt;fetch();
-            
-                  if ($user) {
-                    return true;
-                  }
-            
-                  return false;
-                } catch (PDOException $e) {
-                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-            
-                  exit;
-                }
-              }
-            
-              public static function login($data) {
-                try {
-                  $data = (object) $data;
-                  $data-&gt;password = md5(md5($data-&gt;password));
-                  $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT id, email, username, is_admin FROM user WHERE username = :username AND password = :password");
-                  $query-&gt;execute(array(
-                    ':username' =&gt; $data-&gt;username,
-                    ':password' =&gt; $data-&gt;password,
-                  ));
-            
-                  $user = $query-&gt;fetch();
-            
-                  if ($user) {
-                    $user = (object) $user;
-                    self::createSession($user);
-            
-                    return true;
-                  }
-            
-                  return false;
-                } catch (PDOException $e) {
-                  echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-            
-                  exit;
-                }
-              }
-            
-              public static function createSession($user) {
-                $_SESSION['user'] = [
-                  'id' =&gt; $user-&gt;id,
-                  'email' =&gt; $user-&gt;email,
-                  'username' =&gt; $user-&gt;username,
-                  'is_admin' =&gt; $user-&gt;is_admin,
-                ];
-              }
-            
-              public static function logout() {
-                // Gasimo i unistavamo sesiju nakon logout
-                //   session_unset();
-                //   session_destroy();
-                unset($_SESSION['user']);
-              }
-            
-              public static function isLoggedIn() {
-                // Ako je sesija aktivna znaci da je korisnik ulogovan i dalje.
-                if (isset($_SESSION['user'])) {
-                  return true;
-                }
-            
-                return false;
-              }
-            }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-
-
 
 
           <!-- SECTION START -->
@@ -1031,141 +2023,10 @@ class Database{
           </div>
           <!-- SECTION END -->
 
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Header - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP3" aria-expanded="false" aria-controls="collapseExampleP3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;?php require_once "classes/Korisnik.php"; ?&gt;
-  &lt;?php 
-    $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/')); //  /prijava /registracija /index.php
-  ?&gt;
-  
-  &lt;!DOCTYPE html&gt;
-  &lt;html lang="en"&gt;
-  &lt;head&gt;
-    &lt;meta charset="UTF-8"&gt;
-    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-    &lt;meta http-equiv="X-UA-Compatible" content="ie=edge"&gt;
-    &lt;title&gt;CINEMATIC&lt;/title&gt;
-     &lt;!-- OWL CAROUSEL --&gt;
-    &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" integrity="sha512-tS3S5qG0BlhnQROyJXvNjeEM4UpMXHrQfTGmbQ1gKmelCxlSEBUaxhRBj/EFTzpbP4RVSrpEikbmdJobCvhE3g==" crossorigin="anonymous" /&gt;
-    &lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" integrity="sha512-sMXtMNL1zRzolHYKEujM2AqCLUR9F2C4/05cdbxjjLSRvMQIciEPCQZo++nk7go3BtSuK9kfa/s+a4f4i5pLkw==" crossorigin="anonymous" /&gt;
-    &lt;!-- BOOTSTRAP --&gt;
-    &lt;link rel="stylesheet" href="./public/css/bootstrap/bootstrap.min.css"&gt; &lt;!-- Ovde treba putanja kao da smo u index.php fajlu a ne u header.php --&gt;
-    &lt;!-- CUSTOM CSS --&gt;
-    &lt;link rel="stylesheet" href="./public/css/styles.css"&gt; &lt;!-- Ovde treba putanja kao da smo u index.php fajlu a ne u header.php --&gt;
-    &lt;!-- FONT AWESOME --&gt;
-    &lt;script src="https://kit.fontawesome.com/5c5689b7a2.js"&gt;&lt;/script&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-  
-    &lt;!-- NAVBAR --&gt;
-    &lt;nav id="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary"&gt;
-      &lt;a class="navbar-brand" href="index.php"&gt;CINEMATIC&lt;/a&gt;
-      &lt;button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation"&gt;
-        &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
-      &lt;/button&gt;
-  
-      &lt;div class="collapse navbar-collapse" id="navbarColor01"&gt;
-        &lt;ul class="navbar-nav mr-auto"&gt;
-          &lt;li class="nav-item &lt;?php if($currentPage == '/index.php') echo 'active'; ?&gt;"&gt;
-            &lt;a class="nav-link" href="index.php"&gt;Početna &lt;span class="sr-only"&gt;(current)&lt;/span&gt;&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;li class="nav-item &lt;?php if($currentPage == '/repertoar.php') echo 'active'; ?&gt;"&gt;
-                &lt;a class="nav-link" href="repertoar.php"&gt;Repertoar&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;li class="nav-item &lt;?php if($currentPage == '/uskoro.php') echo 'active'; ?&gt;"&gt;
-                &lt;a class="nav-link" href="uskoro.php"&gt;Uskoro&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;?php if(Korisnik::ulogovan() &amp;&amp; $_SESSION['korisnik']['isAdmin']) { ?&gt;
-            &lt;li class="nav-item &lt;?php if($currentPage == '/karte.php') echo 'active'; ?&gt;"&gt;
-                  &lt;a class="nav-link" href="karte.php"&gt;Karte&lt;/a&gt;
-            &lt;/li&gt;
-          &lt;?php }?&gt;
-        &lt;/ul&gt;
-        &lt;ul class="navbar-nav"&gt;
-        &lt;?php if(Korisnik::ulogovan()){ ?&gt;
-            &lt;li class="nav-item &lt;?php if($currentPage == '/admin.php') echo 'active'; ?&gt;"&gt;
-                &lt;a class="nav-link" href="&lt;?php if($_SESSION['korisnik']['isAdmin']) echo 'admin.php'; else echo '#'; ?&gt;"&gt;Ulogovani kao: &lt;strong&gt;&lt;?php echo $_SESSION['korisnik']['ime']; ?&gt;&lt;?php if($_SESSION['korisnik']['isAdmin']) echo " (admin)"; ?&gt;&lt;/strong&gt;&lt;/a&gt;
-            &lt;/li&gt;
-            &lt;li class="nav-item"&gt;
-                &lt;a class="nav-link" href="odjava.php"&gt;Odjavi se&lt;/a&gt;
-            &lt;/li&gt;
-        &lt;?php }else{ ?&gt;
-          &lt;li class="nav-item &lt;?php if($currentPage == '/registracija.php') echo 'active'; ?&gt;"&gt;
-            &lt;a class="nav-link" href="registracija.php"&gt;Registracija&lt;/a&gt;
-          &lt;/li&gt;
-          &lt;li class="nav-item &lt;?php if($currentPage == '/prijava.php') echo 'active'; ?&gt;"&gt;
-            &lt;a class="nav-link" href="prijava.php"&gt;Prijava&lt;/a&gt;
-          &lt;/li&gt;
-        &lt;?php } ?&gt;
-        &lt;/ul&gt;
-      &lt;/div&gt;
-    &lt;/nav&gt;
-    &lt;!-- NAVBAR --&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Footer - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP4" aria-expanded="false" aria-controls="collapseExampleP4">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-    &lt;br&gt;&lt;br&gt;&lt;br&gt;
-
-    &lt;script src="https://code.jquery.com/jquery-3.4.1.min.js"&gt;&lt;/script&gt;
-    &lt;script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"&gt;&lt;/script&gt;
-    &lt;!-- OWL CAROUSEL --&gt;
-    &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js" integrity="sha512-bPs7Ae6pVvhOSiIcyUClR7/q2OAsRiovw4vAkX+zJbw3ShAeeqezq50RIIcIURq7Oa20rW2n2q+fyXBNcU9lrw==" crossorigin="anonymous"&gt;&lt;/script&gt;
-    &lt;script src="public/scripts/script.js"&gt;&lt;/script&gt;
-
-  &lt;/body&gt;
-  &lt;/html&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
 
 
 
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Is Admin - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  require_once 'classes/Korisnik.php';
 
-  if(!Korisnik::ulogovan() || (Korisnik::ulogovan() && !$_SESSION['korisnik']['isAdmin'])){
-    header("Location: index.php");
-  }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
 
 
 
@@ -1367,410 +2228,8 @@ if(isset($_POST['prijava'])){
 
 
 
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            fuctions.php (clean, flashMessages) - Moviex
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-
-&lt;?php 
-
-require_once 'classes/Database.php';
-
-function clean($input){
-  $input = mysqli_real_escape_string(Database::getInstance()-&gt;getConnection(), $input);
-  $input = trim($input);
-  $input = str_replace('"', "", $input);
-  $input = str_replace("'", "", $input);
-  $input = htmlspecialchars($input); // Mora ispod str_replace jer htmlspecialchars pretvara " u &amp;nesto; i onda ga str_replace ne nadje
-
-  return $input;
-}
-
-function printFlashMessage($sessionName){
-  if(isset($_SESSION[$sessionName])){
-    echo "&lt;div class='container-fluid text-uppercase success-message-custom'&gt;
-            &lt;div class='row'&gt;
-                &lt;div class='col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5'&gt;
-                    &lt;div class='alert alert-dismissible alert-success'&gt;
-                        &lt;button type='button' class='close' data-dismiss='alert'&gt;&amp;times;&lt;/button&gt;
-                        &lt;strong&gt;" . $_SESSION[$sessionName] . " &lt;i class='fas fa-check'&gt;&lt;/i&gt;&lt;/strong&gt;
-                    &lt;/div&gt;
-                &lt;/div&gt;
-            &lt;/div&gt;
-          &lt;/div&gt;";
-      unset($_SESSION[$sessionName]);
-  }
-}
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
 
 
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Foreach Index - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;?php foreach($karte as $key=&gt;$karta): ?&gt;
-
-  &lt;?php if($key % 2 == 0){ ?&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Odjava / Logout - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;?php
-
-    require_once 'classes/Korisnik.php';
-
-    if(!Korisnik::ulogovan()){
-        header("Location: index.php");
-
-        exit;
-    }
-
-    Korisnik::odjavi();
-    header("Location: index.php");
-
-    exit;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Email Validation - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  if(empty($email)){
-    $poruka['email'] = '&lt;p class="error-p"&gt;&lt;label class="text-danger error"&gt;Molimo Vas unesite email.&lt;/label&gt;&lt;/p&gt;';
-  }else{
-      $email = ocisti($email);
-      if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-          $poruka['email'] = '&lt;p class="error-p"&gt;&lt;label class="text-danger error"&gt;Pogrešan Email Format&lt;/label&gt;&lt;/p&gt;';
-      }
-  }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Search - Neda
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;?php
-
-  require_once 'classes/Knjiga.php';
-  session_start();
-
-  if(isset($_POST['trazi'])){
-      $html2 = '';
-
-          $knjige = Knjiga::trazi($_POST['tekst']);
-
-          foreach($knjige as $knjiga){
-                  $html2 .= '&lt;div class="col-md-4 mb-3 mt-3"&gt;
-                      &lt;div class="card mb-3"&gt;
-                          &lt;h3 class="card-header"&gt;NASLOV: ' . $knjiga["naslov"] . '&lt;/h3&gt;
-                          &lt;div class="card-body"&gt;
-                              &lt;h5 class="card-title"&gt;AUTOR: ' . $knjiga["autor"] . '&lt;/h5&gt;
-                              &lt;h6 class="card-subtitle text-muted"&gt;Predlozio/la: ' . Knjiga::nadjiKorisnika($knjiga["korisnik_id"]) . '&lt;/h6&gt;
-                          &lt;/div&gt;
-                          &lt;div class="card-body"&gt;
-                              &lt;p class="card-text"&gt;OPIS: &lt;br&gt;' . $knjiga["opis"] . '&lt;/p&gt;
-                          &lt;/div&gt;
-                          &lt;ul class="list-group list-group-flush"&gt;
-                              &lt;li class="list-group-item"&gt;&lt;a href="' . $knjiga['prodavnica'] . '" class="card-link"&gt;Link do prodavnice&lt;/a&gt;&lt;/li&gt;
-                          &lt;/ul&gt;
-                          &lt;div class="card-body"&gt;';
-
-                              if(isset($_SESSION["korisnik"]) &amp;&amp; Knjiga::pripadaKorisniku($knjiga["id"], $_SESSION["korisnik"]["id"])){
-                                  $html2 .= '
-                                  &lt;a class="btn btn-warning btn-sm" role="button" data-toggle="collapse" href="#collapseEditForm' . $knjiga['id'] . '" aria-expanded="false" aria-controls="collapseEditForm"&gt;
-                                      &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt; Ažuriraj
-                                  &lt;/a&gt;
-                                  &lt;form method="POST" style="display: inline-block;"&gt;
-                                      &lt;input type="hidden" name="knjigaID" value="' . $knjiga['id'] . '"&gt;
-                                      &lt;button name="izbrisi" class="btn btn-sm btn-danger"&gt;Izbriši&lt;/button&gt;
-                                  &lt;/form&gt;
-                                  &lt;div class="collapse" id="collapseEditForm' . $knjiga['id'] . '" style="margin-top: 2rem; margin-bottom: 4rem;"&gt;
-                                      &lt;div class="well"&gt;
-                                          &lt;h4&gt;Popunite podatke o knjizi &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
-                                          &lt;form method="POST"&gt;
-                                              &lt;input type="hidden" name="knjiga2ID" value="' . $knjiga['id'] . '"&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" type="text" disabled value="Korisnik: ' . $_SESSION['korisnik']['nadimak'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="naslov2" type="text" placeholder="Naslov" value="' . $knjiga['naslov'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="autor2" type="text" placeholder="Autor" value="' . $knjiga['autor'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;textarea class="form-control" name="opis2" placeholder="Opis..." rows="5" cols="70"&gt;' . $knjiga['opis'] . '&lt;/textarea&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="cena2" type="number" placeholder="Cena u $" value="' . $knjiga['cena'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="link2" type="text" placeholder="Link prodavnice" value="' . $knjiga['prodavnica'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;button type="submit" class="btn btn-success" name="knjiga2" style="width: 100%;"&gt;Ažuriraj &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
-                                              &lt;/div&gt;
-                                          &lt;/form&gt;
-                                      &lt;/div&gt;
-                                  &lt;/div&gt;';
-
-                              }
-                              $html2 .= '
-                          &lt;/div&gt;
-                          &lt;div class="card-footer text-muted"&gt;
-                              CENA: ' . $knjiga["cena"] . '$
-                          &lt;/div&gt;
-                      &lt;/div&gt;
-                  &lt;/div&gt;';
-          }
-
-          if(count($knjige) &gt; 0){
-              echo $html2;
-          }
-
-  }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Sort - Neda
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;?php
-
-  require_once 'classes/Knjiga.php';
-  session_start();
-
-  if(isset($_POST['vrstaSorta'])){
-      $html2 = '';
-
-      if($_POST['vrstaSorta'] == 'cena'){
-          $knjige = Knjiga::sortirajPoCeni();
-
-          foreach($knjige as $knjiga){
-                  $html2 .= '&lt;div class="col-md-4 mb-3 mt-3"&gt;
-                      &lt;div class="card mb-3"&gt;
-                          &lt;h3 class="card-header"&gt;NASLOV: ' . $knjiga["naslov"] . '&lt;/h3&gt;
-                          &lt;div class="card-body"&gt;
-                              &lt;h5 class="card-title"&gt;AUTOR: ' . $knjiga["autor"] . '&lt;/h5&gt;
-                              &lt;h6 class="card-subtitle text-muted"&gt;Predlozio/la: ' . Knjiga::nadjiKorisnika($knjiga["korisnik_id"]) . '&lt;/h6&gt;
-                          &lt;/div&gt;
-                          &lt;div class="card-body"&gt;
-                              &lt;p class="card-text"&gt;OPIS: &lt;br&gt;' . $knjiga["opis"] . '&lt;/p&gt;
-                          &lt;/div&gt;
-                          &lt;ul class="list-group list-group-flush"&gt;
-                              &lt;li class="list-group-item"&gt;&lt;a href="' . $knjiga['prodavnica'] . '" class="card-link"&gt;Link do prodavnice&lt;/a&gt;&lt;/li&gt;
-                          &lt;/ul&gt;
-                          &lt;div class="card-body"&gt;';
-
-                              if(isset($_SESSION["korisnik"]) &amp;&amp; Knjiga::pripadaKorisniku($knjiga["id"], $_SESSION["korisnik"]["id"])){
-                                  $html2 .= '
-                                  &lt;a class="btn btn-warning btn-sm" role="button" data-toggle="collapse" href="#collapseEditForm' . $knjiga['id'] . '" aria-expanded="false" aria-controls="collapseEditForm"&gt;
-                                      &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt; Ažuriraj
-                                  &lt;/a&gt;
-                                  &lt;form method="POST" style="display: inline-block;"&gt;
-                                      &lt;input type="hidden" name="knjigaID" value="' . $knjiga['id'] . '"&gt;
-                                      &lt;button name="izbrisi" class="btn btn-sm btn-danger"&gt;Izbriši&lt;/button&gt;
-                                  &lt;/form&gt;
-                                  &lt;div class="collapse" id="collapseEditForm' . $knjiga['id'] . '" style="margin-top: 2rem; margin-bottom: 4rem;"&gt;
-                                      &lt;div class="well"&gt;
-                                          &lt;h4&gt;Popunite podatke o knjizi &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
-                                          &lt;form method="POST"&gt;
-                                              &lt;input type="hidden" name="knjiga2ID" value="' . $knjiga['id'] . '"&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" type="text" disabled value="Korisnik: ' . $_SESSION['korisnik']['nadimak'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="naslov2" type="text" placeholder="Naslov" value="' . $knjiga['naslov'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="autor2" type="text" placeholder="Autor" value="' . $knjiga['autor'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;textarea class="form-control" name="opis2" placeholder="Opis..." rows="5" cols="70"&gt;' . $knjiga['opis'] . '&lt;/textarea&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="cena2" type="number" placeholder="Cena u $" value="' . $knjiga['cena'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="link2" type="text" placeholder="Link prodavnice" value="' . $knjiga['prodavnica'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;button type="submit" class="btn btn-success" name="knjiga2" style="width: 100%;"&gt;Ažuriraj &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
-                                              &lt;/div&gt;
-                                          &lt;/form&gt;
-                                      &lt;/div&gt;
-                                  &lt;/div&gt;';
-
-                              }
-                              $html2 .= '
-                          &lt;/div&gt;
-                          &lt;div class="card-footer text-muted"&gt;
-                              CENA: ' . $knjiga["cena"] . '$
-                          &lt;/div&gt;
-                      &lt;/div&gt;
-                  &lt;/div&gt;';
-          }
-
-          echo $html2;
-      }else if($_POST['vrstaSorta'] == 'naziv'){
-          $knjige = Knjiga::sortirajPoNazivu();
-
-          foreach($knjige as $knjiga){
-              $html2 .= '&lt;div class="col-md-4 mb-3 mt-3"&gt;
-                      &lt;div class="card mb-3"&gt;
-                          &lt;h3 class="card-header"&gt;NASLOV: ' . $knjiga["naslov"] . '&lt;/h3&gt;
-                          &lt;div class="card-body"&gt;
-                              &lt;h5 class="card-title"&gt;AUTOR: ' . $knjiga["autor"] . '&lt;/h5&gt;
-                              &lt;h6 class="card-subtitle text-muted"&gt;Predlozio/la: ' . Knjiga::nadjiKorisnika($knjiga["korisnik_id"]) . '&lt;/h6&gt;
-                          &lt;/div&gt;
-                          &lt;div class="card-body"&gt;
-                              &lt;p class="card-text"&gt;OPIS: &lt;br&gt;' . $knjiga["opis"] . '&lt;/p&gt;
-                          &lt;/div&gt;
-                          &lt;ul class="list-group list-group-flush"&gt;
-                              &lt;li class="list-group-item"&gt;&lt;a href="' . $knjiga['prodavnica'] . '" class="card-link"&gt;Link do prodavnice&lt;/a&gt;&lt;/li&gt;
-                          &lt;/ul&gt;
-                          &lt;div class="card-body"&gt;';
-
-                              if(isset($_SESSION["korisnik"]) &amp;&amp; Knjiga::pripadaKorisniku($knjiga["id"], $_SESSION["korisnik"]["id"])){
-                                  $html2 .= '
-                                  &lt;a class="btn btn-warning btn-sm" role="button" data-toggle="collapse" href="#collapseEditForm' . $knjiga['id'] . '" aria-expanded="false" aria-controls="collapseEditForm"&gt;
-                                      &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt; Ažuriraj
-                                  &lt;/a&gt;
-                                  &lt;form method="POST" style="display: inline-block;"&gt;
-                                      &lt;input type="hidden" name="knjigaID" value="' . $knjiga['id'] . '"&gt;
-                                      &lt;button name="izbrisi" class="btn btn-sm btn-danger"&gt;Izbriši&lt;/button&gt;
-                                  &lt;/form&gt;
-                                  &lt;div class="collapse" id="collapseEditForm' . $knjiga['id'] . '" style="margin-top: 2rem; margin-bottom: 4rem;"&gt;
-                                      &lt;div class="well"&gt;
-                                          &lt;h4&gt;Popunite podatke o knjizi &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
-                                          &lt;form method="POST"&gt;
-                                              &lt;input type="hidden" name="knjiga2ID" value="' . $knjiga['id'] . '"&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" type="text" disabled value="Korisnik: ' . $_SESSION['korisnik']['nadimak'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="naslov2" type="text" placeholder="Naslov" value="' . $knjiga['naslov'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="autor2" type="text" placeholder="Autor" value="' . $knjiga['autor'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;textarea class="form-control" name="opis2" placeholder="Opis..." rows="5" cols="70"&gt;' . $knjiga['opis'] . '&lt;/textarea&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="cena2" type="number" placeholder="Cena u $" value="' . $knjiga['cena'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;input class="form-control" name="link2" type="text" placeholder="Link prodavnice" value="' . $knjiga['prodavnica'] . '"&gt;
-                                              &lt;/div&gt;
-                                              &lt;div class="form-group"&gt;
-                                                  &lt;button type="submit" class="btn btn-success" name="knjiga2" style="width: 100%;"&gt;Ažuriraj &lt;i class="far fa-comment"&gt;&lt;/i&gt;&lt;/button&gt;
-                                              &lt;/div&gt;
-                                          &lt;/form&gt;
-                                      &lt;/div&gt;
-                                  &lt;/div&gt;';
-
-                              }
-                              $html2 .= '
-                          &lt;/div&gt;
-                          &lt;div class="card-footer text-muted"&gt;
-                              CENA: ' . $knjiga["cena"] . '$
-                          &lt;/div&gt;
-                      &lt;/div&gt;
-                  &lt;/div&gt;';
-          }
-
-          echo $html2;
-      }
-  }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
 
 
 
@@ -4209,11 +4668,48 @@ function printFlashMessage($sessionName){
           <h1 class="mb-5"><u>JS</u></h1>
 
 
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Select Element By DataAttribute - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+  let element = document.querySelector(`[data-video-index="${counterPlyr++}"]`);
+  let videoToStop = document.querySelector(`video[data-chapter-id="${lastChapterID}"][data-clip-id="${lastClipID}"]`);
+</pre>
 
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Get / Change Data Or Any Other Attribute - CheatSheet.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+            buttons[i].dataset.target = "#collapseExample" + i; // If attr is data-index-here-comes in JS it will return dataset.indexHereComes
+            buttons[i].setAttribute("aria-controls", "collapseExample" + i);
+            event.target.getAttribute('data-value');
+          </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             Display, Disabled, Checked - S2s.
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
@@ -4263,27 +4759,7 @@ function printFlashMessage($sessionName){
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Get / Change Data Or Any Other Attribute - CheatSheet.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  buttons[i].dataset.target = "#collapseExample" + i; // If attr is data-index-here-comes in JS it will return dataset.indexHereComes
-  buttons[i].setAttribute("aria-controls", "collapseExample" + i);
-  event.target.getAttribute('data-value');
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             Scroll To (jquery), URL, Path - DFD.
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
@@ -4468,15 +4944,8 @@ function validateEmail(email) {
 
 
 
-
-
-
-
-
-
-
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             Redirect, Hash - RMTSlagalica.
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
@@ -4531,7 +5000,7 @@ function validateEmail(email) {
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             Lazy Load
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
@@ -4567,7 +5036,7 @@ targets.forEach(lazyLoad);
           </div>
           <!-- SECTION END -->
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             Scroll To Top - Pixelate
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleJS1" aria-expanded="false" aria-controls="collapseExampleJS1">+</button>
@@ -4576,18 +5045,23 @@ targets.forEach(lazyLoad);
           <hr>
           <div class="collapse" id="collapseExampleOC3">
             <pre>
-let offset = pageYOffset;
+// SCROLL TO TOP =========================================================================================================
 
-if (offset > 800) {
-  scrollToTopBtn.style.display = "block";
-} else {
-  scrollToTopBtn.style.display = "none";
-}
+let scrollToTopBtn = document.getElementById('scroll-to-top');
 
-scrollToTopBtn.addEventListener('click', () => {
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
-  window.location.hash = "";
+document.addEventListener("scroll", (event) => {
+  let offset = pageYOffset;
+
+  if (offset > 300) {
+    scrollToTopBtn.style.display = "block";
+  } else {
+    scrollToTopBtn.style.display = "none";
+  }
+
+  scrollToTopBtn.addEventListener('click', () => {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  });
 });
 </pre>
 
@@ -4644,6 +5118,8 @@ window.addEventListener('resize', () => {
               aria-expanded="false" aria-controls="collapseExample3">-</button>
           </div>
           <!-- SECTION END -->
+
+
 
 
 
@@ -5177,7 +5653,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             users.php - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5207,7 +5683,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             proccess.php - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5288,7 +5764,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             XHR File - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5357,7 +5833,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             XHR JSON - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5445,7 +5921,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             XHR GITHUB API - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5507,7 +5983,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             XHR PHP FORMS - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5641,7 +6117,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             XHR GET DATA FROM DATABASE - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5702,7 +6178,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             FETCH - Traversy Ajax
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
@@ -5790,7 +6266,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
           <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
+          <p class="font-weight-bold text-dark important-color">
             Sort / Search - Neda
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
