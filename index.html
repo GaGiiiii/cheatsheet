@@ -112,8 +112,8 @@ class Database {
     } else {
       $this-&gt;host = "localhost"; // Host
       $this-&gt;db_name = "tatamatars_main"; // DB Name
-      $this-&gt;username = "tatamatars_admin"; // DB Username
-      $this-&gt;password = "enterpwhere"; // DB Password
+      $this-&gt;username = "32131"; // DB Username
+      $this-&gt;password = "123131231322131"; // DB Password
     }
     try {
       $this-&gt;connection = new PDO('mysql:host=' . $this-&gt;host . ';dbname=' . $this-&gt;db_name . ';charset=utf8', $this-&gt;username, $this-&gt;password);
@@ -201,6 +201,7 @@ class Database {
 
       if ($result) { // Ukoliko je query uspesan pravimo sesiju i vracamo true
         $_SESSION['user'] = $data;
+        Database::getInstance()-&gt;insertLoginDetails($data, $data-&gt;id);
 
         return true;
       }
@@ -216,6 +217,66 @@ class Database {
   public function warnUser($user_id) {
     try {
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET warned = 1 WHERE id = ?");
+      $result = $query-&gt;execute([$user_id]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function unWarnUser($user_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET warned = 0 WHERE id = ?");
+      $result = $query-&gt;execute([$user_id]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function blockUser($user_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET blocked = 1 WHERE id = ?");
+      $result = $query-&gt;execute([$user_id]);
+
+      return $result;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function isUserBlocked($user_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT id FROM `user` WHERE id = :id AND blocked = 1");
+      $query-&gt;execute(array(
+        ':id' =&gt; $user_id,
+      ));
+
+      $user = $query-&gt;fetch();
+
+      if ($user) {
+        return true;
+      }
+
+      return false;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return false;
+    }
+  }
+
+  public function unBlockUser($user_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET blocked = 0 WHERE id = ?");
       $result = $query-&gt;execute([$user_id]);
 
       return $result;
@@ -353,13 +414,15 @@ class Database {
   public function addCourse($data) {
     try {
       $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO course (name, description, price, course_grade_id, img) VALUES (?, ?, ?, ?, ?)");
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO course (name, description, price, price2, course_grade_id, img, trailer) VALUES (?, ?, ?, ?, ?, ?, ?)");
       $result = $query-&gt;execute([
         $data-&gt;name,
         $data-&gt;description,
         $data-&gt;price,
+        $data-&gt;price2,
         $data-&gt;grade_id,
         $data-&gt;img,
+        $data-&gt;trailer,
       ]);
 
       $lastInsertedID = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
@@ -378,7 +441,7 @@ class Database {
   public function updateCourse($data, $id) {
     try {
       $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `course` SET name = :name, description = :description, price = :price, course_grade_id = :grade_id, img = :img WHERE id = :id");
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `course` SET price2 = :price2, trailer = :trailer,  name = :name, description = :description, price = :price, course_grade_id = :grade_id, img = :img, live = :live WHERE id = :id");
       $result = $query-&gt;execute([
         ':name' =&gt; $data-&gt;name_edit,
         ':description' =&gt; $data-&gt;description_edit,
@@ -386,6 +449,9 @@ class Database {
         ':id' =&gt; $id,
         ':grade_id' =&gt; $data-&gt;grade_id_edit,
         ':img' =&gt; $data-&gt;img_edit,
+        ':live' =&gt; $data-&gt;live_edit,
+        ':trailer' =&gt; $data-&gt;trailer_edit,
+        ':price2' =&gt; $data-&gt;price2_edit,
       ]);
 
       return $result;
@@ -634,8 +700,22 @@ class Database {
 
   public function getAllClips() {
     try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id ORDER BY cu.name, ch.name DESC, c.number");
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.description AS clip_description, c.chapter_id AS current_chapter, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id ORDER BY cu.name, ch.name DESC, c.number");
       $query-&gt;execute();
+      $clips = $query-&gt;fetchAll();
+
+      return $clips;
+    } catch (PDOException $e) {
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+
+      return [];
+    }
+  }
+
+  public function getAllClipsForCourse($course_id) {
+    try {
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.description AS clip_description, c.chapter_id AS current_chapter, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id WHERE c.course_id = :course_id ORDER BY cu.name, ch.name DESC, c.number");
+      $query-&gt;execute(['course_id' =&gt; $course_id]);
       $clips = $query-&gt;fetchAll();
 
       return $clips;
@@ -648,7 +728,7 @@ class Database {
 
   public function getAllClipsForChapterAndCourse($chapter_id, $course_id) {
     try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id WHERE c.chapter_id = $chapter_id AND c.course_id = $course_id ORDER BY cu.name, ch.name DESC, c.number");
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.description AS clip_description, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id WHERE c.chapter_id = $chapter_id AND c.course_id = $course_id ORDER BY cu.name, ch.name DESC, c.number");
       $query-&gt;execute();
       $clips = $query-&gt;fetchAll();
 
@@ -663,15 +743,23 @@ class Database {
   public function updateClip($data, $id) {
     try {
       $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number FROM `clip` WHERE id = :id");
+
+      // Uzmem stari chapter i broj koji je bio po redu u starom chapteru
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number, chapter_id, course_id FROM `clip` WHERE id = :id");
       $query-&gt;execute([
         ':id' =&gt; $id,
       ]);
 
-      $oldNumber = $query-&gt;fetch()['number'];
+      $row = $query-&gt;fetch();
+      $oldNumber = $row['number'];
+      $oldChapter = $row['chapter_id'];
+      $oldCourse = $row['course_id'];
 
+      if ($data-&gt;number_edit &lt; 1) {
+        return false;
+      }
 
-
+      // Ubacim ga u novi chapter i stavim mu novi broj
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET course_id = :course_id, chapter_id = :chapter_id, name = :name, link = :link, description = :description, number = :number WHERE id = :id");
       $result = $query-&gt;execute([
         ':course_id' =&gt; $data-&gt;course_id_edit,
@@ -683,21 +771,19 @@ class Database {
         ':id' =&gt; $id,
       ]);
 
-      if ($oldNumber &gt; $data-&gt;number_edit) {
-        if ($result) {
-          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number + 1 WHERE number &gt;= $data-&gt;number_edit AND number &lt; $oldNumber + 1 AND id != $id AND course_id = $data-&gt;course_id_edit AND chapter_id = $data-&gt;chapter_id_edit");
-          $result = $query-&gt;execute();
-        }
-      } else {
-        if ($result) {
-          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number - 1 WHERE number &gt;= $oldNumber AND number &lt; $data-&gt;number_edit + 1 AND id != $id AND course_id = $data-&gt;course_id_edit AND chapter_id = $data-&gt;chapter_id_edit");
-          $result = $query-&gt;execute();
-        }
+      // Sredi novi chapter, tako sto ces sve klipove koji su veci ili jednaki od njega uvecati za jedan, znaci kao drag and drop gde guras listu na dole
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number + 1 WHERE number &gt;= $data-&gt;number_edit AND id != $id AND course_id = $data-&gt;course_id_edit AND chapter_id = $data-&gt;chapter_id_edit");
+      $result = $query-&gt;execute();
+
+      // Sredi stari chapter, tako sto ces sve posled izbacenog smanjiti za 1
+      if ($oldChapter != $data-&gt;chapter_id_edit) {
+        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number - 1 WHERE number &gt; $oldNumber AND id != $id AND course_id = $oldCourse AND chapter_id = $oldChapter");
+        $result = $query-&gt;execute();
       }
 
       return $result;
     } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
+      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . $e-&gt;getLine() . $oldChapter . "&lt;/p&gt;";
 
       exit;
     }
@@ -1054,7 +1140,8 @@ class Database {
       die();
     }
   }
-}              
+}
+                          
           </pre>
 
             <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
@@ -1464,6 +1551,152 @@ RewriteCond %{HTTP_REFERER} !^https://tatamata.rs/.*$ [NC]
 RewriteCond %{HTTP_REFERER} !^https://www.tatamata.rs/.*$ [NC]
 RewriteRule ^.* - [F,L]
           </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            PHPMailer - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+// Import PHPMailer classes into the global namespace
+// These must be at the top of your script, not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+// Load Composer's autoloader
+require 'vendor/autoload.php';
+
+// Instantiation and passing `true` enables exceptions
+$mail = new PHPMailer(true);
+
+try {
+  //Server settings
+  // $mail-&gt;SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
+  $mail-&gt;isSMTP();                                            // Send using SMTP
+  $mail-&gt;Host       = 'mail.tatamata.rs';                    // Set the SMTP server to send through
+  $mail-&gt;SMTPAuth   = true;                                   // Enable SMTP authentication
+  $mail-&gt;Username   = 'admin@tatamata.rs';                     // SMTP username
+  $mail-&gt;Password   = 'sifra';                               // SMTP password
+  $mail-&gt;SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+  $mail-&gt;Port       = 25;                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
+
+  //Recipients
+  $mail-&gt;setFrom('admin@tatamata.rs', 'Admin Tatamata');
+  // $mail-&gt;addAddress('joe@example.net', 'Joe User');     // Add a recipient
+  $mail-&gt;addAddress('dragoslav.gagi8@gmail.com');               // Name is optional
+  $mail-&gt;addAddress('admin@tatamata.rs');               // Name is optional
+  // $mail-&gt;addReplyTo('admin@tatamata.rs', 'Information');
+
+  // Attachments
+  // $mail-&gt;addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+  // $mail-&gt;addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+
+  // Content
+  $mail-&gt;isHTML(true);                                  // Set email format to HTML
+  $mail-&gt;Subject = 'Korisnik je kupio kurs';
+  $mail-&gt;Body    = 'Korisnik &lt;strong&gt;"' . $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname . "\"&lt;/strong&gt; je kupio kurs &lt;strong&gt;\"" . $course['name'] . "\"&lt;/strong&gt; i potvrdio uplatu. &lt;br&gt;&lt;br&gt; Broj telefona: " . $_SESSION['user']-&gt;phone_number . "&lt;br&gt;Email: " . $_SESSION['user']-&gt;email;
+
+  $mail-&gt;send();
+  // echo 'Message has been sent';
+} catch (Exception $e) {
+  echo "Message could not be sent. Mailer Error: {$mail-&gt;ErrorInfo}";
+}
+          </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Upload Multiple Files - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
+
+if (!isset($_POST['contact'])) {
+  exit;
+}
+
+&lt;form enctype="multipart/form-data" action="contact-form-logic.php" method="POST" onsubmit="return validateForm()"&gt;
+&lt;input id="contact-files" class="form-control" type="file" multiple name="files[]"&gt;
+
+if (!empty($_FILES['files']['name'][0])) { // Da li je poslao neke fajlove
+  $files = $_FILES['files'];
+
+  $uploaded = array();
+  $failed = array();
+
+  $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'jfif'];
+
+  foreach ($files['name'] as $position =&gt; $file_name) {
+    $file_tmp = $files['tmp_name'][$position];
+    $file_size = $files['size'][$position];
+    $file_error = $files['error'][$position];
+
+    $file_ext = explode('.', $file_name);
+    $file_ext = strtolower(end($file_ext));
+
+    if (in_array($file_ext, $allowed)) {
+      if ($file_error === 0) {
+
+        if ($file_size &lt;= 5242880) {
+          $file_name_new = $file_name;
+          $file_destination = 'uploads/' . $file_name_new;
+
+          if (move_uploaded_file($file_tmp, $file_destination)) {
+            $uploaded[$position] = $file_destination;          
+          } else {
+            $failed[$position] = "[{$file_name}] failed upload";
+          }
+        } else {
+          $failed[$position] = "[{$file_name}] is too large";
+        }
+      } else {
+        $failed[$position] = "[{$file_name}] failed to upload";
+      }
+    } else {
+      $failed[$position] = "[{$file_name}] file extension '{$file_ext}' is not allowed";
+    }
+  }
+
+  if (!empty($uploaded)) {
+    try {
+      array_map('unlink', glob('uploads/*')); // Deletes all uploads
+      $_SESSION['contact_form_success'] = '&lt;div class="alert alert-warning alert-dismissible show mt-5" role="alert"&gt;
+        Poruka uspešno poslata.&lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt;&lt;/button&gt;
+      &lt;/div&gt;';
+      header("Location: " . BASE_URL . "pocetna");
+
+      exit;
+    } catch (Exception $e) {
+      echo "Message could not be sent. Mailer Error: {$mail-&gt;ErrorInfo}";
+    }
+  }
+
+  if (!empty($failed)) {
+    print_r($failed);
+  }
+} else { // Nije poslao fajlove
+
+}              
+                    </pre>
 
             <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
               aria-expanded="false" aria-controls="collapseExample3">-</button>
@@ -5191,7 +5424,28 @@ window.addEventListener('resize', () => {
 
 
 
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            Font Awesome as Content - Tatamata.
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample5" aria-expanded="false" aria-controls="collapseExample5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+.accordion-button::after {
+  background-image: none;
+  font-family: "Font Awesome 5 Free";
+  content: "\f078";
+  font-weight: 900;
+}
+</pre>
 
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
 
 
 
