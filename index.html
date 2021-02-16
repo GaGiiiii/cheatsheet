@@ -1149,6 +1149,497 @@ class Database {
           </div>
           <!-- SECTION END -->
 
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            login.php - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
+
+include_once 'includes/functions.php';
+require_once 'classes/Database.php';
+
+if (Database::getInstance()-&gt;isUserLoggedIn()) {
+  $_SESSION['unauthorized_access'] = '&lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+        &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt;&lt;/button&gt;
+      &lt;/div&gt;';
+  header("Location: pocetna");
+
+  exit;
+}
+
+if (isset($_POST['login'])) {
+  $email = clean($_POST['email']);
+  $password = clean($_POST['password']);
+
+  $errors = array();
+
+  if (empty($email)) {
+    $errors['email'] = '&lt;div class="mb-0 invalid-feedback"&gt;Molimo Vas unesite email.&lt;/div&gt;';
+  } else {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $errors['email'] = '&lt;div class="mb-0 invalid-feedback"&gt;Pogrešan email format.&lt;/div&gt;';
+    }
+  }
+
+  if (empty($password)) {
+    $errors['password'] = '&lt;div class="invalid-feedback"&gt;Molimo Vas unesite šifru.&lt;/div&gt;';
+  }
+
+  if (count($errors) == 0) {
+    $data = array(
+      "email" =&gt; $email,
+      "password" =&gt; $password,
+    );
+
+    if (Database::getInstance()-&gt;loginUser($data)) {
+      $_SESSION['login_success_message'] = '&lt;div class="alert alert-warning alert-dismissible show mb-5" role="alert"&gt;
+              &lt;strong&gt;Prijava uspešna! &lt;i class="fas fa-check"&gt;&lt;/i&gt;&lt;/strong&gt; Dobrodošli ' . $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname .
+        '. &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt;&lt;/button&gt;
+            &lt;/div&gt;';
+
+      header("Location: mojikursevi");
+
+      exit;
+    } else {
+      $errors['wrong_combination'] = '&lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+      &lt;strong&gt;Greška!&lt;/strong&gt; Pogrešna kombinacija.
+      &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt;&lt;/button&gt;
+    &lt;/div&gt;';
+    }
+  }
+}
+?&gt;
+
+&lt;?php include 'includes/header.php'; ?&gt;
+
+
+&lt;!-- -------- LOGIN ---------- --&gt;
+&lt;section id="login" class="login-form"&gt;
+
+  &lt;div class="container"&gt;
+    &lt;div class="row justify-content-center"&gt;
+
+      &lt;div class="col-lg-6 col-md-8 col-sm-10 col-10 g-0"&gt;
+
+        &lt;?php printFormatedFlashMessage("reset_password_success_message"); ?&gt;
+        &lt;?php printFormatedFlashMessage("logout_success_message"); ?&gt;
+        &lt;?php echo $errors['wrong_combination'] ?? ""; ?&gt;
+
+
+        &lt;div class="login-form-container"&gt;
+          &lt;h1&gt;Postojeći korisnik&lt;/h1&gt;
+          &lt;form id="login-form" method="POST"&gt;
+            &lt;div class="mb-3"&gt;
+              &lt;label class="form-label"&gt;Email&lt;/label&gt;
+              &lt;input id="email" name="email" type="email" class="form-control &lt;?php if (isset($errors['email'])) echo 'is-invalid';
+                                                                              else if (isset($email)) echo 'is-valid'; ?&gt;" placeholder="Unesite email" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;
+              &lt;?php echo $errors['email'] ?? ""; ?&gt;
+            &lt;/div&gt;
+            &lt;div class="mb-3"&gt;
+              &lt;label class="form-label"&gt;Šifra&lt;/label&gt;
+              &lt;input id="password" name="password" type="password" class="form-control &lt;?php if (isset($errors['password'])) echo 'is-invalid'; ?&gt;" placeholder="Unesite šifru"&gt;
+              &lt;?php echo $errors['password'] ?? ""; ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="forgot-password-container d-flex justify-content-between"&gt;
+              &lt;a href="&lt;?php echo BASE_URL . "zaboravljena-lozinka"; ?&gt;" class="zab-sifru mt-2 d-inline-block text-white"&gt;Zaboravili ste šifru?&lt;/a&gt;
+              &lt;button name="login" id="login-btn" type="submit" class="btn btn-primary scale-btn-2"&gt;Prijavi se&lt;/button&gt;
+            &lt;/div&gt;
+
+          &lt;/form&gt;
+        &lt;/div&gt;
+
+        &lt;div class="mt-4 text-white text-center go-back"&gt;
+          &lt;a href="&lt;?php echo BASE_URL; ?&gt;pocetna"&gt;
+            &lt;i class="fas fa-arrow-left"&gt;&lt;/i&gt; Odustani
+          &lt;/a&gt;
+        &lt;/div&gt;
+
+
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+&lt;!-- -------- LOGIN ---------- --&gt;
+
+&lt;?php include 'includes/footer.php'; ?&gt;
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            register.php - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
+
+include_once 'includes/functions.php';
+include_once 'includes/config.php';
+require_once 'classes/Database.php';
+
+if (Database::getInstance()-&gt;isUserLoggedIn()) {
+  $_SESSION['unauthorized_access'] = '&lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+        &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+      &lt;/div&gt;';
+  header("Location: pocetna");
+
+  exit;
+}
+
+if (isset($_POST['register'])) {
+  $email = clean($_POST['email']);
+  $password = clean($_POST['password']);
+  $password2 = clean($_POST['password2']);
+  $firstname = clean($_POST['firstname']);
+  $lastname = clean($_POST['lastname']);
+  $phone_number = clean($_POST['phone_number']);
+  $grade = clean($_POST['grade']);
+  $slazemSe = $_POST['slazem_se'] ?? 0;
+
+  $errors = array();
+
+  if (empty($email)) {
+    $errors['email'] = '&lt;div class="mb-0 invalid-feedback"&gt;Molimo Vas unesite email.&lt;/div&gt;';
+  } else {
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $errors['email'] = '&lt;div class="mb-0 invalid-feedback"&gt;Pogrešan email format.&lt;/div&gt;';
+    }
+  }
+
+  if (empty($password)) {
+    $errors['password'] = '&lt;div class="mb-0 invalid-feedback"&gt;Molimo Vas unesite šifru.&lt;/div&gt;';
+  } else {
+    if ($password != $password2) {
+      $errors['password_confirm'] = '&lt;div class="mb-0 invalid-feedback"&gt;Šifre se ne poklapaju.&lt;/div&gt;';
+    } else {
+      if (empty($password2)) {
+        $errors['password2'] = '&lt;div class="mb-0 invalid-feedback"&gt;Molimo potvrdite šifru.&lt;/div&gt;';
+      }
+    }
+  }
+
+  if (empty($firstname)) {
+    $errors['firstname'] = '&lt;div class="mb-0 invalid-feedback"&gt;Molimo unesite ime.&lt;/div&gt;';
+  } else {
+    if (!isLettersOnly($firstname)) {
+      $errors['firstname'] = '&lt;div class="mb-0 invalid-feedback"&gt;Dozvoljeno je koristiti samo slova.&lt;/div&gt;';
+    }
+  }
+
+  if (empty($lastname)) {
+    $errors['lastname'] = '&lt;div class="mb-0 invalid-feedback"&gt;Molimo unesite prezime.&lt;/div&gt;';
+  } else {
+    if (!isLettersOnly($lastname)) {
+      $errors['lastname'] = '&lt;div class="mb-0 invalid-feedback"&gt;Dozvoljeno je koristiti samo slova.&lt;/div&gt;';
+    }
+  }
+
+  if ($slazemSe === 0) {
+    $errors['slazem_se'] = '&lt;div class="mb-0 invalid-feedback"&gt;Niste prihvatili uslove korišćenja.&lt;/div&gt;';
+  }
+
+  if (count($errors) == 0) {
+    $data = array(
+      "email" =&gt; $email,
+      "password" =&gt; $password,
+      "firstname" =&gt; $firstname,
+      "lastname" =&gt; $lastname,
+      "phone_number" =&gt; $phone_number,
+      "grade" =&gt; $grade,
+    );
+
+    if (Database::getInstance()-&gt;takenEmail($email)) {
+      $errors['taken_email'] = '&lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+      &lt;strong&gt;Greška!&lt;/strong&gt; Email je zauzet.
+      &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+    &lt;/div&gt;';
+    } else if (Database::getInstance()-&gt;registerUser($data)) {
+      $_SESSION['register_success_message'] = '
+            &lt;div class="alert alert-warning alert-dismissible show" role="alert" style="margin-bottom: 4rem;"&gt;
+              &lt;strong&gt;Registracija uspešna! &lt;i class="fas fa-check"&gt;&lt;/i&gt;&lt;/strong&gt; Dobrodošli ' . $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname .
+        '. &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;i class="fas fa-times"&gt;&lt;/i&gt;&lt;/button&gt;
+            &lt;/div&gt;';
+
+      header("Location: " . BASE_URL . "kursevi");
+
+      exit;
+    }
+  }
+}
+?&gt;
+
+&lt;?php include 'includes/header.php'; ?&gt;
+
+&lt;!-- -------- REGISTRACIJA ---------- --&gt;
+&lt;section id="register" class="registracija mt-4 mb-5"&gt;
+  &lt;div class="container"&gt;
+    &lt;div class="row justify-content-center"&gt;
+      &lt;div class="col-lg-6 col-md-8 col-sm-10 col-10 g-0"&gt;
+
+        &lt;div class="login-form-container"&gt;
+
+          &lt;h1 class="mb-1"&gt;Novi Korisnik&lt;/h1&gt;
+          &lt;p class="mb-4"&gt;Polja označena &lt;strong class="text-danger"&gt;*&lt;/strong&gt; su obavezna.&lt;/p&gt;
+
+          &lt;?php echo $errors['taken_email'] ?? ""; ?&gt;
+
+          &lt;form method="POST"&gt;
+
+            &lt;div class="mb-4"&gt;
+              &lt;label class="form-label"&gt;Ime &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;input name="firstname" type="text" class="form-control &lt;?php if (isset($errors['firstname'])) echo 'is-invalid';
+                                                                      else if (isset($firstname)) echo 'is-valid'; ?&gt;" placeholder="Unesite ime" value="&lt;?php echo $firstname ?? ""; ?&gt;"&gt;
+              &lt;?php echo $errors['firstname'] ?? ""; ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+              &lt;label class="form-label"&gt;Prezime &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;input name="lastname" type="text" class="form-control &lt;?php if (isset($errors['lastname'])) echo 'is-invalid';
+                                                                      else if (isset($lastname)) echo 'is-valid'; ?&gt;" placeholder="Unesite prezime" value="&lt;?php echo $lastname ?? ""; ?&gt;"&gt;
+              &lt;?php echo $errors['lastname'] ?? ""; ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+              &lt;label class="form-label"&gt;Email &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;input name="email" type="email" class="form-control &lt;?php if (isset($errors['email']) || isset($errors['taken_email'])) echo 'is-invalid';
+                                                                    else if (isset($email)) echo 'is-valid'; ?&gt;" placeholder="Unesite email" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;
+              &lt;?php echo $errors['email'] ?? ""; ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+              &lt;label class="form-label"&gt;Šifra &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;input name="password" type="password" class="form-control &lt;?php if (isset($errors['password']) || isset($errors['password_confirm'])) echo 'is-invalid'; ?&gt;" placeholder="Unesite šifru"&gt;
+              &lt;?php echo $errors['password'] ?? ""; ?&gt;
+              &lt;?php echo $errors['password_confirm'] ?? ""; ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+              &lt;label class="form-label"&gt;Potvrda šifre &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;input name="password2" type="password" class="form-control &lt;?php if (isset($errors['password2'])) echo 'is-invalid'; ?&gt;" placeholder="Potvrdite šifru"&gt;
+              &lt;?php echo $errors['password2'] ?? ""; ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-4"&gt;
+              &lt;label class="form-label"&gt;Zemlja &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;select class="form-select" name="country" aria-label="Default select example"&gt;
+                &lt;option value="Srbija" selected&gt;Srbija&lt;/option&gt;
+                &lt;option value="Other"&gt;Preostale zemlje&lt;/option&gt;
+              &lt;/select&gt;
+            &lt;/div&gt;
+
+            &lt;div id="grade-div" class="mb-4"&gt;
+              &lt;label class="form-label"&gt;Koji si razred? &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;select class="form-select" name="grade" aria-label="Default select example"&gt;
+                &lt;option value="Osmi" selected&gt;Osmi&lt;/option&gt;
+                &lt;option value="Sedmi"&gt;Sedmi&lt;/option&gt;
+                &lt;option value="Sesti"&gt;Šesti&lt;/option&gt;
+                &lt;option value="Peti"&gt;Peti&lt;/option&gt;
+                &lt;option value="Nizi"&gt;Niži razredi osnovne škole&lt;/option&gt;
+                &lt;option value="Srednja skola"&gt;Srednja škola&lt;/option&gt;
+              &lt;/select&gt;
+            &lt;/div&gt;
+
+            &lt;div id="number-div" style="margin-bottom: 2rem;"&gt;
+              &lt;label class="form-label"&gt;Broj telefona&lt;/label&gt;
+              &lt;input name="phone_number" type="tel" , pattern="[0-9-+]*" class="form-control" placeholder="Unesite broj telefona" value="&lt;?php echo $phone_number ?? ""; ?&gt;"&gt;
+              &lt;?php echo $errors['phone_number'] ?? ""; ?&gt;
+            &lt;/div&gt;
+
+            &lt;div class="mb-3 form-check"&gt;
+              &lt;input type="checkbox" name="slazem_se" class="form-check-input &lt;?php if (isset($errors['slazem_se'])) echo 'is-invalid'; ?&gt;" id="exampleCheck1" &lt;?php if (isset($slazemSe) &amp;&amp; $slazemSe !== 0) echo 'checked'; ?&gt;&gt;
+              &lt;label class="form-check-label" for="exampleCheck1"&gt;Slažem se sa &lt;a target="_blank" href="&lt;?php echo BASE_URL; ?&gt;uslovi-koriscenja"&gt;uslovima korisćenja&lt;/a&gt; i &lt;a target="_blank" href="&lt;?php echo BASE_URL; ?&gt;politika-privatnosti"&gt;politikom privatnosti&lt;/a&gt;&lt;/label&gt;
+            &lt;/div&gt;
+
+            &lt;button name="register" type="submit" class="register-btn btn btn-primary scale-btn-2"&gt;Registruj se&lt;/button&gt;
+
+            &lt;div class="line-container d-flex justify-content-between"&gt;
+              &lt;div class="line"&gt;&lt;/div&gt;
+              &lt;div class="ili mx-1"&gt;ili&lt;/div&gt;
+              &lt;div class="line"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;div class="not-registered-container d-flex justify-content-between align-items-center"&gt;
+              &lt;p class="mb-0 d-inline-block text-white niste-reg"&gt;Već imate nalog?&lt;/p&gt;
+              &lt;a href="&lt;?php echo BASE_URL . 'prijava'; ?&gt;"&gt;&lt;button type="button" class="btn btn-primary scale-btn-2"&gt;Prijavi se&lt;/button&gt;&lt;/a&gt;
+            &lt;/div&gt;
+
+          &lt;/form&gt;
+        &lt;/div&gt;
+
+        &lt;div class="mt-4 text-white text-center go-back"&gt;
+          &lt;a href="&lt;?php echo BASE_URL; ?&gt;pocetna"&gt;
+            &lt;i class="fas fa-arrow-left"&gt;&lt;/i&gt; Odustani
+          &lt;/a&gt;
+        &lt;/div&gt;
+
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+&lt;!-- -------- REGISTRACIJA ---------- --&gt;
+
+&lt;?php include 'includes/footer.php'; ?&gt;
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            CRUD.php - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php ob_start(); ?&gt;
+
+&lt;?php require_once './header_admin.php'; ?&gt;
+
+&lt;?php
+
+if (isset($_POST['delete-course'])) {
+  $id = clean($_POST['course_id']);
+
+  if (Database::getInstance()-&gt;deleteCourse($id)) {
+    $_SESSION['delete_course_success_message'] = '&lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
+                Brisanje kursa &lt;strong&gt;"' . clean($_POST['course_name']) . '"&lt;/strong&gt; uspešno! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
+                &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+              &lt;/div&gt;';
+  }
+}
+
+if (isset($_POST['update-course'])) {
+  $name_edit = clean($_POST['name_edit']);
+  $description_edit = clean($_POST['description_edit']);
+
+  $errors = array();
+
+  if (empty($name_edit)) {
+    $errors['name_edit'] = '&lt;div class="mb-0 invalid-feedback"&gt;Please enter name.&lt;/div&gt;';
+  }
+
+  if (empty($description_edit)) {
+    $errors['description_edit'] = '&lt;div class="mb-0 invalid-feedback"&gt;Please enter description.&lt;/div&gt;';
+  }
+
+  if (count($errors) == 0) {
+    $data = array(
+      "name_edit" =&gt; $name_edit,
+      "description_edit" =&gt; $description_edit,
+    );
+
+    if (Database::getInstance()-&gt;updateCourse($data, $id_edit)) {
+      $_SESSION['add_course_success_message'] = '&lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
+                Update kursa &lt;strong&gt;"' . $name_edit . '"&lt;/strong&gt; uspešno! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
+                &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+              &lt;/div&gt;';
+      $name_edit = "";
+      $description_edit = "";
+    }
+  }
+}
+
+if (isset($_POST['add-course'])) {
+  $name = clean($_POST['name']);
+  $description = clean($_POST['description']);
+
+  $errors = array();
+
+  if (empty($name)) {
+    $errors['name'] = '&lt;div class="mb-0 invalid-feedback"&gt;Please enter name.&lt;/div&gt;';
+  }
+
+  if (empty($description)) {
+    $errors['description'] = '&lt;div class="mb-0 invalid-feedback"&gt;Please enter description.&lt;/div&gt;';
+  }
+
+  if (count($errors) == 0) {
+    $data = array(
+      "name" =&gt; $name,
+      "description" =&gt; $description,
+    );
+
+    if (Database::getInstance()-&gt;addCourse($data)) {
+      $_SESSION['add_course_success_message'] = '&lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
+                Dodavanje kursa &lt;strong&gt;"' . $name . '"&lt;/strong&gt; uspešno! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
+                &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+              &lt;/div&gt;';
+
+      $name = "";
+      $description = "";
+    }
+  }
+}
+
+$courses = Database::getInstance()-&gt;getAllCourses();
+$grades = Database::getInstance()-&gt;getAllGrades();
+
+?&gt;
+
+&lt;!-- Button trigger modal --&gt;
+&lt;button type="button" class="btn-sm btn-danger text-white" data-bs-toggle="modal" data-bs-target="#deleteCourseModal&lt;?php echo $course['id']; ?&gt;" style="border: none; background-color: transparent;"&gt;
+  &lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash text-danger" viewBox="0 0 16 16"&gt;
+    &lt;path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" /&gt;
+    &lt;path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" /&gt;
+  &lt;/svg&gt;
+&lt;/button&gt;
+
+&lt;!-- DELETE Modal --&gt;
+&lt;div class="modal fade" id="deleteCourseModal&lt;?php echo $course['id']; ?&gt;" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true"&gt;
+  &lt;div class="modal-dialog"&gt;
+    &lt;div class="modal-content"&gt;
+      &lt;div class="modal-header"&gt;
+        &lt;h5 class="modal-title text-danger" id="exampleModalLabel"&gt;Danger &lt;i class="fas fa-exclamation-circle"&gt;&lt;/i&gt;&lt;/h5&gt;
+        &lt;button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"&gt;&lt;/button&gt;
+      &lt;/div&gt;
+      &lt;div class="modal-body"&gt;
+        Are you sure that you want to delete course &lt;strong class="text-danger"&gt;"&lt;?php echo $course['name'] ?? "Error"; ?&gt;"&lt;/strong&gt; ?
+      &lt;/div&gt;
+      &lt;div class="modal-footer"&gt;
+        &lt;form method="POST" class="d-inline"&gt;
+          &lt;input type="hidden" name="course_id" value="&lt;?php echo $course['id'] ?? "-1"; ?&gt;"&gt;
+          &lt;input type="hidden" name="course_name" value="&lt;?php echo $course['name'] ?? "Error"; ?&gt;"&gt;
+          &lt;button name="delete-course" type="submit" class="btn btn-danger text-white"&gt;Yes&lt;/button&gt;
+        &lt;/form&gt;
+        &lt;button type="button" class="btn btn-secondary" data-bs-dismiss="modal"&gt;Cancel&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+
+&lt;?php require_once './footer_admin.php'; ?&gt;
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
 
 
           <!-- SECTION START -->
@@ -1792,255 +2283,6 @@ if (!empty($_FILES['files']['name'][0])) { // Da li je poslao neke fajlove
           <!-- SECTION END -->
 
 
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            login.php - Moviex
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-
-            &lt;?php
-
-            require_once 'includes/functions.php';
-            require_once 'classes/User.php';
-            
-            if(User::isLoggedIn()){
-              header("Location: index");
-
-              exit;
-            }
-            
-            
-            if(isset($_POST['login'])){  
-              $username = clean($_POST['username']);
-              $password = clean($_POST['password']);
-            
-              $errors = array();
-            
-              if(empty($password)){
-                $errors['password'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Passowrd.&lt;/label&gt;&lt;/p&gt;';
-              }
-            
-              if(empty($username)){
-                $errors['username'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Email.&lt;/label&gt;&lt;/p&gt;';
-              }
-            
-              if(count($errors) == 0){
-                $data = array(
-                  "password" =&gt; $password,
-                  "username" =&gt; $username,
-                );
-            
-                if(User::login($data)){
-                  $_SESSION['login_success_message'] = "Logged In Successfully";
-                  header("Location: index");
-            
-                  exit;
-                }else{
-                  $errors['wrong_combination'] = '&lt;div class="alert alert-dismissible alert-danger"&gt;
-                  &lt;button type="button" class="close" data-dismiss="alert"&gt;&amp;times;&lt;/button&gt;
-                  Username And Password Do Not Match.
-                &lt;/div&gt;';
-                }
-            
-              } // COUNT errors CLOSE
-            } // POST REQ CLOSE
-            ?&gt;
-            
-            &lt;?php include 'includes/header.php'; ?&gt;
-            
-            &lt;!-- -------- PRIJAVE ---------- --&gt;
-              &lt;section id="prijave"&gt;
-                &lt;div class="container"&gt;
-                  &lt;div class="row justify-content-center"&gt;
-                    &lt;div class="col-md-6 col-sm-8 col-8"&gt;
-                      &lt;h1 class="mt-5"&gt;LOGIN&lt;/h1&gt;
-            
-                      &lt;?php echo $errors['wrong_combination'] ?? ""; ?&gt;
-            
-                      &lt;form method="POST" class="mb-5"&gt;
-                        &lt;fieldset&gt;
-            
-                          &lt;div class="form-group"&gt;
-                            &lt;label for="username"&gt;Username&lt;/label&gt;
-                            &lt;input type="username" name="username" class="form-control" id="username" placeholder="Unesite username" value="&lt;?php echo $username ?? ""; ?&gt;"&gt;             
-                            &lt;?php echo $errors['username'] ?? ""; ?&gt;
-                          &lt;/div&gt;
-            
-                          &lt;div class="form-group"&gt;
-                            &lt;label for="password"&gt;Passowrd&lt;/label&gt;
-                            &lt;input type="password" name="password" class="form-control" id="password" placeholder="Enter password" value="&lt;?php echo $password ?? ""; ?&gt;"&gt;             
-                            &lt;?php echo $errors['password'] ?? ""; ?&gt;
-                          &lt;/div&gt;
-            
-                          &lt;button id="login-btn" type="submit" name="login" class="btn btn-primary d-block w-100"&gt;LOGIN&lt;/button&gt;
-                        &lt;/fieldset&gt;
-                      &lt;/form&gt;
-                    &lt;/div&gt;
-                  &lt;/div&gt;
-                &lt;/div&gt;
-              &lt;/section&gt;
-              &lt;!-- -------- PRIJAVE ---------- --&gt;
-            
-              &lt;?php include 'includes/footer.php'; ?&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            register.php - Moviex
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-            &lt;?php
-
-            require_once 'includes/functions.php';
-            require_once 'classes/User.php';
-            
-            if(User::isLoggedIn()){
-              header("Location: index");
-
-              exit;
-            }
-            
-            if(isset($_POST['register'])){  
-              $email = clean($_POST['email']);
-              $password = clean($_POST['password']);
-              $password2 = clean($_POST['password2']);
-              $username = clean($_POST['username']);
-            
-              $errors = array();
-            
-              if(empty($email)){
-                $errors['email'] = '&lt;p class="mb-0"&gt;&lt;label class="text-danger font-weight-bold text-uppercase mb-0"&gt;Please Enter Email.&lt;/label&gt;&lt;/p&gt;';
-              }else{
-                  if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-                      $errors['email'] = '&lt;p class="mb-0"&gt;&lt;label class="text-danger font-weight-bold text-uppercase mb-0"&gt;Invalid Email Format.&lt;/label&gt;&lt;/p&gt;';
-                  }
-              }
-            
-              if(empty($password)){
-                $errors['password'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Passowrd.&lt;/label&gt;&lt;/p&gt;';
-              }else{
-                if($password != $password2){
-                  $errors['password_confirm'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Passwords Do Not Match.&lt;/label&gt;&lt;/p&gt;';
-                }
-              }
-            
-              if(empty($password2)){
-                $errors['password2'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Confirm Password.&lt;/label&gt;&lt;/p&gt;';
-              }
-            
-              if(empty($username)){
-                $errors['username'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Please Enter Email.&lt;/label&gt;&lt;/p&gt;';
-              }
-            
-              if(count($errors) == 0){
-                $data = array(
-                  "email" =&gt; $email,
-                  "password" =&gt; $password,
-                  "username" =&gt; $username,
-                );
-            
-                if(User::takenEmail($email)){
-                  $errors['taken_email'] = '&lt;div class="alert alert-dismissible alert-danger"&gt;
-                  &lt;button type="button" class="close" data-dismiss="alert"&gt;&amp;times;&lt;/button&gt;
-                  E-mail already in use.
-                &lt;/div&gt;';
-                }else if(User::takenUsername($username)){
-                  $errors['taken_username'] = '&lt;div class="alert alert-dismissible alert-danger"&gt;
-                  &lt;button type="button" class="close" data-dismiss="alert"&gt;&amp;times;&lt;/button&gt;
-                  Username already in use.
-                &lt;/div&gt;';
-                }else if(User::register($data)){
-                  $_SESSION['register_success_message'] = "Successfully Registerd";
-                  header("Location: index");
-            
-                  exit;
-                }
-            
-              } // COUNT errors CLOSE
-            } // POST REQ CLOSE
-            ?&gt;
-            
-            &lt;?php include 'includes/header.php'; ?&gt;
-            
-            &lt;!-- -------- PRIJAVE ---------- --&gt;
-              &lt;section id="prijave"&gt;
-                &lt;div class="container"&gt;
-                  &lt;div class="row justify-content-center"&gt;
-                    &lt;div class="col-md-6 col-sm-8 col-8"&gt;
-                      &lt;h1 class="mt-5"&gt;REGISTER&lt;/h1&gt;
-            
-                      &lt;?php echo $errors['taken_email'] ?? ""; ?&gt;
-                      &lt;?php echo $errors['taken_username'] ?? ""; ?&gt;
-            
-                      &lt;form method="POST" class="mb-5"&gt;
-                        &lt;fieldset&gt;
-            
-                          &lt;div class="form-group"&gt;
-                            &lt;label for="email"&gt;E-mail&lt;/label&gt;
-                            &lt;input type="email" name="email" class="form-control" id="email" placeholder="Enter e-mail" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;       
-                            &lt;?php echo $errors['email'] ?? ""; ?&gt;      
-                            &lt;small id='emailHelp' class='form-text text-left text-black mt-0'&gt;We'll never share your email with anyone else.&lt;/small&gt;
-                          &lt;/div&gt;
-            
-                          &lt;div class="form-group"&gt;
-                            &lt;label for="password"&gt;Passowrd&lt;/label&gt;
-                            &lt;input type="password" name="password" class="form-control" id="password" placeholder="Enter password" value="&lt;?php echo $password ?? ""; ?&gt;"&gt;             
-                            &lt;?php echo $errors['password'] ?? ""; ?&gt;
-                            &lt;?php echo $errors['password_confirm'] ?? ""; ?&gt;
-                          &lt;/div&gt;
-            
-                          &lt;div class="form-group"&gt;
-                            &lt;label for="password2"&gt;Confirm Password&lt;/label&gt;
-                            &lt;input type="password" name="password2" class="form-control" id="password2" placeholder="Confirm password" value=""&gt;             
-                            &lt;?php echo $errors['password2'] ?? ""; ?&gt;
-                          &lt;/div&gt;
-            
-                          &lt;div class="form-group"&gt;
-                            &lt;label for="username"&gt;Username&lt;/label&gt;
-                            &lt;input type="username" name="username" class="form-control" id="username" placeholder="Unesite username" value="&lt;?php echo $username ?? ""; ?&gt;"&gt;             
-                            &lt;?php echo $errors['username'] ?? ""; ?&gt;
-                          &lt;/div&gt;
-            
-            
-                          &lt;button id="register-btn" type="submit" name="register" class="btn btn-primary d-block w-100"&gt;REGISTER&lt;/button&gt;
-                        &lt;/fieldset&gt;
-                      &lt;/form&gt;
-                    &lt;/div&gt;
-                  &lt;/div&gt;
-                &lt;/div&gt;
-              &lt;/section&gt;
-              &lt;!-- -------- PRIJAVE ---------- --&gt;
-            
-              &lt;?php include 'includes/footer.php'; ?&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
 
 
 
@@ -2256,208 +2498,6 @@ if (!empty($_FILES['files']['name'][0])) { // Da li je poslao neke fajlove
           </div>
           <!-- SECTION END -->
 
-
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Insert / Form With Validation (Select, Radio Buttons) <br> Flash Messages - S2S 2020, Cinematic.
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExample1" aria-expanded="false" aria-controls="collapseExample1">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-function ocisti($input){
-  $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
-  $input = trim($input);
-  $input = str_replace('"', "", $input);
-  $input = str_replace("'", "", $input);
-  $input = htmlspecialchars($input); // Mora ispod str_replace jer htmlspecialchars pretvara " u &nesto; i onda ga str_replace ne nadje
-
-  return $input;
-}
-
-if(isset($_POST['prijava'])){  
-  $email = ocisti($_POST['email']);
-  $trenutnaGodina = $_POST['trenutna_godina'];
-  $zeliObavestenja = $_POST['zeli_obavestenja'];
-  $bioRanije = $_POST['bio_ranije'] ?? null;
-
-  $greske = array();
-  $fail = false;
-
-  if(empty($email)){
-    $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas unesite email.&lt;/label&gt;&lt;/p&gt;';
-    $fail = true;
-  }else{
-      if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-          $greske['email'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Invalid Email Format.&lt;/label&gt;&lt;/p&gt;';
-          $fail = true;
-      }
-  }
-
-  if(!isset($bioRanije)){
-    $greske['bio_ranije'] = '&lt;p&gt;&lt;label class="text-danger font-weight-bold text-uppercase"&gt;Molimo Vas izaberite DA ili NE.&lt;/label&gt;&lt;/p&gt;';
-  }
-
-  if(count($greske) == 0){
-    $data = array(
-      "email" =&gt; $email,
-      "trenutna_godina" =&gt; $trenutnaGodina,
-      "zeli_obavestenja" =&gt; $zeliObavestenja,
-    );
-
-    if(Rezervacija::dodaj($props)){
-      $_SESSION['success_message'] = "&lt;div class='container-fluid'&gt;
-                                        &lt;div class='row'&gt;
-                                            &lt;div class='col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5'&gt;
-                                                &lt;div class='alert alert-dismissible alert-success'&gt;
-                                                    &lt;button type='button' class='close' data-dismiss='alert'&gt;&amp;times;&lt;/button&gt;
-                                                    &lt;strong&gt;Rezervacija uspešno sačuvana.&lt;/strong&gt;.
-                                                &lt;/div&gt;
-                                            &lt;/div&gt;
-                                        &lt;/div&gt;
-                                    &lt;/div&gt;";
-    }else{
-      $fail = true;
-    }
-
-    if($fail){
-      $failMsg = "&lt;div class='container-fluid'&gt;
-                    &lt;div class='row'&gt;
-                        &lt;div class='col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5'&gt;
-                            &lt;div class='alert alert-dismissible alert-danger'&gt;
-                                &lt;button type='button' class='close' data-dismiss='alert'&gt;&amp;times;&lt;/button&gt;
-                                &lt;strong&gt;Rezervacija nije uspela.&lt;/strong&gt;.
-                            &lt;/div&gt;
-                        &lt;/div&gt;
-                    &lt;/div&gt;
-                &lt;/div&gt;";
-    }
-  } // COUNT GRESKE CLOSE
-} // POST REQ CLOSE
-
-
-&lt;?php 
-  if(isset($fail) &amp;&amp; $fail) echo $failMsg;
-
-  if(isset($_SESSION['success_message'])){
-      echo $_SESSION['success_message'];
-      unset($_SESSION['success_message']);
-  }
-?&gt;
-
-&lt;!-- -------- PRIJAVE ---------- --&gt;
-  &lt;section id="prijave"&gt;
-    &lt;div class="container"&gt;
-      &lt;div class="row justify-content-center"&gt;
-        &lt;div class="col-md-6 col-sm-8 col-8 text-center text-white"&gt;
-          &lt;h1 class="mt-5"&gt;PRIJAVE&lt;/h1&gt;
-
-          &lt;?php echo $uspesnaPrijava ?? ""; ?&gt;
-
-          &lt;form method="POST" class="mb-5"&gt;
-            &lt;fieldset&gt;
-
-              &lt;div class="form-group"&gt;
-                &lt;label for="email"&gt;Email&lt;/label&gt;
-                &lt;input type="email" name="email" class="form-control" id="email" placeholder="Unesite email" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;             
-                &lt;?php echo $greske['email'] ?? '&lt;small id="emailHelp" class="form-text text-left text-white"&gt;Vašu e-mail adresu nećemo deliti sa drugima.&lt;/small&gt;'; ?&gt;
-              &lt;/div&gt;
-
-              &lt;div class="form-group"&gt;
-                &lt;label for="trenutna-godina"&gt;Trenutna godina studija&lt;/label&gt;
-                &lt;select class="form-control text-black" name="trenutna_godina" id="trenutna-godina" style="width: 10%;"&gt;
-                  &lt;option value="1"&gt;1&lt;/option&gt;
-                  &lt;option value="2"&gt;2&lt;/option&gt;
-                  &lt;option value="3"&gt;3&lt;/option&gt;
-                  &lt;option value="4"&gt;4&lt;/option&gt;
-                &lt;/select&gt;
-              &lt;/div&gt;
-
-              &lt;!-- UCESTVOVAO RANIJE --&gt;
-              &lt;fieldset class="form-group"&gt;
-                &lt;label class="text-left font-size-17 mb-0"&gt;Da li ste ranije učestvovali na S2S-u ? &lt;span class="orange-star"&gt;*&lt;/span&gt;&lt;/label&gt;
-                &lt;?php echo $greske['bio_ranije'] ?? ""; ?&gt;
-                &lt;div class="form-check"&gt;
-                  &lt;label class="form-check-label"&gt;
-                    &lt;input type="radio" class="form-check-input font-size-15" name="bio_ranije" value="DA" &lt;?php if(isset($bioRanije) &amp;&amp; $bioRanije == "DA") echo "CHECKED"; ?&gt;&gt;
-                    DA
-                  &lt;/label&gt;
-                &lt;/div&gt;
-                &lt;div class="form-check"&gt;
-                  &lt;label class="form-check-label"&gt;
-                    &lt;input type="radio" class="form-check-input font-size-15" name="bio_ranije" value="NE" &lt;?php if(isset($bioRanije) &amp;&amp; $bioRanije == "NE") echo "CHECKED"; ?&gt;&gt;
-                    Ne
-                  &lt;/label&gt;
-                &lt;/div&gt;
-              &lt;/fieldset&gt;
-              &lt;!-- UCESTVOVAO RANIJE --&gt;
-
-              &lt;fieldset class="form-group"&gt;
-                &lt;legend class="text-left"&gt;Da li želite da dobijate obaveštenja o FONISovim projektima ?&lt;/legend&gt;
-                &lt;div class="form-check"&gt;
-                  &lt;label class="form-check-label"&gt;
-                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="DA" checked=""&gt;
-                    DA
-                  &lt;/label&gt;
-                &lt;/div&gt;
-                &lt;div class="form-check"&gt;
-                  &lt;label class="form-check-label"&gt;
-                    &lt;input type="radio" class="form-check-input" name="zeli_obavestenja" value="NE"&gt;
-                    NE
-                  &lt;/label&gt;
-                &lt;/div&gt;
-              &lt;/fieldset&gt;
-
-              &lt;button id="posalji-btn" type="submit" name="prijava" class="btn btn-primary d-block w-100"&gt;POŠALJI&lt;/button&gt;
-            &lt;/fieldset&gt;
-          &lt;/form&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/section&gt;
-  &lt;!-- -------- PRIJAVE ---------- --&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            Update / Delete - Cinematic
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  if(isset($_POST['izbrisi_rezervaciju'])){
-    $rezervacijaID = $_POST['rezervacijaID'];
-    if(Rezervacija::izbrisi($rezervacijaID)){
-        header('Location: karte.php');
-    }
-  }
-  
-  &lt;form method="POST"&gt;
-    &lt;input type="hidden" name="rezervacijaID" value="&lt;?php echo $karta['id']; ?&gt;"&gt;
-    &lt;button type="submit" name="izbrisi_rezervaciju" class="izbrisi-rezervaciju-btn"&gt;&lt;i class="far fa-times-circle"&gt;&lt;/i&gt;&lt;/button&gt;
-  &lt;/form&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
 
 
 
