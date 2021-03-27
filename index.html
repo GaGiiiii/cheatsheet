@@ -2111,6 +2111,58 @@ try {
 
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark important-color">
+            Upload Single File - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
+
+FORA KOD UPLOADOVANJA FAJLOVA JE TA STO JE ON UPLOADOVAN NA TEMP LOKACIJI I ONDA NAKON SVIH PROVERA MORAMO DA POMERIMO FAJL SA TEMP LOKACIJE I TEMP IMENOM 
+NA PRAVU LOKACIJU I SA PRAVIM IMENOM. PRAVU LOKACIJU MORAMO PREKO __DIR__ ILI NECEGA SLICNOG, NE MOZE PREKO HTTP://URL/PUBLIC....
+
+&lt;form enctype="multipart/form-data" method="POST"&gt;
+&lt;input type="file" name="file"&gt;
+
+if (!empty($_FILES['file']['name'])) { // Da li je poslao neke fajlove
+  $file = $_FILES['file'];
+
+  $file_name = $file['name'];
+  $file_tmp = $file['tmp_name'];
+  $file_size = $file['size'];
+  $file_error = $file['error'];
+
+  $file_ext = explode('.', $file_name);
+  $file_ext = strtolower(end($file_ext));
+
+  $file_name_new = $file_name;
+  $file_destination = dirname(__FILE__, 2) . '/videos/' . $file_name_new;
+
+  $uploadOk = 1;
+
+  // Check if $uploadOk is set to 0 by an error
+  if ($uploadOk == 0) {
+    echo "Sorry, your file was not uploaded.";
+    // if everything is ok, try to upload file
+  } else {
+    if (move_uploaded_file($file_tmp, $file_destination)) {
+      echo "The file " . htmlspecialchars(basename($_FILES["upload"]["name"])) . " has been uploaded.";
+    } else {
+      echo "Sorry, there was an error uploading your file.";
+    }
+  }           
+                    </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
             Upload Multiple Files - Tatamata
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
@@ -2193,6 +2245,7 @@ if (!empty($_FILES['files']['name'][0])) { // Da li je poslao neke fajlove
               aria-expanded="false" aria-controls="collapseExample3">-</button>
           </div>
           <!-- SECTION END -->
+
 
 
           <!-- SECTION START -->
