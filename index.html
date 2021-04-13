@@ -93,7 +93,7 @@ if (session_status() == PHP_SESSION_NONE) {
   session_start();
 }
 
-class Database {
+class Database extends PDO {
   private $host; // Host
   private $db_name; // DB Name
   private $username; // DB Username
@@ -118,10 +118,11 @@ class Database {
     try {
       $this-&gt;connection = new PDO('mysql:host=' . $this-&gt;host . ';dbname=' . $this-&gt;db_name . ';charset=utf8', $this-&gt;username, $this-&gt;password);
       $this-&gt;connection-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $this-&gt;connection-&gt;setAttribute(PDO::ATTR_FETCH_TABLE_NAMES, PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
       echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
 
-      exit();
+      die("Database didn't connect.");
     }
 
     // $this-&gt;connection = mysqli_connect($this-&gt;host, $this-&gt;username, $this-&gt;password, $this-&gt;db_name);
@@ -146,28 +147,7 @@ class Database {
         ':email' =&gt; $email,
       ));
 
-      $user = $query-&gt;fetch();
-
-      if ($user) {
-        return true;
-      }
-
-      return false;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return false;
-    }
-  }
-
-  public function takenUsername($username) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT username FROM user WHERE username = :username");
-      $query-&gt;execute(array(
-        ':username' =&gt; $username,
-      ));
-
-      $user = $query-&gt;fetch();
+      $user = $query-&gt;fetch(PDO::FETCH_ASSOC);
 
       if ($user) {
         return true;
@@ -227,66 +207,6 @@ class Database {
     }
   }
 
-  public function unWarnUser($user_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET warned = 0 WHERE id = ?");
-      $result = $query-&gt;execute([$user_id]);
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return false;
-    }
-  }
-
-  public function blockUser($user_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET blocked = 1 WHERE id = ?");
-      $result = $query-&gt;execute([$user_id]);
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return false;
-    }
-  }
-
-  public function isUserBlocked($user_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT id FROM `user` WHERE id = :id AND blocked = 1");
-      $query-&gt;execute(array(
-        ':id' =&gt; $user_id,
-      ));
-
-      $user = $query-&gt;fetch();
-
-      if ($user) {
-        return true;
-      }
-
-      return false;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return false;
-    }
-  }
-
-  public function unBlockUser($user_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET blocked = 0 WHERE id = ?");
-      $result = $query-&gt;execute([$user_id]);
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return false;
-    }
-  }
-
   public function loginUser($data) {
     try {
       $data = (object) $data;
@@ -297,7 +217,7 @@ class Database {
         ':password' =&gt; $data-&gt;password,
       ));
 
-      $user = $query-&gt;fetch();
+      $user = $query-&gt;fetch(PDO::FETCH_ASSOC);
 
       if ($user) {
         $user = (object) $user;
@@ -334,7 +254,7 @@ class Database {
         ':id' =&gt; $id,
       ));
 
-      $user = $query-&gt;fetch();
+      $user = $query-&gt;fetch(PDO::FETCH_ASSOC);
 
       return $user;
     } catch (PDOException $e) {
@@ -351,7 +271,7 @@ class Database {
         ':email' =&gt; $email,
       ));
 
-      $user = $query-&gt;fetch();
+      $user = $query-&gt;fetch(PDO::FETCH_ASSOC);
 
       return $user;
     } catch (PDOException $e) {
@@ -397,9 +317,9 @@ class Database {
 
   public function getAllUsers() {
     try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user");
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM `user` u");
       $query-&gt;execute();
-      $users = $query-&gt;fetchAll();
+      $users = $query-&gt;fetchAll(PDO::FETCH_ASSOC);
 
       return $users;
     } catch (PDOException $e) {
@@ -410,57 +330,6 @@ class Database {
   }
 
   // COURESES =====================================================================================================================================
-
-  public function addCourse($data) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO course (name, description, price, price2, course_grade_id, img, trailer) VALUES (?, ?, ?, ?, ?, ?, ?)");
-      $result = $query-&gt;execute([
-        $data-&gt;name,
-        $data-&gt;description,
-        $data-&gt;price,
-        $data-&gt;price2,
-        $data-&gt;grade_id,
-        $data-&gt;img,
-        $data-&gt;trailer,
-      ]);
-
-      $lastInsertedID = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO chapter (name, course_id, number) VALUES ('_global', $lastInsertedID, -1)");
-      $result = $query-&gt;execute();
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return false;
-    }
-  }
-
-  public function updateCourse($data, $id) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `course` SET price2 = :price2, trailer = :trailer,  name = :name, description = :description, price = :price, course_grade_id = :grade_id, img = :img, live = :live WHERE id = :id");
-      $result = $query-&gt;execute([
-        ':name' =&gt; $data-&gt;name_edit,
-        ':description' =&gt; $data-&gt;description_edit,
-        ':price' =&gt; $data-&gt;price_edit,
-        ':id' =&gt; $id,
-        ':grade_id' =&gt; $data-&gt;grade_id_edit,
-        ':img' =&gt; $data-&gt;img_edit,
-        ':live' =&gt; $data-&gt;live_edit,
-        ':trailer' =&gt; $data-&gt;trailer_edit,
-        ':price2' =&gt; $data-&gt;price2_edit,
-      ]);
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
 
   public function deleteCourse($id) {
     try {
@@ -484,20 +353,6 @@ class Database {
     }
   }
 
-  public function getAllCourses() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM course c JOIN grade g ON c.course_grade_id = g.grade_id");
-      $query-&gt;execute();
-      $courses = $query-&gt;fetchAll();
-
-      return $courses;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
   public function getCourse($id) {
     try {
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM course c JOIN grade g ON g.grade_id = c.course_grade_id WHERE id = :id");
@@ -505,7 +360,7 @@ class Database {
         ':id' =&gt; $id,
       ));
 
-      $course = $query-&gt;fetch();
+      $course = $query-&gt;fetch(PDO::FETCH_ASSOC);
 
       return $course;
     } catch (PDOException $e) {
@@ -532,115 +387,11 @@ class Database {
     }
   }
 
-  public function getUser_Course($user_id, $course_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user_course WHERE user_id = :user_id AND course_id = :course_id");
-      $query-&gt;execute(array(
-        ':user_id' =&gt; $user_id,
-        ':course_id' =&gt; $course_id,
-      ));
-
-      $course = $query-&gt;fetch();
-
-      return $course;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return null;
-    }
-  }
-
   // USER_COURSE =================================================================================================================================================
-
-  public function getAllUser_Courses() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.name AS course_name, u.id AS user_id, uc.id AS uc_id, uc.created_at as uc_created_at FROM user_course uc JOIN user u ON u.id = uc.user_id JOIN course c ON c.id = uc.course_id");
-      $query-&gt;execute();
-      $courses = $query-&gt;fetchAll();
-
-      return $courses;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
-  public function getAllCoursesForUser($user_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.id AS course_id, uc.id AS uc_id, c.name AS course_name FROM user_course uc JOIN user u ON u.id = uc.user_id JOIN course c ON c.id = uc.course_id WHERE user_id = :user_id ORDER BY confirmed DESC");
-      $query-&gt;execute(array(
-        ':user_id' =&gt; $user_id,
-      ));
-      $courses = $query-&gt;fetchAll();
-
-      return $courses;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
-  public function insertUserCourseConfirmed($data) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user_course (user_id, course_id, confirmed) VALUES (?, ?, ?)");
-      $result = $query-&gt;execute([
-        $data-&gt;user_id,
-        $data-&gt;course_id,
-        1
-      ]);
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  public function userCourseExists($data) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user_course WHERE user_id = ? AND course_id = ?");
-      $result = $query-&gt;execute([
-        $data-&gt;user_id,
-        $data-&gt;course_id,
-      ]);
-
-      $userCourse = $query-&gt;fetch();
-
-      if ($userCourse) {
-        return true;
-      }
-
-      return false;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
 
   public function confirmCoursePurchase($id) {
     try {
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user_course` SET confirmed = 1 WHERE id = :id");
-      $result = $query-&gt;execute(array(
-        ':id' =&gt; $id,
-      ));
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  public function unconfirmCourse($id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user_course` SET confirmed = 0 WHERE id = :id");
       $result = $query-&gt;execute(array(
         ':id' =&gt; $id,
       ));
@@ -659,279 +410,6 @@ class Database {
       $result = $query-&gt;execute(array(
         ':id' =&gt; $id,
       ));
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  // CLIPS ===========================================================================================================================
-
-  public function addClip($data) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO `clip` (name, number, description, link, course_id, chapter_id) VALUES (?, ?, ?, ?, ?, ?)");
-      $result = $query-&gt;execute([
-        $data-&gt;name,
-        $data-&gt;number,
-        $data-&gt;description,
-        $data-&gt;link,
-        $data-&gt;course_id,
-        $data-&gt;chapter_id,
-      ]);
-
-      $lastInsertedID = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
-
-      if ($result) {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number + 1 WHERE number &gt;= $data-&gt;number AND id != $lastInsertedID AND course_id = $data-&gt;course_id AND chapter_id = $data-&gt;chapter_id");
-        $result = $query-&gt;execute();
-      }
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  public function getAllClips() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.description AS clip_description, c.chapter_id AS current_chapter, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id ORDER BY cu.name, ch.name DESC, c.number");
-      $query-&gt;execute();
-      $clips = $query-&gt;fetchAll();
-
-      return $clips;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
-  public function getAllClipsForCourse($course_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.description AS clip_description, c.chapter_id AS current_chapter, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id WHERE c.course_id = :course_id ORDER BY cu.name, ch.name DESC, c.number");
-      $query-&gt;execute(['course_id' =&gt; $course_id]);
-      $clips = $query-&gt;fetchAll();
-
-      return $clips;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
-  public function getAllClipsForChapterAndCourse($chapter_id, $course_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.description AS clip_description, c.number AS clip_number, cu.name AS course_name, ch.name AS chapter_name, c.name AS c_name, c.description AS c_description, c.id AS c_id FROM `clip` c JOIN course cu ON cu.id = c.course_id JOIN chapter ch ON ch.id = c.chapter_id WHERE c.chapter_id = $chapter_id AND c.course_id = $course_id ORDER BY cu.name, ch.name DESC, c.number");
-      $query-&gt;execute();
-      $clips = $query-&gt;fetchAll();
-
-      return $clips;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
-  public function updateClip($data, $id) {
-    try {
-      $data = (object) $data;
-
-      // Uzmem stari chapter i broj koji je bio po redu u starom chapteru
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number, chapter_id, course_id FROM `clip` WHERE id = :id");
-      $query-&gt;execute([
-        ':id' =&gt; $id,
-      ]);
-
-      $row = $query-&gt;fetch();
-      $oldNumber = $row['number'];
-      $oldChapter = $row['chapter_id'];
-      $oldCourse = $row['course_id'];
-
-      if ($data-&gt;number_edit &lt; 1) {
-        return false;
-      }
-
-      // Ubacim ga u novi chapter i stavim mu novi broj
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET course_id = :course_id, chapter_id = :chapter_id, name = :name, link = :link, description = :description, number = :number WHERE id = :id");
-      $result = $query-&gt;execute([
-        ':course_id' =&gt; $data-&gt;course_id_edit,
-        ':chapter_id' =&gt; $data-&gt;chapter_id_edit,
-        ':name' =&gt; $data-&gt;name_edit,
-        ':link' =&gt; $data-&gt;link_edit,
-        ':description' =&gt; $data-&gt;description_edit,
-        ':number' =&gt; $data-&gt;number_edit,
-        ':id' =&gt; $id,
-      ]);
-
-      // Sredi novi chapter, tako sto ces sve klipove koji su veci ili jednaki od njega uvecati za jedan, znaci kao drag and drop gde guras listu na dole
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number + 1 WHERE number &gt;= $data-&gt;number_edit AND id != $id AND course_id = $data-&gt;course_id_edit AND chapter_id = $data-&gt;chapter_id_edit");
-      $result = $query-&gt;execute();
-
-      // Sredi stari chapter, tako sto ces sve posled izbacenog smanjiti za 1
-      if ($oldChapter != $data-&gt;chapter_id_edit) {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number - 1 WHERE number &gt; $oldNumber AND id != $id AND course_id = $oldCourse AND chapter_id = $oldChapter");
-        $result = $query-&gt;execute();
-      }
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . $e-&gt;getLine() . $oldChapter . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  public function deleteClip($id) {
-    try {
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number, course_id FROM `clip` WHERE id = :id");
-      $query-&gt;execute([
-        ':id' =&gt; $id,
-      ]);
-
-      $row = $query-&gt;fetch();
-      $oldNumber = $row['number'];
-      $course_id = $row['course_id'];
-      $chapter_id = $row['course_id'];
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `clip` WHERE id = :id LIMIT 1");
-      $result = $query-&gt;execute(array(':id' =&gt; $id));
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `clip` SET number = number -1  WHERE number &gt; $oldNumber AND course_id = $course_id AND chapter_id = $chapter_id");
-      $result = $query-&gt;execute();
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  // CHAPTERS ===========================================================================================================================
-
-  public function addChapter($data) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO `chapter` (name, number, course_id) VALUES (?, ?, ?)");
-      $result = $query-&gt;execute([
-        $data-&gt;name,
-        $data-&gt;number,
-        $data-&gt;course_id,
-      ]);
-
-      $lastInsertedID = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
-
-      if ($result) {
-        $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number + 1 WHERE number &gt;= $data-&gt;number AND id != $lastInsertedID AND course_id = $data-&gt;course_id");
-        $result = $query-&gt;execute();
-      }
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  public function getAllChapters() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.name AS chapter_name, c.number AS chapter_number, c.id AS chapter_id FROM `chapter` c JOIN course cu ON cu.id = c.course_id ORDER BY cu.name, c.number");
-      $query-&gt;execute();
-      $chapters = $query-&gt;fetchAll();
-
-      return $chapters;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
-  public function getAllChaptersForCourse($course_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, c.name AS chapter_name, c.number AS chapter_number, c.id AS chapter_id FROM `chapter` c JOIN course cu ON cu.id = c.course_id WHERE c.course_id = $course_id ORDER BY cu.name, c.number");
-      $query-&gt;execute();
-      $chapters = $query-&gt;fetchAll();
-
-      return $chapters;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      return [];
-    }
-  }
-
-  public function updateChapter($data, $id) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number FROM `chapter` WHERE id = :id");
-      $query-&gt;execute([
-        ':id' =&gt; $id,
-      ]);
-
-      $oldNumber = $query-&gt;fetch()['number'];
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET course_id = :course_id, name = :name, number = :number WHERE id = :id");
-      $result = $query-&gt;execute([
-        ':course_id' =&gt; $data-&gt;course_id_edit,
-        ':name' =&gt; $data-&gt;name_edit,
-        ':number' =&gt; $data-&gt;number_edit,
-        ':id' =&gt; $id,
-      ]);
-
-      if ($oldNumber &gt; $data-&gt;number_edit) {
-        if ($result) {
-          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number + 1 WHERE number &gt;= $data-&gt;number_edit AND number &lt; $oldNumber + 1 AND id != $id AND course_id = $data-&gt;course_id_edit");
-          $result = $query-&gt;execute();
-        }
-      } else {
-        if ($result) {
-          $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number - 1 WHERE number &gt;= $oldNumber AND number &lt; $data-&gt;number_edit + 1 AND id != $id AND course_id = $data-&gt;course_id_edit");
-          $result = $query-&gt;execute();
-        }
-      }
-
-
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
-  public function deleteChapter($id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT number, course_id FROM `chapter` WHERE id = :id");
-      $query-&gt;execute([
-        ':id' =&gt; $id,
-      ]);
-
-      $row = $query-&gt;fetch();
-      $oldNumber = $row['number'];
-      $course_id = $row['course_id'];
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `chapter` WHERE id = :id LIMIT 1");
-      $result = $query-&gt;execute(array(':id' =&gt; $id));
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `chapter` SET number = number - 1 WHERE number &gt; $oldNumber AND course_id = $course_id");
-      $result = $query-&gt;execute();
-
-      // DELETE ALL CLIPS FOR THAT CHAPTER
-
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `clip` WHERE chapter_id = :id");
-      $result = $query-&gt;execute(array(':id' =&gt; $id));
 
       return $result;
     } catch (PDOException $e) {
@@ -998,116 +476,6 @@ class Database {
     }
   }
 
-  // LOGIN DETAILS ================================================================================================================================================
-
-  public function getAllLoginDetails() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, u.id AS user_id, ld.id AS ld_id FROM `login_details` ld JOIN user u ON u.id = ld.user_id");
-      $query-&gt;execute();
-
-      $login_details = $query-&gt;fetchAll();
-
-      return $login_details;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      die();
-    }
-  }
-
-  public function getAllLoginDetailsSortedByUsers() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, u.id AS user_id, ld.id AS ld_id FROM `login_details` ld JOIN user u ON u.id = ld.user_id ORDER BY u.firstname, u.lastname, ld.date DESC");
-      $query-&gt;execute();
-
-      $login_details = $query-&gt;fetchAll();
-
-      return $login_details;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      die();
-    }
-  }
-
-  public function getAllLoginDetailsSortedByDate() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT *, u.id AS user_id, ld.id AS ld_id FROM `login_details` ld JOIN user u ON u.id = ld.user_id ORDER BY ld.date DESC");
-      $query-&gt;execute();
-
-      $login_details = $query-&gt;fetchAll();
-
-      return $login_details;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      die();
-    }
-  }
-
-  // public function deletePasswordReset($email) {
-  //   try {
-  //     $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM password_reset WHERE email = :email");
-  //     $result = $query-&gt;execute([
-  //       ':email' =&gt; $email,
-  //     ]);
-
-  //     return $result;
-  //   } catch (PDOException $e) {
-  //     echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-  //     echo $e-&gt;getLine();
-
-  //     exit;
-  //   }
-  // }
-
-  public function insertLoginDetails($data, $user_id) {
-    try {
-      $data = (object) $data;
-      if ($data-&gt;cookies_enabled == 'true') {
-        $data-&gt;cookies_enabled = 1;
-      }
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO login_details (user_id, gpu, ram, cpu_cores, os, screen_resolution, timezone, color_depth, cookies_enabled, fonts) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-      $result = $query-&gt;execute([
-        $user_id,
-        $data-&gt;gpu,
-        $data-&gt;ram,
-        $data-&gt;cpu_cores,
-        $data-&gt;os,
-        $data-&gt;screen_resolution,
-        $data-&gt;timezone,
-        $data-&gt;color_depth,
-        $data-&gt;cookies_enabled,
-        $data-&gt;fonts,
-      ]);
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-      echo $e-&gt;getLine();
-
-      exit;
-    }
-  }
-
-  public function getLoginInfoForUser($user_id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM `login_details` WHERE user_id = ? ORDER BY date DESC");
-      $result = $query-&gt;execute([
-        $user_id,
-      ]);
-
-      $login_details = $query-&gt;fetchAll();
-
-      return $login_details;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-      echo $e-&gt;getLine();
-
-      exit;
-    }
-  }
-
   public function deleteLoginInfo($id) {
     try {
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("DELETE FROM `login_details` WHERE id= ?");
@@ -1121,23 +489,6 @@ class Database {
       echo $e-&gt;getLine();
 
       exit;
-    }
-  }
-
-  // GRADES ========================================================================================================================================================
-
-  public function getAllGrades() {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM `grade` ORDER BY grade_name DESC");
-      $query-&gt;execute();
-
-      $grades = $query-&gt;fetchAll();
-
-      return $grades;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      die();
     }
   }
 }
@@ -1926,10 +1277,9 @@ exit;
           </div>
           <!-- SECTION END -->
 
-
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark important-color">
-            fuctions.php (clean, flashMessages, lettersOnly) - Tatamata
+            config.php - Tatamata
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
@@ -1937,18 +1287,69 @@ exit;
           <hr>
           <div class="collapse" id="collapseExampleOC3">
             <pre>
+&lt;?php
+
+if ($_SERVER['SERVER_NAME'] == "localhost") {
+  define("BASE_URL", "https://" . $_SERVER['SERVER_NAME'] . '/hakeri_2021/');
+} else {
+  define("BASE_URL", "https://" . $_SERVER['SERVER_NAME'] . '/hakaton/');
+}
+                    </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            functions.php (clean, flashMessages, lettersOnly) - Tatamata
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
 function clean($input) {
   $input = trim($input);
   $input = str_replace('"', "", $input);
   $input = str_replace("'", "", $input);
   $input = htmlspecialchars($input); // Mora ispod str_replace jer htmlspecialchars pretvara " u &amp;nesto; i onda ga str_replace ne nadje
-  // $input = mysqli_real_escape_string(Database::getInstance()->getConnection(), $input);
+  // $input = mysqli_real_escape_string(Database::getInstance()-&gt;getConnection(), $input);
 
   return $input;
 }
 
 function isLettersOnly($text) {
   if (preg_match('/^[a-zA-ZšđčćžŠĐČĆŽ]+$/', $text)) {
+    return true;
+  }
+
+  return false;
+}
+
+function isAdress($text) {
+  if (preg_match('/^[a-zA-ZšđčćžŠĐČĆŽ]+[0-9]+$/', $text)) {
+    return true;
+  }
+
+  return false;
+}
+
+function isPhoneNumber($text) {
+  if (preg_match('/^[0-9-]+$/', $text)) {
+    return true;
+  }
+
+  return false;
+}
+// URADI VALIDACIJU VREMENA ( ([0-1][0-9] | [2][0-3]):[0-5][0-9])
+
+function isVreme($text) {
+  if (preg_match('/^([0-1][0-9]|[2][0-3]):[0-5][0-9]+$/', $text)) {
     return true;
   }
 
@@ -2239,6 +1640,68 @@ if (!empty($_FILES['files']['name'][0])) { // Da li je poslao neke fajlove
 } else { // Nije poslao fajlove
 
 }              
+                    </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark important-color">
+            Google Captcha - Hakaton 2021
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleP5" aria-expanded="false" aria-controls="collapseExampleP5">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+https://www.google.com/recaptcha/admin/
+
+if (isset($_POST['ponudismestaj'])) {
+  $errors = array();
+
+  // Call the function post_captcha
+  $res = post_captcha($_POST['g-recaptcha-response']);
+
+  if (!$res['success']) {
+    // What happens when the CAPTCHA wasn't checked
+    $errors['captcha'] = '&lt;div class="mb-2 text-danger font-weight-bold"&gt;Molimo potvrdite da niste robot.&lt;/div&gt;';
+  } else {
+    $ime = clean($_POST['ime'] ?? null);
+    $prezime = clean($_POST['prezime'] ?? null);
+    ......................
+  }
+}
+
+function post_captcha($user_response) {
+  $fields_string = '';
+  $fields = array(
+    'secret' =&gt; 'private-key',
+    'response' =&gt; $user_response
+  );
+  foreach ($fields as $key =&gt; $value)
+    $fields_string .= $key . '=' . $value . '&amp;';
+  $fields_string = rtrim($fields_string, '&amp;');
+
+  $ch = curl_init();
+  curl_setopt($ch, CURLOPT_URL, 'https://www.google.com/recaptcha/api/siteverify');
+  curl_setopt($ch, CURLOPT_POST, count($fields));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, True);
+
+  $result = curl_exec($ch);
+  curl_close($ch);
+
+  return json_decode($result, true);
+}
+
+&lt;script src="https://www.google.com/recaptcha/api.js"&gt;&lt;/script&gt; ovo ide u head tag
+
+&lt;div class="g-recaptcha" data-sitekey="public-key"&gt;&lt;/div&gt; ovo ide pre submit dugmeta
+
+
                     </pre>
 
             <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
@@ -5744,290 +5207,7 @@ $("#blogs .owl-carousel").owlCarousel({
 
         <!-- ---------- AJAX ---------- -->
         <div id="ajax" class="mb-5">
-          <h1 class="mb-5"><u>AJAX / .htaccess</u></h1>
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            .htaccess - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  ## SOURCE: http://www.developphp.com/video/Miscellaneous/Semantic-URL-htaccess-Tutorial-SEO-Friendly-and-Clean-Links
-
-  # Turn Rewrite Engine On
-  
-  RewriteEngine on
-  
-  # Rewrite for user.php
-  
-  RewriteRule ^user/([0-9]+)$ user.php?id=$1 [NC,L]
-  
-  # NC makes the rule non case sensitive
-  # L makes this the last rule that this specific condition will match
-  # $ in the regular expression makes the matching stop so that "customblah" will not work
-  
-  # RewriteCond %{REQUEST_FILENAME} !-f
-  # RewriteRule ^([^\.]+)$ $1.php [NC,L]
-  
-  # Rewrite for article.php?id=1&title=Title-Goes-Here
-  # RewriteRule ^article/([0-9]+)/([0-9a-zA-Z_-]+)$ article.php?id=$1&title=$2 [NC,L]
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            SQL FILE - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  -- phpMyAdmin SQL Dump
-  -- version 5.0.2
-  -- https://www.phpmyadmin.net/
-  --
-  -- Host: 127.0.0.1
-  -- Generation Time: Aug 17, 2020 at 08:37 PM
-  -- Server version: 10.4.13-MariaDB
-  -- PHP Version: 7.4.8
-  
-  SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-  START TRANSACTION;
-  SET time_zone = "+00:00";
-  
-  
-  /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-  /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-  /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-  /*!40101 SET NAMES utf8mb4 */;
-  
-  --
-  -- Database: `ajax`
-  --
-  
-  -- --------------------------------------------------------
-  
-  --
-  -- Table structure for table `user`
-  --
-  
-  CREATE TABLE `user` (
-    `id` int(11) NOT NULL,
-    `name` varchar(40) NOT NULL
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-  
-  --
-  -- Dumping data for table `user`
-  --
-  
-  INSERT INTO `user` (`id`, `name`) VALUES
-  (3, 'gagi'),
-  (4, 'dzadzi'),
-  (5, 'Djadji'),
-  (6, 'gagoj'),
-  (7, 'gagoli');
-  
-  --
-  -- Indexes for dumped tables
-  --
-  
-  --
-  -- Indexes for table `user`
-  --
-  ALTER TABLE `user`
-    ADD PRIMARY KEY (`id`);
-  
-  --
-  -- AUTO_INCREMENT for dumped tables
-  --
-  
-  --
-  -- AUTO_INCREMENT for table `user`
-  --
-  ALTER TABLE `user`
-    MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-  COMMIT;
-  
-  /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-  /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-  /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            sample.txt - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatum dignissimos cum nam temporibus, itaque vitae maxime enim iste magni perspiciatis illo animi quae accusamus quasi maiores aspernatur qui perferendis? Ullam, quia. Magni laudantium accusantium exercitationem itaque, facilis quia nam, sint est illo sequi quod rerum aliquid doloribus? Numquam, est assumenda.
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            user.json - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  {
-    "id": 1,
-    "name": "Dzadzi",
-    "email": "dzadzi@gmail.com"
-  }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            users.json - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-[
-  {
-      "id": 1,
-      "name": "Dzadzi",
-      "email": "dzadzi@gmail.com"
-  },
-  {
-      "id": 1,
-      "name": "RopeFS",
-      "email": "ropefs@gmail.com"
-  },
-  {
-      "id": 1,
-      "name": "Grog",
-      "email": "grog@gmail.com"
-  }
-]
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark">
-            user.php - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;?php
-
-  if(isset($_GET['id'])){
-      $id = $_GET['id'];
-      $connection = mysqli_connect('localhost', 'root', '', 'ajax');
-      $query = "SELECT * FROM User WHERE id = $id";
-      $result = mysqli_query($connection, $query);
-  
-      $user = mysqli_fetch_all($result, MYSQLI_ASSOC);
-      // print_r($user);
-  
-      echo "&lt;strong&gt;ID: &lt;/strong&gt;" . $user[0]['id'] . "&lt;br&gt;";
-      echo "&lt;strong&gt;Name: &lt;/strong&gt;" . $user[0]['name'] . "&lt;br&gt;";
-  }else{
-      echo "No selected user.";
-  }
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark important-color">
-            users.php - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;?php
-
-  $connection = mysqli_connect('localhost', 'root', '', 'ajax');
-  $query = "SELECT * FROM User";
-  $result = mysqli_query($connection, $query);
-
-  $users = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-  echo json_encode($users);
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
+          <h1 class="mb-5"><u>AJAX, XHR</u></h1>
 
 
           <!-- SECTION START -->
@@ -6176,160 +5356,6 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark important-color">
-            XHR JSON - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;!DOCTYPE html&gt;
-  &lt;html lang="en"&gt;
-  &lt;head&gt;
-      &lt;meta charset="UTF-8"&gt;
-      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-      &lt;title&gt;Ajax 2 - JSON&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-      
-      &lt;button id="button"&gt;Get User&lt;/button&gt;
-      &lt;button id="button2"&gt;Get Users&lt;/button&gt;
-  
-      &lt;script&gt;
-  
-          const button = document.getElementById('button');
-          const button2 = document.getElementById('button2');
-          button.addEventListener('click', loadUser);
-          button2.addEventListener('click', loadUsers);
-  
-          function loadUser(){
-              let xhr = new XMLHttpRequest();
-              
-              xhr.open('GET', 'user.json', true);
-  
-              xhr.onload = () =&gt; { // If we use lambda expression we can't use this
-                  if(xhr.status == 200){
-                      let user = JSON.parse(xhr.responseText);
-                      console.log(user.name);
-                  }
-              }
-  
-              xhr.onerror = () =&gt; {
-                  console.log('Request Error.');
-              }
-  
-              xhr.send();
-          }
-  
-          function loadUsers(){
-              let xhr = new XMLHttpRequest();
-              
-              xhr.open('GET', 'users.json', true);
-  
-              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
-                  if(xhr.status == 200){
-                      let users = JSON.parse(xhr.responseText);
-                      console.log(users[0]);
-                      console.log(users[1]);
-                      console.log(users[2]);
-                  }
-              }
-  
-              xhr.onerror = () =&gt; {
-                  console.log('Request Error.');
-              }
-  
-              xhr.send();
-          }
-  
-      &lt;/script&gt;
-  
-  &lt;/body&gt;
-  &lt;/html&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark important-color">
-            XHR GITHUB API - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;!DOCTYPE html&gt;
-  &lt;html lang="en"&gt;
-  &lt;head&gt;
-      &lt;meta charset="UTF-8"&gt;
-      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-      &lt;title&gt;Ajax 3 - External API&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-      
-      &lt;button id="button"&gt;Get Github Users&lt;/button&gt;
-  
-      &lt;script&gt;
-  
-          const button = document.getElementById('button');
-          button.addEventListener('click', loadGithubUsers);
-  
-          function loadGithubUsers(){
-              let xhr = new XMLHttpRequest();
-              
-              xhr.open('GET', 'https://api.github.com/users', true);
-  
-              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
-                  if(xhr.status == 200){
-                      let users = JSON.parse(xhr.responseText);
-                      console.log(users);
-                  }
-              }
-  
-              xhr.onerror = () =&gt; {
-                  console.log('Request Error.');
-              }
-  
-              xhr.send();
-          }
-  
-      &lt;/script&gt;
-  
-  &lt;/body&gt;
-  &lt;/html&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
-
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark important-color">
             XHR PHP FORMS - Traversy Ajax
@@ -6460,71 +5486,6 @@ $("#blogs .owl-carousel").owlCarousel({
 
 
 
-
-
-
-
-          <!-- SECTION START -->
-          <p class="font-weight-bold text-dark important-color">
-            XHR GET DATA FROM DATABASE - Traversy Ajax
-            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
-              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
-            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
-          </p>
-          <hr>
-          <div class="collapse" id="collapseExampleOC3">
-            <pre>
-  &lt;!DOCTYPE html&gt;
-  &lt;html lang="en"&gt;
-  &lt;head&gt;
-      &lt;meta charset="UTF-8"&gt;
-      &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-      &lt;title&gt;Ajax 5 - Get From Database&lt;/title&gt;
-  &lt;/head&gt;
-  &lt;body&gt;
-      
-      &lt;button id="button"&gt;Get Users&lt;/button&gt;
-  
-      &lt;script&gt;
-  
-          const button = document.getElementById('button');
-          button.addEventListener('click', loadUsers);
-  
-          function loadUsers(){
-              let xhr = new XMLHttpRequest();
-              
-              xhr.open('GET', 'users.php', true);
-  
-              xhr.onload = () =&gt; { // If we use lambda expression we can't use this.status
-                  if(xhr.status == 200){
-                      let users = JSON.parse(xhr.responseText);
-                      console.log(users);
-                  }
-              }
-  
-              xhr.onerror = () =&gt; {
-                  console.log('Request Error.');
-              }
-  
-              xhr.send();
-          }
-  
-      &lt;/script&gt;
-  
-  &lt;/body&gt;
-  &lt;/html&gt;
-</pre>
-
-            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
-              aria-expanded="false" aria-controls="collapseExample3">-</button>
-          </div>
-          <!-- SECTION END -->
-
-
-
-
-
-
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark important-color">
             FETCH - Traversy Ajax
@@ -6602,20 +5563,9 @@ $("#blogs .owl-carousel").owlCarousel({
           <!-- SECTION END -->
 
 
-
-
-
-
-
-
-
-
-
-
-
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark important-color">
-            Sort / Search - Neda
+            jQuery Ajax - Neda
             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
               data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
@@ -6623,48 +5573,53 @@ $("#blogs .owl-carousel").owlCarousel({
           <hr>
           <div class="collapse" id="collapseExampleOC3">
             <pre>
+
+=========================================  PHP FILE ==================================================
+
+&lt;?php
+include_once '../includes/functions.php';
+include_once '../includes/config.php';
+require_once '../classes/Database.php';
+
+if (!isset($_POST['myData'])) {
+  header("Location: " . BASE_URL . "index.php");
+
+  exit;
+}
+
+$requestObj = json_decode($_POST['myData']);
+
+echo json_encode(Database::getInstance()-&gt;getAllPrevozSearch($requestObj));
+
+exit;
+
+=========================================  PHP FILE ==================================================
+
   const form = document.getElementById('sortiraj-forma');
   const select = document.getElementById('sortiraj-select');
   
-  const traziForm = document.getElementById('trazi-form');
-  const traziInput = document.getElementById('trazi-input');
-  
-  
   form.addEventListener('submit', (event) => {
-      event.preventDefault();
+    let dataToSend = {
+      radio: selectedRadio.value,
+      sort: selectedSort,
+      search: searchText,
+    };
+    let dataString = JSON.stringify(dataToSend);
   
-      let izbor = select.options[select.selectedIndex].value;
+    let izbor = select.options[select.selectedIndex].value;
   
       $.ajax({
           url: 'sortiraj.php',
           type: 'POST',
           data: {
-              vrstaSorta: izbor
+              vrstaSorta: izbor,
+              myData: dataString,
           },
           success: (response) => {
-              console.log(response)
+              console.log(response);
+              let smestaji = JSON.parse(response);
+              console.log(smestaji);
               document.getElementById('knjige-container').innerHTML = response;
-          }
-      });
-  });
-  
-  traziForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-  
-      let unetiTekst = traziInput.value;
-  
-      $.ajax({
-          url: 'trazi.php',
-          type: 'POST',
-          data: {
-              trazi: true,
-              tekst: unetiTekst
-          },
-          success: (response) => {
-              console.log(response)
-              if(response != ''){
-                  document.getElementById('knjige-container').innerHTML = response;
-              }
           }
       });
   });
