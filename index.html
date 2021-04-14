@@ -89,6 +89,19 @@
             <pre>
 &lt;?php
 
+/*
+
+1. SELECT ALL
+2. SELECT ALL WHERE
+3. SELECT ONE
+4. SELECT ONE WHERE
+5. SELECT JOIN
+6. INSERT
+7. UPDATE
+8. DELETE
+
+*/
+
 if (session_status() == PHP_SESSION_NONE) {
   session_start();
 }
@@ -140,9 +153,11 @@ class Database extends PDO {
     return self::$instance;
   }
 
+  /* oSELECT ONE WHERE */
+
   public function takenEmail($email) {
     try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT email FROM user WHERE email = :email");
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user WHERE email = :email");
       $query-&gt;execute(array(
         ':email' =&gt; $email,
       ));
@@ -160,6 +175,8 @@ class Database extends PDO {
       return false;
     }
   }
+
+  /* oINSERT */
 
   public function registerUser($data) {
     try {
@@ -193,6 +210,8 @@ class Database extends PDO {
       return false;
     }
   }
+
+  /* oUPDATE */
 
   public function warnUser($user_id) {
     try {
@@ -315,6 +334,8 @@ class Database extends PDO {
     }
   }
 
+  /* oSELECT ALL */
+
   public function getAllUsers() {
     try {
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM `user` u");
@@ -330,6 +351,8 @@ class Database extends PDO {
   }
 
   // COURESES =====================================================================================================================================
+
+  /* oDELETE */
 
   public function deleteCourse($id) {
     try {
@@ -353,6 +376,8 @@ class Database extends PDO {
     }
   }
 
+  /* oSELECT ONE WHERE */
+
   public function getCourse($id) {
     try {
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM course c JOIN grade g ON g.grade_id = c.course_grade_id WHERE id = :id");
@@ -370,39 +395,9 @@ class Database extends PDO {
     }
   }
 
-  public function buyCourse($data) {
-    try {
-      $data = (object) $data;
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user_course (user_id, course_id) VALUES (?, ?)");
-      $result = $query-&gt;execute([
-        $data-&gt;user_id,
-        $data-&gt;course_id,
-      ]);
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
-
   // USER_COURSE =================================================================================================================================================
 
-  public function confirmCoursePurchase($id) {
-    try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user_course` SET confirmed = 1 WHERE id = :id");
-      $result = $query-&gt;execute(array(
-        ':id' =&gt; $id,
-      ));
-
-      return $result;
-    } catch (PDOException $e) {
-      echo "&lt;p class='alert mb-0 alert-danger'&gt;PDO EXCEPTION: " . $e-&gt;getMessage() . "&lt;/p&gt;";
-
-      exit;
-    }
-  }
+  /* oDELETE */
 
   public function deleteCoursePurchase($id) {
     try {
