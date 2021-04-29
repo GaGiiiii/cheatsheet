@@ -5721,6 +5721,7 @@ exit;
   axios.defaults.headers.common['X-Auth-Token'] = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
   
   // GET REQUEST
+
   function getTodos() {
     // axios({
     //   method: 'GET',
@@ -5741,6 +5742,43 @@ exit;
   }
   
   // POST REQUEST
+
+  /* 
+    Details - slozen javascript objekat iz PayPal onApprove() metode.
+
+    create_time: "2021-04-29T21:24:04Z"
+    id: "29D2182226830205V"
+    intent: "CAPTURE"
+    links: Array(1)
+    0: {href: "https://api.sandbox.paypal.com/v2/checkout/orders/29D2182226830205V", rel: "self", method: "GET", title: "GET"}
+    length: 1
+    __proto__: Array(0)
+    payer:
+    address: {country_code: "RS"}
+    email_address: "dragoslav.gagi888@gmail.com"
+    name:
+    given_name: "DragoslavP"
+    surname: "JankovicP"
+    __proto__: Object
+    payer_id: "SK8JNE9MSU3ZL"
+    __proto__: Object
+    purchase_units: [{…}]
+    status: "COMPLETED"
+    update_time: "2021-04-29T21:28:15Z"
+    __proto__: Object
+  */
+  
+  axios.post('purchase-validation.php', {
+    details,
+  }).then(res =&gt; {
+    console.log("============RES============");
+    console.log(res);
+    console.log("============RES============");
+    console.log("============RES DATA============");
+    console.log(res.data);
+    console.log("============RES DATA============");
+  }).catch(err =&gt; console.log(err));
+
   function addTodo() {
     axios.post('https://jsonplaceholder.typicode.com/todos', {
       title: 'New Todo',
@@ -5751,6 +5789,7 @@ exit;
   }
   
   // PUT/PATCH REQUEST
+
   function updateTodo() { // Put ce replace ceo objekat, izgubice se userid, a patch ce zameniti samo ono sto smo poslali i ostaviti sve staro
     axios.put('https://jsonplaceholder.typicode.com/todos/1', {
       title: 'Updated Todo',
@@ -5761,6 +5800,7 @@ exit;
   }
   
   // DELETE REQUEST
+
   function removeTodo() {
     axios.delete('https://jsonplaceholder.typicode.com/todos/1')
     .then(res =&gt; showOutput(res))
@@ -5768,6 +5808,7 @@ exit;
   }
   
   // SIMULTANEOUS DATA
+
   function getData() {
     axios.all([
       axios.get('https://jsonplaceholder.typicode.com/todos?_limit=5'),
@@ -5781,6 +5822,7 @@ exit;
   }
   
   // CUSTOM HEADERS
+
   function customHeaders() {
     const config = {
       headers: {
@@ -5798,6 +5840,7 @@ exit;
   }
   
   // TRANSFORMING REQUESTS &amp; RESPONSES
+
   function transformResponse() { // Ne radi
     const options = {
       method: 'POST',
@@ -5816,6 +5859,7 @@ exit;
   }
   
   // ERROR HANDLING
+
   function errorHandling() {
     axios.get('https://jsonplaceholder.typicode.com/todoss?_limit=5')
     .then(res =&gt; showOutput(res))
@@ -5838,6 +5882,7 @@ exit;
   }
   
   // CANCEL TOKEN
+
   function cancelToken() {
     const source = axios.CancelToken.source();
   
@@ -5857,6 +5902,7 @@ exit;
   }
   
   // INTERCEPTING REQUESTS &amp; RESPONSES
+
   axios.interceptors.request.use(config =&gt; {
     console.log(`${config.method.toUpperCase()} request sent to ${config.url}
     at ${new Date().getTime()}`);
@@ -5867,6 +5913,7 @@ exit;
   });
   
   // AXIOS INSTANCES
+
   const axiosInstance = axios.create({
     baseURL: 'https://jsonplaceholder.typicode.com'
     // other custom settings
@@ -5908,6 +5955,7 @@ exit;
   }
   
   // Event listeners
+
   document.getElementById('get').addEventListener('click', getTodos);
   document.getElementById('post').addEventListener('click', addTodo);
   document.getElementById('update').addEventListener('click', updateTodo);
@@ -5920,6 +5968,36 @@ exit;
   document.getElementById('error').addEventListener('click', errorHandling);
   document.getElementById('cancel').addEventListener('click', cancelToken);
 </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            PHP
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+&lt;?php
+
+  $_POST = json_decode(file_get_contents("php://input"), true);
+
+  if($_POST['details']['purchase_units'][0]['amount']['value'] == 10.00){
+    echo json_encode($_POST);
+  }else{
+    echo 0;
+  }
+
+  exit;
+          </pre>
 
             <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
               aria-expanded="false" aria-controls="collapseExample3">-</button>
