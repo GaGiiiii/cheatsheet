@@ -69,6 +69,7 @@
           <a class="list-group-item list-group-item-action" data-menu-item="java" href="#java">Java</a>
           <a class="list-group-item list-group-item-action" data-menu-item="java-2" href="#java-2">Java 2</a>
           <a class="list-group-item list-group-item-action" data-menu-item="joni" href="#joni">Joni</a>
+          <a class="list-group-item list-group-item-action" data-menu-item="is" href="#is">IS</a>
         </div>
       </div>
 
@@ -7722,6 +7723,774 @@ public class TimeThread extends Thread{
 
         </div>
         <!-- ---------- JONI END ---------- -->
+
+
+        <!-- ---------- IS START ---------- -->
+        <div id="is" class="mb-5">
+          <h1 class="mb-5"><u>IS</u></h1>
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            Trening.txt
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+import org.neuroph.core.NeuralNetwork;
+import org.neuroph.core.data.DataSet;
+
+/*
+  * To change this license header, choose License Headers in Project Properties.
+  * To change this template file, choose Tools | Templates
+  * and open the template in the editor.
+  */
+
+/**
+  *
+  * @author Mirko
+  */
+public class Trening {
+    private NeuralNetwork mreza;
+    private DataSet dataset;
+    
+    private int brIteracija;
+    private double koefUcenja;
+    private double greska;
+    private double momentum;
+    private double acc;
+
+    public Trening() {
+    }
+
+    public Trening(NeuralNetwork mreza, DataSet dataset, int brIteracija, double koefUcenja, double greska, double momentum, double acc) {
+        this.mreza = mreza;
+        this.dataset = dataset;
+        this.brIteracija = brIteracija;
+        this.koefUcenja = koefUcenja;
+        this.greska = greska;
+        this.momentum = momentum;
+        this.acc = acc;
+    }
+
+    public double getAcc() {
+        return acc;
+    }
+
+    public void setAcc(double acc) {
+        this.acc = acc;
+    }
+
+    public NeuralNetwork getMreza() {
+        return mreza;
+    }
+
+    public void setMreza(NeuralNetwork mreza) {
+        this.mreza = mreza;
+    }
+
+    public DataSet getDataset() {
+        return dataset;
+    }
+
+    public void setDataset(DataSet dataset) {
+        this.dataset = dataset;
+    }
+
+    public int getBrIteracija() {
+        return brIteracija;
+    }
+
+    public void setBrIteracija(int brIteracija) {
+        this.brIteracija = brIteracija;
+    }
+
+    public double getKoefUcenja() {
+        return koefUcenja;
+    }
+
+    public void setKoefUcenja(double koefUcenja) {
+        this.koefUcenja = koefUcenja;
+    }
+
+    public double getGreska() {
+        return greska;
+    }
+
+    public void setGreska(double greska) {
+        this.greska = greska;
+    }
+
+    public double getMomentum() {
+        return momentum;
+    }
+
+    public void setMomentum(double momentum) {
+        this.momentum = momentum;
+    }
+    
+    
+}
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            Klasa.txt
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+import java.util.ArrayList;
+import org.neuroph.core.NeuralNetwork;
+import org.neuroph.core.data.DataSet;
+import org.neuroph.core.data.DataSetRow;
+import org.neuroph.core.events.LearningEvent;
+import org.neuroph.core.events.LearningEventListener;
+import org.neuroph.nnet.MultiLayerPerceptron;
+import org.neuroph.nnet.learning.MomentumBackpropagation;
+import org.neuroph.util.data.norm.MaxNormalizer;
+import org.neuroph.util.data.norm.Normalizer;
+
+/*
+  * To change this license header, choose License Headers in Project Properties.
+  * To change this template file, choose Tools | Templates
+  * and open the template in the editor.
+  */
+/**
+  *
+  * @author Mirko
+  */
+public class Klasa implements LearningEventListener {
+    
+    String podaci = "diabetes_data.csv";
+    int brojUlaza = 30;
+    int brojIzlaza = 1;
+    ArrayList&lt;Trening&gt; treninzi = new ArrayList&lt;&gt;();
+    
+    public static void main(String[] args) {
+        (new Klasa()).run();
+    }
+    
+    @Override
+    public void handleLearningEvent(LearningEvent event) {
+        MomentumBackpropagation mp = (MomentumBackpropagation) event.getSource();
+        // ako je ono sa greskom bilo bi BackPropagation
+        System.out.println("Trenutna iteracija " + mp.getCurrentIteration() + " totalnaGreskaMreze " + mp.getTotalNetworkError());
+    }
+    
+    private void run() {
+        DataSet dataset = DataSet.createFromFile(podaci, brojUlaza, brojIzlaza, ",");
+        Normalizer n = new MaxNormalizer(dataset);
+        n.normalize(dataset);
+        dataset.shuffle();
+        
+        DataSet[] trainITest = dataset.createTrainingAndTestSubsets(65, 35);
+        DataSet train = trainITest[0];
+        DataSet test = trainITest[1];
+        int brIteracija = 0;
+        
+        for (int skriveni = 10; skriveni &lt;= 30; skriveni += 10) {
+            for (double koefUcenja = 0.2; koefUcenja &lt;= 0.6; koefUcenja += 0.2) {
+                MultiLayerPerceptron mreza = new MultiLayerPerceptron(brojUlaza, skriveni, brojIzlaza);
+                mreza.setLabel("mreza sa max acc je sa skrivenim " + skriveni + " i koef. ucenja " + koefUcenja);
+                MomentumBackpropagation mp = (MomentumBackpropagation) mreza.getLearningRule();
+                // kad je greska umesto momentum parametra IDE!!!! BackPropagation bp=new mreza.getLearningRule()
+                mp.setMomentum(0.6);
+                //islo bi bp.setMaxError(0.5)
+                mp.addListener(this);
+                mreza.learn(train);
+                
+                brIteracija += mp.getCurrentIteration();
+                
+                Trening t = new Trening(mreza, dataset, mp.getCurrentIteration(), koefUcenja, mp.getMaxError(), mp.getMomentum(), 0);
+
+                // umesto ovog dole bi bilo double razlika i double kvadratnaGreska
+                int TP = 0;
+                int TN = 0;
+                int FP = 0;
+                int FN = 0;
+                
+                double acc = 0;
+                
+                for (DataSetRow red : test) {
+                    // ovo je uvek isto
+                    mreza.setInput(red.getInput());
+                    mreza.calculate();
+                    
+                    double[] izlazMreze = mreza.getOutput();
+                    double[] zeljeniIzlaz = red.getDesiredOutput();
+                    
+                    for (int i = 0; i &lt; izlazMreze.length; i++) {
+                        // bilo bi 
+//                         razlika=(double)(zeljeniIzlaz[i]-izlazMreze[i])
+//                          kvadratnaGreska+=razlika*razlika
+                        if (zeljeniIzlaz[i] - izlazMreze[i] &gt; 0.5 &amp;&amp; zeljeniIzlaz[i] == 1) {
+                            TP++;
+                        }
+                        
+                        if (zeljeniIzlaz[i] - izlazMreze[i] &gt; 0.5 &amp;&amp; zeljeniIzlaz[i] == 0) {
+                            FP++;
+                        }
+                        
+                        if (zeljeniIzlaz[i] - izlazMreze[i] &lt; 0.5 &amp;&amp; zeljeniIzlaz[i] == 1) {
+                            TN++;
+                        }
+                        
+                        if (zeljeniIzlaz[i] - izlazMreze[i] &lt; 0.5 &amp;&amp; zeljeniIzlaz[i] == 0) {
+                            FN++;
+                        }
+                    }
+                    
+                }
+//              UMESTO SLEDECA 3 REDA BILO BI 
+//                 double RMSE=(double)kvdaratnaGreska/test.size();
+//                t.setRMSE(rmse);
+//                System.out.println("RMSE je: "+rmse);
+
+                acc = (double) (TP + TN) / (TP + TN + FP + FN);
+                t.setAcc(acc);
+                System.out.println("Acc je: " + acc);
+                treninzi.add(t);
+            }
+        }
+        
+        System.out.println("br iteracija: " + brIteracija / 3);
+        NeuralNetwork nn = prodjiKroz();
+        System.out.println("Mreza sa najvecim acc je: " + nn.getLabel());
+        nn.save(nn.getLabel() + ".nnet");
+        
+    }
+    
+    private NeuralNetwork prodjiKroz() {
+        // moze se traziti najveca greska i najveci accuracy ili najm gr. il najm acc.
+        Trening maxAcc = treninzi.get(0);
+        
+        for (Trening trening : treninzi) {
+            if (trening.getAcc() &gt; maxAcc.getAcc()) {
+                maxAcc = trening;
+            }
+        }
+        
+        return maxAcc.getMreza();
+    }
+    
+}              
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            Diabetis_Trening.txt
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
+package diabetesfeb2018;
+
+import org.neuroph.core.NeuralNetwork;
+
+/**
+*
+* @author jelica
+*/
+public class Training {
+    private NeuralNetwork neuralNet;
+    private int iterations;
+    private double accuracy;
+
+    public Training() {
+    }
+
+    public Training(NeuralNetwork neuralNet, int iterations, double accuracy) {
+        this.neuralNet = neuralNet;
+        this.iterations = iterations;
+        this.accuracy = accuracy;
+    }
+
+    
+    public NeuralNetwork getNeuralNet() {
+        return neuralNet;
+    }
+
+    public int getIterations() {
+        return iterations;
+    }
+
+    public double getAccuracy() {
+        return accuracy;
+    }
+
+    public void setNeuralNet(NeuralNetwork neuralNet) {
+        this.neuralNet = neuralNet;
+    }
+
+    public void setIterations(int iterations) {
+        this.iterations = iterations;
+    }
+
+    public void setAccuracy(double accuracy) {
+        this.accuracy = accuracy;
+    }
+    
+    
+    
+}
+      </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            Diabetis.txt
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
+package diabetesfeb2018;
+
+import java.util.ArrayList;
+import org.neuroph.core.NeuralNetwork;
+import org.neuroph.core.data.DataSet;
+import org.neuroph.core.data.DataSetRow;
+import org.neuroph.eval.ClassifierEvaluator;
+import org.neuroph.eval.Evaluation;
+import org.neuroph.eval.classification.ClassificationMetrics;
+import org.neuroph.eval.classification.ConfusionMatrix;
+import org.neuroph.nnet.MultiLayerPerceptron;
+import org.neuroph.nnet.learning.BackPropagation;
+import org.neuroph.util.TrainingSetImport;
+import org.neuroph.util.data.norm.MaxNormalizer;
+
+/**
+*
+* @author jelica
+*/
+public class DiabetesFEB2018 {
+
+    int inputCount = 8;
+    int outputCount = 1;
+    double[] learningRates = {0.2, 0.4, 0.6};
+    ArrayList&lt;Training&gt; trainings = new ArrayList&lt;&gt;();
+
+    /**
+    * @param args the command line arguments
+    */
+    public static void main(String[] args) {
+        new DiabetesFEB2018().run();
+    }
+
+    private void run() {
+
+        System.out.println("1. Ucitavanje data seta");
+
+        DataSet dataSet = DataSet.createFromFile("diabetes_data.csv", inputCount, outputCount, ",");
+
+        System.out.println("2. Normalizovanje i mesanje data seta");
+        MaxNormalizer normalizer = new MaxNormalizer();
+        normalizer.normalize(dataSet);
+        dataSet.shuffle();
+
+        System.out.println("3. Kreiranje trening i test seta");
+        DataSet[] dataSets = dataSet.createTrainingAndTestSubsets(70, 30);
+        DataSet train = dataSets[0];
+        DataSet test = dataSets[1];
+
+        for (double lr : learningRates) {
+            System.out.println("Training neural network for learning rate " + lr);
+            MultiLayerPerceptron neuralNet = new MultiLayerPerceptron(inputCount, 20, 10, outputCount);
+            BackPropagation bp = neuralNet.getLearningRule();
+            bp.setMaxError(0.07);
+            bp.setLearningRate(lr);
+
+            neuralNet.learn(train);
+
+            int numOfIterations = bp.getCurrentIteration();
+            double accuracy = evaluateAccuracy(neuralNet, test);
+            evaluateAccuracyNeuroph(neuralNet, test);
+
+            Training t = new Training(neuralNet, numOfIterations, accuracy);
+            trainings.add(t);
+
+            calculateMSENeuroph(neuralNet, test);
+            calculateMSE(neuralNet, test);
+        }
+
+        printAverageIterations();
+        saveMaxAccuracyNet();
+    }
+
+    private void evaluateAccuracyNeuroph(MultiLayerPerceptron neuralNet, DataSet test) {
+        Evaluation evaluation = new Evaluation();
+        evaluation.addEvaluator(new ClassifierEvaluator.Binary(0.5));
+        evaluation.evaluateDataSet(neuralNet, test);
+
+        ClassifierEvaluator evaluator = evaluation.getEvaluator(ClassifierEvaluator.Binary.class);
+        ConfusionMatrix cm = evaluator.getResult();
+        System.out.println("Matrica konfuzije Neuroph: ");
+        System.out.println(cm.toString());
+
+        ClassificationMetrics[] metrics = ClassificationMetrics.createFromMatrix(cm);
+        ClassificationMetrics.Stats average = ClassificationMetrics.average(metrics);
+
+        System.out.println("Accuracy neuroph: " + average.accuracy);
+
+    }
+
+    private double evaluateAccuracy(MultiLayerPerceptron neuralNet, DataSet test) {
+        int tp = 0, tn = 0, fp = 0, fn = 0;
+
+        for (DataSetRow row : test) {
+            neuralNet.setInput(row.getInput());
+            neuralNet.calculate();
+
+            double actual = row.getDesiredOutput()[0];
+            double predicted = neuralNet.getOutput()[0];
+
+            if (actual == 1.0 &amp;&amp; predicted &gt; 0.5) {
+                tp++;
+            }
+            if (actual == 0.0 &amp;&amp; predicted &lt;= 0.5) {
+                tn++;
+            }
+            if (actual == 1.0 &amp;&amp; predicted &lt;= 0.5) {
+                fn++;
+            }
+
+            if (actual == 0.0 &amp;&amp; predicted &gt; 0.5) {
+                fp++;
+            }
+        }
+
+        double accuracy = (double) (tp + tn) / (tp + tn + fp + fn);
+
+        System.out.println("Accuracy: " + accuracy);
+
+        return accuracy;
+    }
+
+    private void saveMaxAccuracyNet() {
+        Training max = trainings.get(0);
+        for (int i = 1; i &lt; trainings.size(); i++) {
+            if (max.getAccuracy() &lt; trainings.get(i).getAccuracy()) {
+                max = trainings.get(i);
+            }
+        }
+
+        System.out.println("Saving net with max accuracy");
+        max.getNeuralNet().save("net.nnet");
+    }
+
+    private void printAverageIterations() {
+        int sumTotal = 0;
+        for (Training t : trainings) {
+            sumTotal += t.getIterations();
+        }
+        double averageIterations = (double) sumTotal / trainings.size();
+        System.out.println("Prosecan broj iteracija je " + averageIterations);
+    }
+
+    private void calculateMSENeuroph(MultiLayerPerceptron neuralNet, DataSet test) {
+        Evaluation evaluation = new Evaluation();
+        evaluation.addEvaluator(new ClassifierEvaluator.Binary(0.5));
+        evaluation.evaluateDataSet(neuralNet, test);
+
+        System.out.println("MSE Neuroph: " + evaluation.getMeanSquareError());
+    }
+
+    private void calculateMSE(MultiLayerPerceptron neuralNet, DataSet test) {
+        double sumError = 0, meanError = 0;
+        for (DataSetRow row : test) {
+            neuralNet.setInput(row.getInput());
+            neuralNet.calculate();
+
+            double actual = row.getDesiredOutput()[0];
+            double predicted = neuralNet.getOutput()[0];
+
+            sumError += Math.pow(actual - predicted, 2);
+        }
+
+        meanError = sumError / (2 * test.size());
+        System.out.println("MSE: " + meanError);
+    }
+
+}        
+</pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            Kancer_Trening.txt
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
+package breastcancerjun2018;
+
+import org.neuroph.core.NeuralNetwork;
+
+/**
+*
+* @author jelica
+*/
+public class Training {
+
+    NeuralNetwork neuralNet;
+    double error;
+
+    public Training(NeuralNetwork neuralNet, double error) {
+        this.neuralNet = neuralNet;
+        this.error = error;
+    }
+    
+    
+}
+        </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+          <!-- SECTION START -->
+          <p class="font-weight-bold text-dark">
+            Kancer.txt
+            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+              data-target="#collapseExampleOC3" aria-expanded="false" aria-controls="collapseExampleOC3">+</button>
+            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+          </p>
+          <hr>
+          <div class="collapse" id="collapseExampleOC3">
+            <pre>
+/*
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
+package breastcancerjun2018;
+
+import java.util.ArrayList;
+import org.neuroph.core.data.DataSet;
+import org.neuroph.core.data.DataSetRow;
+import org.neuroph.eval.ClassifierEvaluator;
+import org.neuroph.eval.Evaluation;
+import org.neuroph.eval.classification.ClassificationMetrics;
+import org.neuroph.eval.classification.ConfusionMatrix;
+import org.neuroph.nnet.MultiLayerPerceptron;
+import org.neuroph.nnet.learning.MomentumBackpropagation;
+import org.neuroph.util.data.norm.MaxNormalizer;
+
+/**
+*
+* @author jelica
+*/
+public class BreastCancerJUN2018 {
+
+    ArrayList&lt;Training&gt; trainings = new ArrayList&lt;&gt;();
+    int inputCount = 30;
+    int outputCount = 1;
+    double[] learningRates = {0.2, 0.4, 0.6};
+    int[] hiddenNeurons = {10, 20, 30};
+
+    /**
+    * @param args the command line arguments
+    */
+    public static void main(String[] args) {
+        new BreastCancerJUN2018().run();
+    }
+
+    private void run() {
+        System.out.println("Ucitavanje dataseta: ");
+        DataSet dataset = DataSet.createFromFile("breast_cancer_data.csv", inputCount, outputCount, ",");
+        MaxNormalizer normalizer = new MaxNormalizer();
+        normalizer.normalize(dataset);
+        dataset.shuffle();
+
+        DataSet[] trainAndTest = dataset.createTrainingAndTestSubsets(65, 35);
+        DataSet train = trainAndTest[0];
+        DataSet test = trainAndTest[1];
+
+        int numberOfTrainings = 0;
+        int numberOfIterations = 0;
+
+        for (double lr : learningRates) {
+            for (int hn : hiddenNeurons) {
+                MultiLayerPerceptron neuralNet = new MultiLayerPerceptron(inputCount, hn, outputCount);
+                MomentumBackpropagation bp = (MomentumBackpropagation) neuralNet.getLearningRule();
+                bp.setMomentum(0.7);
+                bp.setLearningRate(lr);
+                bp.setMaxError(0.07);
+
+                neuralNet.learn(train);
+
+                calculateMeanSquaredError(neuralNet, test);
+                calculateMeanSquaredErrorNeuroph(neuralNet, test);
+
+                calculateAccuracy(neuralNet, test);
+                calculateAccuracyNeuroph(neuralNet, test);
+
+                numberOfTrainings++;
+                numberOfIterations += bp.getCurrentIteration();
+
+            }
+        }
+
+        saveNetWithMinError();
+        System.out.println("Srednja vrednost broja iteracija: " + (double) numberOfIterations / numberOfTrainings);
+
+    }
+
+    private void calculateMeanSquaredError(MultiLayerPerceptron neuralNet, DataSet test) {
+        double sumError = 0, meanSquaredError = 0;
+        for (DataSetRow row : test) {
+            neuralNet.setInput(row.getInput());
+            neuralNet.calculate();
+
+            double predicted = neuralNet.getOutput()[0];
+            double actual = row.getDesiredOutput()[0];
+
+            double error = Math.pow((predicted - actual), 2);
+            sumError += error;
+        }
+
+        meanSquaredError = (double) sumError / (2 * test.size());
+        System.out.println("Srednja kvadratna greska treninga: " + meanSquaredError);
+
+        Training t = new Training(neuralNet, meanSquaredError);
+        trainings.add(t);
+
+    }
+
+    private void calculateMeanSquaredErrorNeuroph(MultiLayerPerceptron neuralNet, DataSet test) {
+        Evaluation evaluation = new Evaluation();
+        evaluation.addEvaluator(new ClassifierEvaluator.Binary(0.5));
+        evaluation.evaluateDataSet(neuralNet, test);
+
+        System.out.println("Srednja kvadratna greska treninga - njihova metoda: " + evaluation.getMeanSquareError());
+    }
+
+    private void saveNetWithMinError() {
+        Training min = trainings.get(0);
+        for (int i = 1; i &lt; trainings.size(); i++) {
+            if (min.error &gt; trainings.get(i).error) {
+                min = trainings.get(i);
+            }
+        }
+
+        min.neuralNet.save("neuralNet.nnet");
+    }
+
+    private void calculateAccuracyNeuroph(MultiLayerPerceptron neuralNet, DataSet test) {
+        Evaluation evaluation = new Evaluation();
+        evaluation.addEvaluator(new ClassifierEvaluator.Binary(0.5));
+        evaluation.evaluateDataSet(neuralNet, test);
+
+        ClassifierEvaluator evaluator = evaluation.getEvaluator(ClassifierEvaluator.Binary.class);
+        ConfusionMatrix matrix = evaluator.getResult();
+        ClassificationMetrics[] metrics = ClassificationMetrics.createFromMatrix(matrix);
+        ClassificationMetrics.Stats average = ClassificationMetrics.average(metrics);
+        double accuracy = average.accuracy;
+
+        System.out.println("Accuracy-njihove metode: " + accuracy);
+    }
+
+    private void calculateAccuracy(MultiLayerPerceptron neuralNet, DataSet test) {
+        int tp = 0, tn = 0, fp = 0, fn = 0;
+
+        for (DataSetRow row : test) {
+            neuralNet.setInput(row.getInput());
+            neuralNet.calculate();
+
+            double predicted = neuralNet.getOutput()[0];
+            double actual = row.getDesiredOutput()[0];
+
+            if (actual == 1 &amp;&amp; predicted &gt; 0.5) {
+                tp++;
+            }
+
+            if (actual == 0 &amp;&amp; predicted &lt;= 0.5) {
+                tn++;
+            }
+
+            if (actual == 1 &amp;&amp; predicted &lt;= 0.5) {
+                fn++;
+            }
+
+            if (actual == 0 &amp;&amp; predicted &gt; 0.5) {
+                fp++;
+            }
+        }
+
+        double accuracy = (double) (tp + tn) / (tp + tn + fp + fn);
+        System.out.println("Accuracy: " + accuracy);
+    }
+
+}         
+        </pre>
+
+            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+              aria-expanded="false" aria-controls="collapseExample3">-</button>
+          </div>
+          <!-- SECTION END -->
+
+
+
+
+
+        </div>
+        <!-- ---------- IS END ---------- -->
 
 
 
