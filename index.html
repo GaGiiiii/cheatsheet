@@ -182,26 +182,22 @@ class Database extends PDO {
 
   public function registerUser($data) {
     try {
-      $data = (object) $data;
-      $data-&gt;password = md5(md5($data-&gt;password)); // Hashovanje sifre sa md5
-      $data-&gt;password = password_hash($data-&gt;password, PASSWORD_BCRYPT);
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user (email, password, firstname, lastname, phone_number, grade, country) VALUES (?, ?, ?, ?, ?, ?, ?)");
+      $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT); // Hashovanje sifre sa md5
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user (email, password, username, image) VALUES (?, ?, ?, ?)");
       $result = $query-&gt;execute([
-        $data-&gt;email,
-        $data-&gt;password,
-        $data-&gt;firstname,
-        $data-&gt;lastname,
-        $data-&gt;phone_number,
-        $data-&gt;grade,
-        $data-&gt;country,
+        $data['email'],
+        $data['password'],
+        $data['username'],
+        $data['image'],
       ]);
 
-      $data-&gt;id = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
-      $data-&gt;is_admin = false;
+      $data['id'] = Database::getInstance()-&gt;getConnection()-&gt;lastInsertId();
+      $data['is_admin'] = false;
+
+      $data = $this-&gt;fixData($data);
 
       if ($result) { // Ukoliko je query uspesan pravimo sesiju i vracamo true
         $_SESSION['user'] = $data;
-        Database::getInstance()-&gt;insertLoginDetails($data, $data-&gt;id);
 
         return true;
       }
@@ -212,6 +208,21 @@ class Database extends PDO {
 
       return false;
     }
+  }
+
+  public function fixData($data) {
+    //Get keys
+    $keys = array_keys($data);
+
+    //Map keys to format function
+    $keys = array_map(function($key){
+      return $key = "user." . $key;
+    }, $keys);
+
+    //Use array_combine to map formatted keys to array values
+    $data = array_combine($keys, $data);
+
+    return $data;
   }
 
   /* oUPDATE */
@@ -231,10 +242,9 @@ class Database extends PDO {
 
   public function loginUser($data) {
     try {
-      $data = (object) $data;
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user WHERE email = :email");
       $query-&gt;execute(array(
-        ':email' =&gt; $data-&gt;email,
+        ':email' =&gt; $data['email'],
       ));
 
       $user = $query-&gt;fetch(PDO::FETCH_ASSOC);
