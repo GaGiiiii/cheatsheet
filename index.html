@@ -232,19 +232,15 @@ class Database extends PDO {
   public function loginUser($data) {
     try {
       $data = (object) $data;
-      $data-&gt;password = md5(md5($data-&gt;password));
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user WHERE email = :email AND password = :password");
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("SELECT * FROM user WHERE email = :email");
       $query-&gt;execute(array(
         ':email' =&gt; $data-&gt;email,
-        ':password' =&gt; $data-&gt;password,
       ));
 
       $user = $query-&gt;fetch(PDO::FETCH_ASSOC);
 
-      if ($user) {
-        $user = (object) $user;
+      if ($user &amp;&amp; password_verify($data-&gt;password, $user['user.password'])) {
         $_SESSION['user'] = $user;
-        Database::getInstance()-&gt;insertLoginDetails($data, $user-&gt;id);
 
         return true;
       }
@@ -548,10 +544,16 @@ if (isset($_POST['login'])) {
     );
 
     if (Database::getInstance()-&gt;loginUser($data)) {
-      $_SESSION['login_success_message'] = '&lt;div class="alert alert-warning alert-dismissible show mb-5" role="alert"&gt;
-              &lt;strong&gt;Login successful! &lt;i class="fas fa-check"&gt;&lt;/i&gt;&lt;/strong&gt; Welcome ' . $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname .
-        '. &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/i&gt;&lt;/button&gt;
-            &lt;/div&gt;';
+      $_SESSION['login_success_message'] = '&lt;div class="container-fluid"&gt;
+        &lt;div class="row"&gt;
+          &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+            &lt;div class="alert alert-warning alert-dismissible show mb-5" role="alert"&gt;
+              &lt;strong&gt;Login successful! &lt;i class="fas fa-check"&gt;&lt;/i&gt;&lt;/strong&gt; Welcome ' . $_SESSION['user']['user.username'] .
+          '. &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/i&gt;&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;';
 
       header("Location: mojikursevi");
 
@@ -725,7 +727,7 @@ if (isset($_POST['register'])) {
     } else if (Database::getInstance()-&gt;registerUser($data)) {
       $_SESSION['register_success_message'] = '
             &lt;div class="alert alert-warning alert-dismissible show" role="alert" style="margin-bottom: 4rem;"&gt;
-              &lt;strong&gt;Registration successful! &lt;i class="fas fa-check"&gt;&lt;/i&gt;&lt;/strong&gt; Welcome ' . $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname .
+              &lt;strong&gt;Registration successful! &lt;i class="fas fa-check"&gt;&lt;/i&gt;&lt;/strong&gt; Welcome ' . $_SESSION['user']['user.firstname'] . " " . $_SESSION['user']['user.lastname'] .
         '. &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/i&gt;&lt;/button&gt;
             &lt;/div&gt;';
 
@@ -1094,7 +1096,7 @@ $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], 
                 &lt;?php } else { ?&gt;
                   &lt;li class="nav-item dropdown"&gt;
                     &lt;a class="nav-link logged-in-as&lt;?php if (isset($currentPage) &amp;&amp; $currentPage == '/profil.php') echo ' active'; ?&gt; dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"&gt;
-                      &lt;i class="far fa-user"&gt;&lt;/i&gt;&amp;nbsp; &lt;?php echo $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname; ?&gt;
+                      &lt;i class="far fa-user"&gt;&lt;/i&gt;&amp;nbsp; &lt;?php echo $_SESSION['user']['user.firstname'] . " " . $_SESSION['user']['user.lastname']; ?&gt;
                       &lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill rotate" viewBox="0 0 16 16"&gt;
                         &lt;path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" /&gt;
                       &lt;/svg&gt;
@@ -1111,7 +1113,7 @@ $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], 
                       &lt;li&gt;
                         &lt;hr class="dropdown-divider"&gt;
                       &lt;/li&gt;
-                      &lt;?php if ($_SESSION['user']-&gt;is_admin) { ?&gt;
+                      &lt;?php if ($_SESSION['user']['user.is_admin']) { ?&gt;
                         &lt;li&gt;
                           &lt;a class="dropdown-item" href="&lt;?php echo BASE_URL . "admin/overview"; ?&gt;"&gt;
                             &lt;div class="row"&gt;
@@ -1201,7 +1203,7 @@ $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], 
 
 $loggedIn = Database::getInstance()-&gt;isUserLoggedIn();
 
-if (!$loggedIn || ($loggedIn &amp;&amp; !$_SESSION['user']-&gt;is_admin)) {
+if (!$loggedIn || ($loggedIn &amp;&amp; !$_SESSION['user']['user.is_admin'])) {
   $_SESSION['unauthorized_access'] = '&lt;div class="container-fluid"&gt;
   &lt;div class="row"&gt;
     &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
@@ -1254,7 +1256,7 @@ if (!Database::getInstance()-&gt;isUserLoggedIn()) {
   exit;
 }
 
-$leavingUN = $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname;
+$leavingUN = $_SESSION['user']['user.firstname'] . " " . $_SESSION['user']['user.lastname'];
 
 Database::getInstance()-&gt;logoutUser();
 $_SESSION['logout_success_message'] = '&lt;div class="container-fluid"&gt;
@@ -1496,7 +1498,7 @@ try {
   // Content
   $mail-&gt;isHTML(true);                                  // Set email format to HTML
   $mail-&gt;Subject = 'Korisnik je kupio kurs';
-  $mail-&gt;Body    = 'Korisnik &lt;strong&gt;"' . $_SESSION['user']-&gt;firstname . " " . $_SESSION['user']-&gt;lastname . "\"&lt;/strong&gt; je kupio kurs &lt;strong&gt;\"" . $course['name'] . "\"&lt;/strong&gt; i potvrdio uplatu. &lt;br&gt;&lt;br&gt; Broj telefona: " . $_SESSION['user']-&gt;phone_number . "&lt;br&gt;Email: " . $_SESSION['user']-&gt;email;
+  $mail-&gt;Body    = 'Korisnik &lt;strong&gt;"' . $_SESSION['user']['user.firstname'] . " " . $_SESSION['user']['user.lastname'] . "\"&lt;/strong&gt; je kupio kurs &lt;strong&gt;\"" . $course['name'] . "\"&lt;/strong&gt; i potvrdio uplatu. &lt;br&gt;&lt;br&gt; Broj telefona: " . $_SESSION['user']['user.phone_number'] . "&lt;br&gt;Email: " . $_SESSION['user']['user.email'];
 
   $mail-&gt;send();
   // echo 'Message has been sent';
