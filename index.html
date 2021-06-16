@@ -249,7 +249,7 @@ class Database extends PDO {
 
       $user = $query-&gt;fetch(PDO::FETCH_ASSOC);
 
-      if ($user &amp;&amp; password_verify($data-&gt;password, $user['user.password'])) {
+      if ($user &amp;&amp; password_verify($data['password'], $user['user.password'])) {
         $_SESSION['user'] = $user;
 
         return true;
