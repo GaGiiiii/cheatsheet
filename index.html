@@ -570,7 +570,7 @@ if (isset($_POST['login'])) {
 
 
 &lt;!-- -------- LOGIN ---------- --&gt;
-&lt;section id="login" class="login-form"&gt;
+&lt;section id="login" class="login-form mt-4"&gt;
 
   &lt;div class="container"&gt;
     &lt;div class="row justify-content-center"&gt;
@@ -584,15 +584,17 @@ if (isset($_POST['login'])) {
 
         &lt;div class="login-form-container"&gt;
           &lt;h1&gt;Login&lt;/h1&gt;
+          &lt;p class="mb-4"&gt;Fields marked with &lt;strong class="text-danger"&gt;*&lt;/strong&gt; are required.&lt;/p&gt;
+
           &lt;form id="login-form" method="POST"&gt;
             &lt;div class="mb-3"&gt;
-              &lt;label class="form-label"&gt;Email&lt;/label&gt;
+              &lt;label class="form-label"&gt;Email &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
               &lt;input id="email" name="email" type="email" class="form-control &lt;?php if (isset($errors['email'])) echo 'is-invalid';
                                                                               else if (isset($email)) echo 'is-valid'; ?&gt;" placeholder="Enter email" value="&lt;?php echo $email ?? ""; ?&gt;"&gt;
               &lt;?php echo $errors['email'] ?? ""; ?&gt;
             &lt;/div&gt;
             &lt;div class="mb-3"&gt;
-              &lt;label class="form-label"&gt;Šifra&lt;/label&gt;
+              &lt;label class="form-label"&gt;Password &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
               &lt;input id="password" name="password" type="password" class="form-control &lt;?php if (isset($errors['password'])) echo 'is-invalid'; ?&gt;" placeholder="Enter password"&gt;
               &lt;?php echo $errors['password'] ?? ""; ?&gt;
             &lt;/div&gt;
