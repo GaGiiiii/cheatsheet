@@ -184,6 +184,7 @@ class Database extends PDO {
     try {
       $data = (object) $data;
       $data-&gt;password = md5(md5($data-&gt;password)); // Hashovanje sifre sa md5
+      $data-&gt;password = password_hash($data-&gt;password, PASSWORD_BCRYPT);
       $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("INSERT INTO user (email, password, firstname, lastname, phone_number, grade, country) VALUES (?, ?, ?, ?, ?, ?, ?)");
       $result = $query-&gt;execute([
         $data-&gt;email,
@@ -1551,7 +1552,8 @@ if (!empty($_FILES['file']['name'])) { // Da li je poslao neke fajlove
     } else {
       echo "Sorry, there was an error uploading your file.";
     }
-  }           
+  }
+}           
                     </pre>
 
             <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
