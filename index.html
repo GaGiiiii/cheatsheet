@@ -510,10 +510,16 @@ include_once 'includes/functions.php';
 require_once 'classes/Database.php';
 
 if (Database::getInstance()-&gt;isUserLoggedIn()) {
-  $_SESSION['unauthorized_access'] = '&lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
-        &lt;strong&gt;Danger!&lt;/strong&gt; Access denied! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
-        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/i&gt;&lt;/button&gt;
-      &lt;/div&gt;';
+  $_SESSION['unauthorized_access'] = '&lt;div class="container-fluid"&gt;
+    &lt;div class="row"&gt;
+      &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+        &lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+          &lt;strong&gt;Danger!&lt;/strong&gt; Access denied! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+          &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;';
   header("Location: pocetna");
 
   exit;
@@ -648,10 +654,16 @@ include_once 'includes/config.php';
 require_once 'classes/Database.php';
 
 if (Database::getInstance()-&gt;isUserLoggedIn()) {
-  $_SESSION['unauthorized_access'] = '&lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
-        &lt;strong&gt;Danger!&lt;/strong&gt; Access denied! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
-        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
-      &lt;/div&gt;';
+  $_SESSION['unauthorized_access'] = '&lt;div class="container-fluid"&gt;
+    &lt;div class="row"&gt;
+      &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+        &lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+          &lt;strong&gt;Danger!&lt;/strong&gt; Access denied! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+          &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;';
   header("Location: pocetna");
 
   exit;
@@ -1205,15 +1217,15 @@ $loggedIn = Database::getInstance()-&gt;isUserLoggedIn();
 
 if (!$loggedIn || ($loggedIn &amp;&amp; !$_SESSION['user']['user.is_admin'])) {
   $_SESSION['unauthorized_access'] = '&lt;div class="container-fluid"&gt;
-  &lt;div class="row"&gt;
-    &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
-      &lt;div class="alert alert-danger alert-dismissible fade show" role="alert"&gt;
-        &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
-        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+    &lt;div class="row"&gt;
+      &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+        &lt;div class="alert alert-danger alert-dismissible fade show" role="alert"&gt;
+          &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+          &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+        &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;';
+  &lt;/div&gt;';
   header("Location: " . BASE_URL . "pocetna");
 
   exit;
@@ -1242,15 +1254,15 @@ require_once 'classes/Database.php';
 
 if (!Database::getInstance()-&gt;isUserLoggedIn()) {
   $_SESSION['unauthorized_access'] = '&lt;div class="container-fluid"&gt;
-  &lt;div class="row"&gt;
-    &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
-      &lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
-        &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
-        &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/i&gt;&lt;/button&gt;
+    &lt;div class="row"&gt;
+      &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+        &lt;div class="alert alert-danger alert-dismissible show" role="alert"&gt;
+          &lt;strong&gt;Greška!&lt;/strong&gt; Zabranjen pristup! &lt;i class="fas fa-exclamation-triangle"&gt;&lt;/i&gt;
+          &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/i&gt;&lt;/button&gt;
+        &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;';
+  &lt;/div&gt;';
   header("Location: pocetna");
 
   exit;
