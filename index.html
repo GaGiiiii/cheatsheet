@@ -227,10 +227,16 @@ class Database extends PDO {
 
   /* oUPDATE */
 
-  public function warnUser($user_id) {
+  public function updateProduct($data, $productID) {
     try {
-      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `user` SET warned = 1 WHERE id = ?");
-      $result = $query-&gt;execute([$user_id]);
+      $query = Database::getInstance()-&gt;getConnection()-&gt;prepare("UPDATE `product` SET name = ?, price = ?, image = ?, description = ? WHERE id = ?");
+      $result = $query-&gt;execute([
+        $data['name_edit'],
+        $data['price_edit'],
+        $data['image_edit'],
+        $data['description_edit'],
+        $productID,
+        ]);
 
       return $result;
     } catch (PDOException $e) {
@@ -805,7 +811,7 @@ if (isset($_POST['register'])) {
             &lt;/div&gt;
 
             &lt;div class="mb-4"&gt;
-              &lt;label class="form-label"&gt;Passowrd &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
+              &lt;label class="form-label"&gt;Password &lt;strong class="text-danger"&gt;*&lt;/strong&gt;&lt;/label&gt;
               &lt;input name="password" type="password" class="form-control &lt;?php if (isset($errors['password']) || isset($errors['password_confirm'])) echo 'is-invalid'; ?&gt;" placeholder="Confirm password"&gt;
               &lt;?php echo $errors['password'] ?? ""; ?&gt;
               &lt;?php echo $errors['password_confirm'] ?? ""; ?&gt;
@@ -905,14 +911,21 @@ if (isset($_POST['delete-course'])) {
   $id = clean($_POST['course_id']);
 
   if (Database::getInstance()-&gt;deleteCourse($id)) {
-    $_SESSION['delete_course_success_message'] = '&lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
-                Brisanje kursa &lt;strong&gt;"' . clean($_POST['course_name']) . '"&lt;/strong&gt; uspešno! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
-                &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
-              &lt;/div&gt;';
+    $_SESSION['delete_product_success_message'] = '&lt;div class="container-fluid"&gt;
+    &lt;div class="row"&gt;
+      &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+        &lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
+          Success! &lt;strong&gt;"' . clean($_POST['product_name']) . '"&lt;/strong&gt; successfully deleted! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
+          &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;';
   }
 }
 
 if (isset($_POST['update-course'])) {
+  $id_edit = clean($_POST['id_edit']);
   $name_edit = clean($_POST['name_edit']);
   $description_edit = clean($_POST['description_edit']);
 
@@ -933,10 +946,16 @@ if (isset($_POST['update-course'])) {
     );
 
     if (Database::getInstance()-&gt;updateCourse($data, $id_edit)) {
-      $_SESSION['add_course_success_message'] = '&lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
-                Update kursa &lt;strong&gt;"' . $name_edit . '"&lt;/strong&gt; uspešno! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
-                &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
-              &lt;/div&gt;';
+      $_SESSION['update_product_success_message'] = '&lt;div class="container-fluid"&gt;
+      &lt;div class="row"&gt;
+        &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+          &lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
+            Success! &lt;strong&gt;"' . $name_edit . '"&lt;/strong&gt; successfully updated! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
+            &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;';
       $name_edit = "";
       $description_edit = "";
     }
@@ -964,10 +983,16 @@ if (isset($_POST['add-course'])) {
     );
 
     if (Database::getInstance()-&gt;addCourse($data)) {
-      $_SESSION['add_course_success_message'] = '&lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
-                Dodavanje kursa &lt;strong&gt;"' . $name . '"&lt;/strong&gt; uspešno! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
-                &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
-              &lt;/div&gt;';
+      $_SESSION['add_product_success_message'] = '&lt;div class="container-fluid"&gt;
+      &lt;div class="row"&gt;
+        &lt;div class="col-md-10 col-sm-10 offset-sm-1 offset-md-1 p-0 mt-5"&gt;
+          &lt;div class="alert alert-warning alert-dismissible fade show" role="alert"&gt;
+            Success!&lt;strong&gt; "' . $name . '"&lt;/strong&gt; successfully added! &lt;i class="fas fa-check"&gt;&lt;/i&gt;
+            &lt;button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"&gt;&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;';
 
       $name = "";
       $description = "";
@@ -1342,6 +1367,11 @@ if ($_SERVER['SERVER_NAME'] == "localhost") {
           <div class="collapse" id="collapseExampleOC3">
             <pre>
 &lt;?php
+
+&lt;?php printFormatedFlashMessage("add_product_success_message"); ?&gt;
+&lt;?php printFormatedFlashMessage("delete_product_success_message"); ?&gt;
+&lt;?php printFormatedFlashMessage("update_product_success_message"); ?&gt;
+
 function clean($input) {
   $input = trim($input);
   $input = str_replace('"', "", $input);
