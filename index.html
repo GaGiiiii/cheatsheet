@@ -5852,10 +5852,10 @@ exit;
     axios.get(`https://jsonplaceholder.typicode.com/todos?_limit=5`, {
       timeout: 5, // ako prodje 5ms a server ne vrati odgovor prekidaj
     })
-    .then((res) =&amp;gt; {
+    .then((res) =&gt; {
       console.log(response);
     })
-    .catch((error) =&amp;gt; {
+    .catch((error) =&gt; {
       console.log(error.response.data);
       console.log(error.response.status);
       console.log(error.response.headers);
@@ -5891,14 +5891,14 @@ exit;
   
   axios.post(`url`, {
     details,
-  }).then(res =&amp;gt; {
+  }).then(res =&gt; {
     console.log("============RES============");
     console.log(res);
     console.log("============RES============");
     console.log("============RES DATA============");
     console.log(res.data);
     console.log("============RES DATA============");
-  }).catch(err =&amp;gt; {
+  }).catch(err =&gt; {
     console.log(error.response.data);
     console.log(error.response.status);
     console.log(error.response.headers);
