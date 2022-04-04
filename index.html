@@ -56,6 +56,7 @@
 
       <div class="col-lg-2 col-md-3 my-5" id="menu-container">
         <div id="menu" class="list-group">
+          <a class="list-group-item list-group-item-action" data-menu-item="laravel" href="#laravel">Laravel</a>
           <a class="list-group-item list-group-item-action" data-menu-item="php" href="#php">PHP</a>
           <a class="list-group-item list-group-item-action" data-menu-item="nodejs" href="#nodejs">NodeJS</a>
           <a class="list-group-item list-group-item-action" data-menu-item="js" href="#js">JS</a>
@@ -74,6 +75,463 @@
       </div>
 
       <div id="col-right" class="col-lg-10 col-md-9 col-sm-12 mb-5 mt-3 pr-5">
+
+        <!-- ---------- LARAVEL ---------- -->
+        <div id="laravel">
+            <h1 class="mb-5"><u>Laravel</u></h1>
+
+
+    <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
+        DTO Class - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse" id="collapseExampleOC3">
+        <pre>
+&lt;?php
+
+namespace App\Data\User;
+
+use App\Models\Role;
+use Illuminate\Http\Request;
+use Spatie\DataTransferObject\DataTransferObject;
+
+class UserData extends DataTransferObject
+{
+    public string $name;
+    public string $email;
+    public ?string $password;
+    public Role $role;
+
+    public static function fromRequest(Request $request)
+    {
+        return new static([
+            'name' =&gt; $request-&gt;name,
+            'email' =&gt; $request-&gt;email,
+            'password' =&gt; $request-&gt;password,
+            'role' =&gt; Role::findById($request-&gt;role_id)
+        ]);
+    }
+}
+            
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+
+
+
+
+
+    <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
+        Service Class - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse" id="collapseExampleOC3">
+        <pre>
+&lt;?php
+
+namespace App\Services\User;
+
+use App\Data\User\UserData;
+use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
+class UserService
+{
+
+    /**
+        * Retrieves all the categories.
+        *
+        * @return LengthAwarePaginator
+        */
+    public function getAll(): LengthAwarePaginator
+    {
+        return User::paginate(10);
+    }
+
+    /**
+        * Retrieves single User.
+        *
+        * @param int $id
+        * @return User
+        * @throws ModelNotFoundException
+        */
+    public function getById(int $id): ?User
+    {
+        return User::findOrFail($id);
+    }
+
+    /**
+        * Creates a new User.
+        *
+        * @param UserData $userData
+        * @return User
+        */
+    public function create(UserData $userData): User
+    {
+        $user = new User();
+        $userData-&gt;password = Hash::make($userData-&gt;password);
+        $user = $user-&gt;create($userData-&gt;toArray());
+
+        return $user;
+    }
+
+    /**
+        * Updates a existing User.
+        *
+        * @param UserData $userData
+        * @param User|null $user
+        * @return User
+        * @throws ModelNotFoundException
+        */
+    public function update(UserData $userData, ?User $user): User
+    {
+        if ($user === null) {
+            throw new ModelNotFoundException();
+        }
+
+        if ($userData-&gt;password === null) {
+            $user-&gt;update($userData-&gt;except('password')-&gt;toArray());
+
+            return $user-&gt;refresh();
+        }
+
+        $userData-&gt;password = Hash::make($userData-&gt;password);
+        $user-&gt;update($userData-&gt;toArray());
+
+        return $user-&gt;refresh();
+    }
+
+    /**
+        * Deletes a existing User.
+        *
+        * @param User $user
+        * @return User
+        */
+    public function delete(?User $user): User
+    {
+        if ($user === null) {
+            throw new ModelNotFoundException();
+        }
+
+        $user-&gt;delete();
+
+        return $user;
+    }
+}            
+            
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+
+
+
+
+          <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
+        Controller Class - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse" id="collapseExampleOC3">
+        <pre>
+&lt;?php
+
+namespace App\Http\Controllers;
+
+use App\Data\User\UserData;
+use App\Http\Requests\User\CreateUserRequest;
+use App\Http\Requests\User\DeleteUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\User\UserResource;
+use App\Services\User\UserService;
+use Doctrine\DBAL\Query\QueryException;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResource;
+use Illuminate\Support\Facades\Log;
+
+class UserController extends Controller
+{
+
+    private UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this-&gt;userService = $userService;
+    }
+
+    /**
+        * Display a listing of the resource.
+        *
+        * @return JsonResource
+        */
+    public function index()
+    {
+        try {
+            $users = $this-&gt;userService-&gt;getAll();
+        } catch (QueryException $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
+        } catch (Exception $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
+        }
+
+        return (UserResource::collection($users))-&gt;additional([
+            'message' =&gt; 'User found'
+        ]);
+    }
+
+    /**
+        * Store a newly created resource in storage.
+        *
+        * @param  CreateUserRequest  $request
+        * @return JsonResource
+        */
+    public function store(CreateUserRequest $request)
+    {
+        try {
+            $user = $this-&gt;userService-&gt;create(UserData::fromRequest($request));
+        } catch (QueryException $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
+        } catch (Exception $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
+        }
+
+        return (new UserResource($user))-&gt;additional([
+            'message' =&gt; 'User created'
+        ])-&gt;response()-&gt;setStatusCode(201);
+    }
+
+    /**
+        * Display the specified resource.
+        *
+        * @param  int  $id
+        * @return JsonResource
+        */
+    public function show($id)
+    {
+        try {
+            $user = $this-&gt;userService-&gt;getById($id);
+        } catch (QueryException $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
+        } catch (ModelNotFoundException $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "User not found",
+            ], 404);
+        } catch (Exception $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
+        }
+
+        return (new UserResource($user))-&gt;additional([
+            'message' =&gt; 'User found'
+        ]);
+    }
+
+    /**
+        * Update the specified resource.
+        *
+        * @param  UpdateUserRequest  $request
+        * @param  int  $id
+        * @return JsonResource
+        */
+    public function update(UpdateUserRequest $request, $id)
+    {
+        try {
+            $user = $this-&gt;userService-&gt;update(UserData::fromRequest($request), $request-&gt;user);
+        } catch (ModelNotFoundException $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "User not found.",
+            ], 404);
+        }
+
+        return (new UserResource($user))-&gt;additional([
+            'message' =&gt; 'User updated'
+        ]);
+    }
+
+    /**
+        * Delete the specified resource.
+        *
+        * @param  DeleteUserRequest  $request
+        * @param  int  $id
+        * @return JsonResource
+        */
+    public function destroy(DeleteUserRequest $request, $id)
+    {
+        try {
+            $user = $this-&gt;userService-&gt;delete($request-&gt;user);
+        } catch (ModelNotFoundException $e) {
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "User not found.",
+            ], 404);
+        }
+
+        return (new UserResource($user))-&gt;additional([
+            'message' =&gt; 'User Deleted'
+        ]);
+    }
+}
+            
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+
+
+
+
+
+          <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
+        Update/Delete Request Class - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse" id="collapseExampleOC3">
+        <pre>
+&lt;?php
+
+namespace App\Http\Requests\User;
+
+use App\Services\User\UserService;
+use Exception;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+
+class UpdateUserRequest extends FormRequest
+{
+
+    private UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this-&gt;userService = $userService;
+    }
+
+    /**
+        * Determine if the user is authorized to make this request.
+        *
+        * @return bool
+        */
+    public function authorize()
+    {
+        try {
+            $this-&gt;user = $this-&gt;userService-&gt;getById($this-&gt;route('user'));
+        } catch (ModelNotFoundException $e) {
+            $this-&gt;user = null;
+
+            return true;
+        }
+
+        return auth()-&gt;check() &amp;&amp; auth()-&gt;user()-&gt;isUBER();
+    }
+
+    /**
+        * Get the validation rules that apply to the request.
+        *
+        * @return array
+        */
+    public function rules()
+    {
+        return [
+            'email' =&gt; 'email|required|max:255|unique:mysql_users.screener_users.users,email',
+            'password' =&gt; 'string|nullable|max:255',
+            'name' =&gt; 'string|required|max:255',
+            'role_id' =&gt; [
+                'bail',
+                'required',
+                'integer',
+                Rule::in([2]),
+            ]
+        ];
+    }
+
+//    protected function failedValidation(Validator $validator)
+//    {
+//        $response = response()-&gt;json([
+//            'category' =&gt; null,
+//            'message' =&gt; 'Validation failed.',
+//            'errors' =&gt; $validator-&gt;messages(),
+//            ], 400);
+//
+//        throw new ValidationException($validator, $response);
+//    }
+}
+            
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+        <!-- ---------- LARAVEL ---------- -->
+
+
+
+
+
         <!-- ---------- PHP ---------- -->
         <div id="php">
           <h1 class="mb-5"><u>PHP</u></h1>
