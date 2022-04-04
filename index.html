@@ -35,6 +35,30 @@
       color: white;
     }
 
+    .collapse-btn-G, .collapse-btn-G:active, .collapse-btn-G:focus{
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .collapse-btn-G .collapse-arrow{
+        transform: rotate(90deg);
+        display: inline-block;
+        transition: transform .2s ease-in-out;
+    }
+
+    .collapse-btn-G.collapsed .collapse-arrow{
+        transform: rotate(0);
+        display: inline-block;
+    }
+
+    .collapse-arrow{
+        color: black;
+        font-size:50px;
+        position: relative;
+        margin-left: 10px;
+    }
+
     @media only screen and (max-width: 768px) {
       #menu-container {
         display: none;
@@ -78,8 +102,12 @@
 
         <!-- ---------- LARAVEL ---------- -->
         <div id="laravel">
-            <h1 class="mb-5"><u>Laravel</u></h1>
+            <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#laravel-collapse" aria-expanded="false" aria-controls="laravel-collapse">
+                <u>Laravel</u>
+                 <span class="collapse-arrow">&#8250;</span>
+            </h1>
 
+<div class="collapse" id="laravel-collapse">
 
     <!-- SECTION START -->
     <p class="font-weight-bold text-dark">
@@ -89,7 +117,7 @@
         <button class="btn btn-primary btn-sm copy-btn">Copy</button>
       </p>
       <hr>
-      <div class="collapse" id="collapseExampleOC3">
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
         <pre>
 &lt;?php
 
@@ -136,7 +164,7 @@ class UserData extends DataTransferObject
         <button class="btn btn-primary btn-sm copy-btn">Copy</button>
       </p>
       <hr>
-      <div class="collapse" id="collapseExampleOC3">
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
         <pre>
 &lt;?php
 
@@ -251,7 +279,7 @@ class UserService
         <button class="btn btn-primary btn-sm copy-btn">Copy</button>
       </p>
       <hr>
-      <div class="collapse" id="collapseExampleOC3">
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
         <pre>
 &lt;?php
 
@@ -430,7 +458,7 @@ class UserController extends Controller
         <button class="btn btn-primary btn-sm copy-btn">Copy</button>
       </p>
       <hr>
-      <div class="collapse" id="collapseExampleOC3">
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
         <pre>
 &lt;?php
 
@@ -513,7 +541,7 @@ class UpdateUserRequest extends FormRequest
       <!-- SECTION END -->
 
 
-
+</div>
 
 
 
@@ -534,7 +562,13 @@ class UpdateUserRequest extends FormRequest
 
         <!-- ---------- PHP ---------- -->
         <div id="php">
-          <h1 class="mb-5"><u>PHP</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#php-collapse" aria-expanded="false" aria-controls="php-collapse">
+              <u>PHP</u>
+              <span class="collapse-arrow">&#8250;</span>
+            </h1>
+
+
+        <div class="collapse" id="php-collapse">
 
 
           <!-- SECTION START -->
@@ -545,7 +579,7 @@ class UpdateUserRequest extends FormRequest
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -976,7 +1010,7 @@ class Database extends PDO {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -1119,7 +1153,7 @@ if (isset($_POST['login'])) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -1357,7 +1391,7 @@ if (isset($_POST['register'])) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php ob_start(); ?&gt;
 
@@ -1513,7 +1547,7 @@ $grades = Database::getInstance()-&gt;getAllGrades();
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php require_once "classes/Database.php"; ?&gt;
 &lt;?php require_once "includes/config.php"; ?&gt;
@@ -1676,7 +1710,7 @@ $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], 
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;br&gt;&lt;br&gt;&lt;br&gt;
 
@@ -1704,7 +1738,7 @@ $currentPage = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], 
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php require_once "../classes/Database.php"; ?&gt;
 &lt;?php require_once "../includes/config.php"; ?&gt;
@@ -1744,7 +1778,7 @@ if (!$loggedIn || ($loggedIn &amp;&amp; !$_SESSION['user']['user.is_admin'])) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -1797,7 +1831,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -1822,7 +1856,7 @@ if ($_SERVER['SERVER_NAME'] == "localhost") {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -1910,7 +1944,7 @@ function printFlashMessage($sessionName) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 ## SOURCE: http://www.developphp.com/video/Miscellaneous/Semantic-URL-htaccess-Tutorial-SEO-Friendly-and-Clean-Links
 
@@ -1974,7 +2008,7 @@ RewriteRule ^.* - [F,L]
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 // Import PHPMailer classes into the global namespace
 // These must be at the top of your script, not inside a function
@@ -2035,7 +2069,7 @@ try {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -2088,7 +2122,7 @@ if (!empty($_FILES['file']['name'])) { // Da li je poslao neke fajlove
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -2173,7 +2207,7 @@ if (!empty($_FILES['files']['name'][0])) { // Da li je poslao neke fajlove
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 https://www.google.com/recaptcha/admin/
 
@@ -2237,7 +2271,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   ob_start();
 </pre>
@@ -2255,7 +2289,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -2276,7 +2310,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php 
 
@@ -2328,7 +2362,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   require_once 'Database.php';
 
@@ -2440,7 +2474,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   require_once 'Database.php'; // Pozivanje fajla gde je Database
 
@@ -2534,7 +2568,7 @@ function post_captcha($user_response) {
 
 
 
-
+        </div>
 
 
 
@@ -2549,7 +2583,12 @@ function post_captcha($user_response) {
 
         <!-- ---------- NODEJS ---------- -->
         <div id="nodejs" class="mb-5">
-          <h1 class="mb-5"><u>NODEJS</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#nodejs-collapse" aria-expanded="false" aria-controls="nodejs-collapse">
+              <u>NODEJS</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+        <div class="collapse" id="nodejs-collapse">
 
 
           <!-- SECTION START -->
@@ -2560,7 +2599,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   npm i nodemon --save
 
@@ -2587,7 +2626,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   /* ********** DB CONFIG ********** */
 
@@ -2614,7 +2653,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const LocalStrategy = require('passport-local').Strategy;
   const UserModel = require('../models/user.model');
@@ -2689,7 +2728,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   /* ********** MODELS ********** */
 
@@ -2821,7 +2860,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   /* ********** MODELS ********** */
 
@@ -2946,7 +2985,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   /* ********** MODELS ********** */
 
@@ -3135,7 +3174,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   /* ********** MODELS ********** */
 
@@ -3589,7 +3628,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
@@ -3634,7 +3673,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
@@ -3696,7 +3735,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
@@ -3764,7 +3803,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const mongoose = require('mongoose');
   const Schema = mongoose.Schema;
@@ -3840,7 +3879,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const express = require('express');
   const router = express.Router();
@@ -3903,7 +3942,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const express = require('express');
   const router = express.Router();
@@ -3965,7 +4004,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   https://gist.github.com/brianmacarthur/a4e3e0093d368aa8e423
 
@@ -4017,7 +4056,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   /* ********** DEPENDENCIES ********** */
 
@@ -4133,7 +4172,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   {{#if message}}
   &lt;div class="container-fluid mt-5"&gt;
@@ -4202,7 +4241,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 
 
@@ -4262,7 +4301,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;div class="row"&gt;
     &lt;div class="col-md-8 offset-md-2" id="body-container"&gt;
@@ -4343,7 +4382,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   {{!-- {{log commentID}} --}}
 
@@ -4504,7 +4543,7 @@ function post_captcha($user_response) {
       {{#if ../loggedInUser}}
   
       &lt;!--Edit comment form--&gt;
-        &lt;div class="collapse" id="collapseEdit{{this._id}}"&gt;
+        &lt;div class="collapse custom-collapse-class" id="collapseEdit{{this._id}}"&gt;
           &lt;div class="well well-edit"&gt;
             &lt;h4&gt;Edit your comment &lt;i class="fas fa-pencil-alt"&gt;&lt;/i&gt;&lt;/h4&gt;
             &lt;form id="edit-comment-form{{this._id}}" name="{{this._id}}" action="/comments/update/{{this._id}}" method="POST" onsubmit="return validateEditCommentForm(this);"&gt;
@@ -4555,7 +4594,7 @@ function post_captcha($user_response) {
     &lt;/div&gt;
   
   &lt;!--Collapse Add a comment form START--&gt;
-    &lt;div class="collapse" id="collapseComment"&gt;
+    &lt;div class="collapse custom-collapse-class" id="collapseComment"&gt;
       &lt;div class="well"&gt;
         {{#unless loggedInUser}}
           &lt;!--If the user is not logged in, direct him to the login page--&gt;
@@ -4599,7 +4638,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
@@ -4692,7 +4731,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   module.exports = {
     userJoins,
@@ -4730,7 +4769,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   /* ********** DEPENDENCIES ********** */
 
@@ -4955,7 +4994,7 @@ function post_captcha($user_response) {
 
 
 
-
+        </div>
 
 
 
@@ -4972,7 +5011,14 @@ function post_captcha($user_response) {
 
         <!-- ---------- JS ---------- -->
         <div id="js" class="mb-5">
-          <h1 class="mb-5"><u>JS</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#js-collapse" aria-expanded="false" aria-controls="js-collapse">
+              <u>JS</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+
+        <div class="collapse" id="js-collapse">
+
 
 
           <!-- SECTION START -->
@@ -4983,7 +5029,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   let element = document.querySelector(`[data-video-index="${counterPlyr++}"]`);
   let element = document.querySelector(`input[name="${insertNameHere}"]`);
@@ -5003,7 +5049,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
             buttons[i].dataset.target = "#collapseExample" + i; // If attr is data-index-here-comes in JS it will return dataset.indexHereComes
             buttons[i].setAttribute("aria-controls", "collapseExample" + i);
@@ -5024,7 +5070,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   zastoHocePanelDiv.style.display = "block";
   event.target.disabled
@@ -5045,7 +5091,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   let logo = document.querySelector('a.navbar-brand');
 
@@ -5074,7 +5120,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   let pathname = window.location.pathname; // Returns path only (/path/example.html)
   let url      = window.location.href;     // Returns full URL (https://example.com/path/example.html)
@@ -5110,7 +5156,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   const socket = io(origin); // Client Socket
   const socket = io(origin + '/'); // Client socket
@@ -5144,7 +5190,7 @@ function post_captcha($user_response) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 function cleanInput(input){
   // Create a new div element
@@ -5260,7 +5306,7 @@ function validateEmail(email) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   window.location.href = redirectInfo.destination;
   let startHash = window.location.hash;
@@ -5290,7 +5336,7 @@ function validateEmail(email) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   td.parentNode.removeChild(td);
   userList.appendChild(li);
@@ -5315,7 +5361,7 @@ function validateEmail(email) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 const targets = document.querySelectorAll('img[data-lazy]');
 
@@ -5351,7 +5397,7 @@ targets.forEach(lazyLoad);
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 // SCROLL TO TOP =========================================================================================================
 
@@ -5388,7 +5434,7 @@ document.addEventListener("scroll", (event) => {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 let variablesKeys = Object.keys(variables);
 </pre>
@@ -5408,7 +5454,7 @@ let variablesKeys = Object.keys(variables);
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 let windowWidth = window.innerWidth;
 
@@ -5430,7 +5476,7 @@ window.addEventListener('resize', () => {
 
 
 
-
+        </div>
 
 
 
@@ -5449,8 +5495,12 @@ window.addEventListener('resize', () => {
 
         <!-- ---------- BOOTSTRAP ---------- -->
         <div id="bootstrap" class="mb-5">
-          <h1 class="mb-5"><u>BOOTSTRAP 5</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#bootstrap-collapse" aria-expanded="false" aria-controls="bootstrap-collapse">
+              <u>BOOTSTRAP 5</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
 
+        <div class="collapse" id="bootstrap-collapse">
 
 
           <!-- SECTION START -->
@@ -5461,7 +5511,7 @@ window.addEventListener('resize', () => {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 // Selektujemo collapse DIV, znaci ne button koji kliknemo da se desi collapse,
 // Nego div u kome je collapse content, zatim napravimo promenljivu koja je tipa
@@ -5491,6 +5541,8 @@ if (currentChapter != newChapter) {
 
 
         </div>
+
+        </div>
         <!-- ---------- BOOTSTRAP ---------- -->
 
 
@@ -5498,7 +5550,14 @@ if (currentChapter != newChapter) {
 
         <!-- ---------- HTML ---------- -->
         <div id="html" class="mb-5">
-          <h1 class="mb-5"><u>HTML</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#html-collapse" aria-expanded="false" aria-controls="html-collapse">
+              <u>HTML</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+
+        <div class="collapse" id="html-collapse">
+
 
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark">
@@ -5508,7 +5567,7 @@ if (currentChapter != newChapter) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;input type="tel" name="broj_telefona" class="form-control" id="broj-telefona" placeholder="Format: +381-XXXXXXX" value="&lt;?php echo $brojTelefona ?? ''; ?&gt;" pattern="\+[0-9]{3}-[0-9]{8,9}"&gt;
 </pre>
@@ -5526,7 +5585,7 @@ if (currentChapter != newChapter) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;form onsubmit="return validateForm(this)"&gt;&lt;/form&gt;
 </pre>
@@ -5536,6 +5595,7 @@ if (currentChapter != newChapter) {
           </div>
           <!-- SECTION END -->
 
+</div>
 
         </div>
         <!-- ---------- HTML ---------- -->
@@ -5545,8 +5605,12 @@ if (currentChapter != newChapter) {
 
         <!-- ---------- CSS ---------- -->
         <div id="css" class="mb-5">
-          <h1 class="mb-5"><u>CSS</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#css-collapse" aria-expanded="false" aria-controls="css-collapse">
+              <u>CSS</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
 
+        <div class="collapse" id="css-collapse">
 
 
           <!-- SECTION START -->
@@ -5557,7 +5621,7 @@ if (currentChapter != newChapter) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 .accordion-button::after {
   background-image: none;
@@ -5582,7 +5646,7 @@ if (currentChapter != newChapter) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
             .success-message-custom{
               position: fixed;
@@ -5614,6 +5678,7 @@ if (currentChapter != newChapter) {
           </div>
           <!-- SECTION END -->
 
+            </div>
         </div>
         <!-- ---------- CSS ---------- -->
 
@@ -5622,7 +5687,13 @@ if (currentChapter != newChapter) {
 
         <!-- ---------- OWL CAROUSEL ---------- -->
         <div id="owl-carousel" class="mb-5">
-          <h1 class="mb-5"><u>OWL CAROUSEL</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#owl-collapse" aria-expanded="false" aria-controls="owl-collapse">
+              <u>OWL CAROUSEL</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+        <div class="collapse" id="owl-collapse">
+
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark">
             HTML
@@ -5631,7 +5702,7 @@ if (currentChapter != newChapter) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;!-- OWL CAROSEL --&gt;
   &lt;section id="banner-area"&gt;
@@ -5659,7 +5730,7 @@ if (currentChapter != newChapter) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   #banner-area img{
     max-height: 700px;
@@ -5679,7 +5750,7 @@ if (currentChapter != newChapter) {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 // BANNER OWL CAROUSEL
 $("#banner-area .owl-carousel").owlCarousel({
@@ -5755,7 +5826,7 @@ $("#blogs .owl-carousel").owlCarousel({
               aria-expanded="false" aria-controls="collapseExample3">-</button>
           </div>
           <!-- SECTION END -->
-
+        </div>
 
         </div>
         <!-- ---------- OWL CAROUSEL ---------- -->
@@ -5775,8 +5846,12 @@ $("#blogs .owl-carousel").owlCarousel({
 
         <!-- ---------- AJAX ---------- -->
         <div id="ajax" class="mb-5">
-          <h1 class="mb-5"><u>AJAX, XHR</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#ajax-collapse" aria-expanded="false" aria-controls="ajax-collapse">
+              <u>AJAX, XHR</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
 
+        <div class="collapse" id="ajax-collapse">
 
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark important-color">
@@ -5786,7 +5861,7 @@ $("#blogs .owl-carousel").owlCarousel({
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;?php
 
@@ -5867,7 +5942,7 @@ $("#blogs .owl-carousel").owlCarousel({
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
@@ -5932,7 +6007,7 @@ $("#blogs .owl-carousel").owlCarousel({
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
@@ -6062,7 +6137,7 @@ $("#blogs .owl-carousel").owlCarousel({
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
@@ -6139,7 +6214,7 @@ $("#blogs .owl-carousel").owlCarousel({
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 
 =========================================  PHP FILE ==================================================
@@ -6198,7 +6273,7 @@ exit;
           </div>
           <!-- SECTION END -->
 
-
+        </div>
 
         </div>
         <!-- ---------- AJAX ---------- -->
@@ -6213,7 +6288,12 @@ exit;
 
         <!-- ---------- AXIOS ---------- -->
         <div id="axios" class="mb-5">
-          <h1 class="mb-5"><u>AXIOS</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#axios-collapse" aria-expanded="false" aria-controls="axios-collapse">
+              <u>AXIOS</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+        <div class="collapse" id="axios-collapse">
 
 
           <!-- SECTION START -->
@@ -6224,7 +6304,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   &lt;!DOCTYPE html&gt;
   &lt;html lang="en"&gt;
@@ -6287,7 +6367,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   // AXIOS GLOBALS
 
@@ -6567,7 +6647,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 &lt;?php
 
@@ -6587,7 +6667,7 @@ exit;
           </div>
           <!-- SECTION END -->
 
-
+        </div>
         </div>
         <!-- ---------- AXIOS ---------- -->
 
@@ -6603,8 +6683,12 @@ exit;
 
         <!-- ---------- JAVA ---------- -->
         <div id="java" class="mb-5">
-          <h1 class="mb-5"><u>JAVA</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#java-collapse" aria-expanded="false" aria-controls="java-collapse">
+              <u>JAVA</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
 
+        <div class="collapse" id="java-collapse">
 
           <!-- SECTION START -->
           <p class="font-weight-bold text-dark">
@@ -6614,7 +6698,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   <img src="Screenshot_1.png" alt="">
 </pre>
@@ -6634,7 +6718,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   public class Controller {
 
@@ -6713,7 +6797,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   public class Database {
 
@@ -6763,7 +6847,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   public interface IDatabase&lt;T, K&gt; {
 
@@ -6794,7 +6878,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   try {
     String query = "INSERT INTO `show` (naziv, opis, trajanje, godina_proizvodnje, datum_pocetka, tip, studio_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -6838,7 +6922,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   List&lt;Show&gt; shows = new ArrayList&lt;&gt;();
 
@@ -6878,7 +6962,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   Studio s = null;
 
@@ -6912,7 +6996,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   try {
     String query = "UPDATE `prop` SET zalihe = zalihe - 1 WHERE id = ?";
@@ -6940,7 +7024,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   public class MemoryAdmin implements IDatabase&lt;Admin, Long&gt; {
 
@@ -6995,7 +7079,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   public class ViewController {
     
@@ -7053,7 +7137,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 
   private final int MAX_BROJ_POKUSAJA = 3;
@@ -7136,7 +7220,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {                                        
     try {
@@ -7242,7 +7326,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   private void selectBtnActionPerformed(java.awt.event.ActionEvent evt) {                                          
     List&lt;Prop&gt; props = new ArrayList&lt;&gt;();
@@ -7291,7 +7375,7 @@ exit;
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class PropsTableModel extends AbstractTableModel {
 
@@ -7378,7 +7462,7 @@ public class PropsTableModel extends AbstractTableModel {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
   private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {                                       
     ApplicationTableModel model = (ApplicationTableModel) crudTable.getModel();
@@ -7447,9 +7531,7 @@ public class PropsTableModel extends AbstractTableModel {
           </div>
           <!-- SECTION END -->
 
-
-
-
+        </div>
 
 
         </div>
@@ -7459,7 +7541,12 @@ public class PropsTableModel extends AbstractTableModel {
 
         <!-- ---------- JAVA 2 ---------- -->
         <div id="java-2" class="mb-5">
-          <h1 class="mb-5"><u>JAVA 2</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#java2-collapse" aria-expanded="false" aria-controls="java2-collapse">
+              <u>JAVA 2</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+        <div class="collapse" id="java2-collapse">
 
 
           <!-- SECTION START -->
@@ -7470,7 +7557,7 @@ public class PropsTableModel extends AbstractTableModel {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class MainForm extends javax.swing.JFrame {
 
@@ -7535,7 +7622,7 @@ public class MainForm extends javax.swing.JFrame {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class StartServer extends Thread {
 
@@ -7599,7 +7686,7 @@ public class StartServer extends Thread {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class CommunicationWithClient extends Thread implements Serializable {
 
@@ -7706,7 +7793,7 @@ public class CommunicationWithClient extends Thread implements Serializable {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class LoginForm extends javax.swing.JFrame {
 
@@ -7753,7 +7840,7 @@ public class LoginForm extends javax.swing.JFrame {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class MainForm extends javax.swing.JFrame {
     
@@ -7821,7 +7908,7 @@ public class MainForm extends javax.swing.JFrame {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class CommunicationWithServer implements Serializable{
 
@@ -7879,7 +7966,7 @@ public class CommunicationWithServer implements Serializable{
           </div>
           <!-- SECTION END -->
 
-
+        </div>
 
         </div>
         <!-- JAVA 2 END -->
@@ -7888,7 +7975,12 @@ public class CommunicationWithServer implements Serializable{
 
         <!-- ---------- JONI START ---------- -->
         <div id="joni" class="mb-5">
-          <h1 class="mb-5"><u>Joni</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#joni-collapse" aria-expanded="false" aria-controls="joni-collapse">
+              <u>Joni</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+        <div class="collapse" id="joni-collapse">
 
 
           <!-- SECTION START -->
@@ -7899,7 +7991,7 @@ public class CommunicationWithServer implements Serializable{
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class ServerNit extends Thread{
 
@@ -8081,7 +8173,7 @@ class ServerReadThread extends Thread{
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class ClientNit {
 
@@ -8210,7 +8302,7 @@ class ClientReadThread extends Thread{
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 public class TimeThread extends Thread{
   SimpleDateFormat sdfTrenutnoVreme; 
@@ -8249,7 +8341,7 @@ public class TimeThread extends Thread{
           </div>
           <!-- SECTION END -->
 
-
+        </div>
 
 
         </div>
@@ -8258,7 +8350,12 @@ public class TimeThread extends Thread{
 
         <!-- ---------- IS START ---------- -->
         <div id="is" class="mb-5">
-          <h1 class="mb-5"><u>IS</u></h1>
+          <h1 class="collapse-btn-G collapsed mb-5" type="button" data-toggle="collapse" data-target="#is-collapse" aria-expanded="false" aria-controls="is-collapse">
+              <u>IS</u>
+            <span class="collapse-arrow">&#8250;</span>
+        </h1>
+
+        <div class="collapse" id="is-collapse">
 
 
           <!-- SECTION START -->
@@ -8269,7 +8366,7 @@ public class TimeThread extends Thread{
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 import org.neuroph.core.NeuralNetwork;
 import org.neuroph.core.data.DataSet;
@@ -8382,7 +8479,7 @@ public class Trening {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 import java.util.ArrayList;
 import org.neuroph.core.NeuralNetwork;
@@ -8535,7 +8632,7 @@ public class Klasa implements LearningEventListener {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 /*
 * To change this license header, choose License Headers in Project Properties.
@@ -8608,7 +8705,7 @@ public class Training {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 /*
 * To change this license header, choose License Headers in Project Properties.
@@ -8799,7 +8896,7 @@ public class DiabetesFEB2018 {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 /*
 * To change this license header, choose License Headers in Project Properties.
@@ -8843,7 +8940,7 @@ public class Training {
             <button class="btn btn-primary btn-sm copy-btn">Copy</button>
           </p>
           <hr>
-          <div class="collapse" id="collapseExampleOC3">
+          <div class="collapse custom-collapse-class" id="collapseExampleOC3">
             <pre>
 /*
 * To change this license header, choose License Headers in Project Properties.
@@ -9026,7 +9123,7 @@ public class BreastCancerJUN2018 {
           <hr>
           <!-- SECTION END -->
 
-
+        </div>
 
 
         </div>

@@ -1,4 +1,4 @@
-let containerDivsForPres = document.querySelectorAll("div.collapse");
+let containerDivsForPres = document.querySelectorAll("div.custom-collapse-class");
 // console.log(containerDivsForPres);
 let buttons = document.querySelectorAll(".cBTN");
 let buttonsClose = document.querySelectorAll(".cBTN-close");
