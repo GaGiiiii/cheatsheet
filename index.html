@@ -317,11 +317,15 @@ class UserController extends Controller
         try {
             $users = $this-&gt;userService-&gt;getAll();
         } catch (QueryException $e) {
+            Log::error('GetAll Users Query Error', [$e-&gt;getMessage()]);
+
             return response()-&gt;json([
                 "data" =&gt; null,
                 "message" =&gt; "Server Error",
             ], 500);
         } catch (Exception $e) {
+            Log::error('GetAll Users Exception Error', [$e-&gt;getMessage()]);
+
             return response()-&gt;json([
                 "data" =&gt; null,
                 "message" =&gt; "Server Error",
@@ -344,11 +348,15 @@ class UserController extends Controller
         try {
             $user = $this-&gt;userService-&gt;create(UserData::fromRequest($request));
         } catch (QueryException $e) {
+            Log::error('Create User Query Error', [$e-&gt;getMessage()]);
+
             return response()-&gt;json([
                 "data" =&gt; null,
                 "message" =&gt; "Server Error",
             ], 500);
         } catch (Exception $e) {
+            Log::error('Create User Exception Error', [$e-&gt;getMessage()]);
+
             return response()-&gt;json([
                 "data" =&gt; null,
                 "message" =&gt; "Server Error",
@@ -371,6 +379,8 @@ class UserController extends Controller
         try {
             $user = $this-&gt;userService-&gt;getById($id);
         } catch (QueryException $e) {
+            Log::error('Get User Query Error', [$e-&gt;getMessage()]);
+
             return response()-&gt;json([
                 "data" =&gt; null,
                 "message" =&gt; "Server Error",
@@ -381,6 +391,8 @@ class UserController extends Controller
                 "message" =&gt; "User not found",
             ], 404);
         } catch (Exception $e) {
+            Log::error('Get User Exception Error', [$e-&gt;getMessage()]);
+
             return response()-&gt;json([
                 "data" =&gt; null,
                 "message" =&gt; "Server Error",
@@ -403,11 +415,25 @@ class UserController extends Controller
     {
         try {
             $user = $this-&gt;userService-&gt;update(UserData::fromRequest($request), $request-&gt;user);
+        } catch (QueryException $e) {
+            Log::error('Update User Query Error', [$e-&gt;getMessage()]);
+
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
         } catch (ModelNotFoundException $e) {
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "User not found.",
+                "message" =&gt; "User not found",
             ], 404);
+        } catch (Exception $e) {
+            Log::error('Update User Exception Error', [$e-&gt;getMessage()]);
+
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
         }
 
         return (new UserResource($user))-&gt;additional([
@@ -426,11 +452,25 @@ class UserController extends Controller
     {
         try {
             $user = $this-&gt;userService-&gt;delete($request-&gt;user);
+        } catch (QueryException $e) {
+            Log::error('Delete User Query Error', [$e-&gt;getMessage()]);
+
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
         } catch (ModelNotFoundException $e) {
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "User not found.",
+                "message" =&gt; "User not found",
             ], 404);
+        } catch (Exception $e) {
+            Log::error('Delete User Exception Error', [$e-&gt;getMessage()]);
+
+            return response()-&gt;json([
+                "data" =&gt; null,
+                "message" =&gt; "Server Error",
+            ], 500);
         }
 
         return (new UserResource($user))-&gt;additional([
