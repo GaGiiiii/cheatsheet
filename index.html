@@ -549,7 +549,7 @@ class UpdateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' =&gt; 'email|required|max:255|unique:mysql_users.screener_users.users,email',
+            'email' =&gt; 'email|required|max:255|unique:mysql_users.screener_users.users,email,' . $this-&gt;user-&gt;id,
             'password' =&gt; 'string|nullable|max:255',
             'name' =&gt; 'string|required|max:255',
             'role_id' =&gt; [
@@ -557,7 +557,64 @@ class UpdateUserRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::in([2]),
-            ]
+            ],
+            'target_audience_info' =&gt; [
+                'required',
+                // Mora da bude sledece strukture:
+                // [{"6":{"countries":[{"2":1},{"201":1}],"mail_driver":"1"}},{"7":{"countries":[{"201":2}],"mail_driver":"1"}}]
+                // Imamo niz gde su keys CLIENTIDs, a values su novi nizovi i unutar njih se nalazi COUNTREIS i MAIL_DRIVER
+                // Countries je takodje niz koji u sebi sadrzi novi niz key value pairsa gde je key ZEMLJAID aa value OFFERID
+                // Na primer: {"201":1} - 201: zemljaID, 1: offerID
+                function ($attribute, $value, $fail) {
+                    foreach ($value as $clientKEY =&gt; $clientValue) {
+                        // [{"6":{"countries":[{"2":1},{"201":1}],"mail_driver":"1"}},{"7":{"countries":[{"201":2}],"mail_driver":"1"}}]
+                        $helpArr = $clientValue[key($clientValue)]; // {"countries":[{"2":1},{"201":1}],"mail_driver":"1"}
+                        $helpArrKeys = array_keys($helpArr); // Only countries and mail driver allowed
+
+                        // We should only have 2 keys, countries | mail_driver
+                        foreach ($helpArrKeys as $helpArrKey) {
+                            if ($helpArrKey !== 'countries' &amp;&amp; $helpArrKey !== 'mail_driver') {
+                                $fail('Target audience info field is required.');
+                                // $fail('Target audience info is in invalid format.');
+
+                                return;
+                            }
+                        }
+
+                        // Log::debug(['help' =&gt; $helpArr, 'empty' =&gt; empty($helpArr['countries'])]);
+
+                        if (empty($helpArr['countries']) || empty($helpArr['countries'][0])) {
+                            $fail('Target audience info field is in invalid format. Country or offer is not selected.');
+
+                            return;
+                        }
+
+                        // $countryAndOffer - {"201":1}
+                        foreach ($helpArr['countries'] as $countryAndOffer) {
+                            // Log::debug(['candoffer' =&gt; $countryAndOffer]);
+
+                            foreach ($countryAndOffer as $country =&gt; $offer) {
+                                // Log::debug(['country' =&gt; $country, 'offer' =&gt; $offer]);
+
+                                // Country and offer should be numbers
+                                if (!is_numeric($country) || !is_numeric($offer) || $country === 0) {
+                                    $fail('Target audience info field is in invalid format. Country or offer is
+                                    not selected.');
+
+                                    return;
+                                }
+                            }
+                        }
+
+                        // Mail driver value must be number
+                        if (!is_numeric($helpArr['mail_driver'])) {
+                            $fail('Target audience info field is in invalid format. Mail driver is not selected.');
+
+                            return;
+                        }
+                    }
+                }
+            ],
         ];
     }
 
