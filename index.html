@@ -638,6 +638,111 @@ class UpdateUserRequest extends FormRequest
       <!-- SECTION END -->
 
 
+
+          <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
+        Query Builder - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+        <pre>
+/**
+* Returns number of subscribed users for specified day and widget.
+*
+* @param int $widget_id
+* @param string $day Eg. (2016-04-31)
+* @param bool $allWidgets
+* @param User|null $client
+* @return object|null
+*/
+private function subscribedForTheDay(
+    int $widget_id,
+    string $day,
+    bool $allWidgets,
+    ?User $client
+) {
+    $arr = explode('-', $day);
+
+    return DB::table('lead_metadata')
+        -&gt;select(
+            $allWidgets === false ? 'leads.widget_id' : 'leads.client_id',
+            DB::raw("COUNT(DISTINCT lead_id) AS num_of_subscribed"),
+        )-&gt;leftJoin('leads', 'leads.id', '=', 'lead_metadata.lead_id')
+        -&gt;where('lead_metadata.status', '=', 'subscribed')
+        -&gt;whereRaw("YEAR(lead_metadata.created_at) = {$arr[0]}")
+        -&gt;whereRaw("MONTH(lead_metadata.created_at) = {$arr[1]}")
+        -&gt;whereRaw("DAY(lead_metadata.created_at) = {$arr[2]}")
+        -&gt;where(
+            $allWidgets === false ? 'leads.widget_id' : 'leads.client_id',
+            '=',
+            $allWidgets === false ? $widget_id : $client-&gt;id
+        )
+        -&gt;groupBy($allWidgets === false ? 'leads.widget_id' : 'leads.client_id')
+        -&gt;first();
+}    
+
+public function findWithReports($id)
+{
+    $q = DB::table('campaigns')-&gt;select(
+        'campaigns.*',
+        DB::raw('ifnull(help_table_1.num_of_opens, 0) AS action_open'),
+        DB::raw('ifnull(help_table_2.num_of_clicks, 0) AS action_click'),
+        DB::raw('ifnull(help_table_3.num_of_delivered, 0) AS action_delivered'),
+        DB::raw('ifnull(help_table_4.num_of_errors, 0) AS num_of_errors'),
+        DB::raw('if(help_table_4.num_of_errors &gt; 0, "error", campaigns.status) AS status'),
+    )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, SUM(help_table_1_1.num_of_opens) AS num_of_opens 
+            FROM `client_campaign_newsletter` ccn
+            LEFT JOIN (SELECT ccc_id, count(ccc_id) AS num_of_opens FROM `opens` GROUP BY ccc_id) help_table_1_1
+            ON help_table_1_1.ccc_id = ccn.id 
+            GROUP BY campaign_id) AS help_table_1"),
+            'campaigns.id',
+            '=',
+            'help_table_1.campaign_id'
+        )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, SUM(help_table_2_1.num_of_clicks) AS num_of_clicks 
+            FROM `client_campaign_newsletter` ccn
+            LEFT JOIN (SELECT ccc_id, count(ccc_id) AS num_of_clicks FROM `clicks` GROUP BY ccc_id) AS help_table_2_1
+            ON help_table_2_1.ccc_id = ccn.id 
+            GROUP BY campaign_id) AS help_table_2"),
+            'campaigns.id',
+            '=',
+            'help_table_2.campaign_id'
+        )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, SUM(delivered_count) AS num_of_delivered 
+            FROM `client_campaign_newsletter` 
+            GROUP BY campaign_id) AS help_table_3"),
+            'campaigns.id',
+            '=',
+            'help_table_3.campaign_id'
+        )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, COUNT(error_id) AS num_of_errors 
+            FROM `client_campaign_newsletter` 
+            GROUP BY campaign_id) AS help_table_4"),
+            'campaigns.id',
+            '=',
+            'help_table_4.campaign_id'
+        )-&gt;where('id', '=', $id);
+
+    $q = $q-&gt;whereNull('deleted_at');
+
+    return  $q-&gt;first();
+}
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+
+
 </div>
 
 
