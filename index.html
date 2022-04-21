@@ -743,6 +743,136 @@ public function findWithReports($id)
       <!-- SECTION END -->
 
 
+
+
+          <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
+        Raw Select, With, Max, Virtual Tables - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+        <pre>
+/**
+* Finds the name of the widget with the best CTA%
+*
+* Custom table looks like this:\
+* | WIDGET_ID | IMPRESSIONS | CONVERSIONS | CTA
+*
+* @param int $client_id
+* @return array
+*/
+private function bestCTA(int $client_id)
+{
+    /* ADDED MULTIPLE WITHS */
+
+    return DB::select("WITH 
+    num_of_conversions_table AS (
+        SELECT widget_id, count(*) AS conversions
+        FROM widget_trackings
+        WHERE `action` = 'conversion'
+        GROUP BY widget_id
+    ),
+    num_of_impressions_table AS (
+        SELECT widget_id, count(*) AS impressions
+        FROM widget_trackings
+        WHERE `action` = 'impression'
+        GROUP BY widget_id
+    ),
+    custom_table AS (
+        SELECT widget_trackings.widget_id,
+            num_of_conversions_table.conversions AS num_of_conversions,
+            num_of_impressions_table.impressions AS num_of_impressions,
+            (num_of_conversions_table.conversions * 100 / num_of_impressions_table.impressions) AS CTA
+        FROM widget_trackings
+        LEFT JOIN num_of_conversions_table
+        ON widget_trackings.widget_id = num_of_conversions_table.widget_id
+        LEFT JOIN num_of_impressions_table
+        ON widget_trackings.widget_id = num_of_impressions_table.widget_id
+        LEFT JOIN widgets
+            ON widget_trackings.widget_id = widgets.id
+        WHERE widgets.client_id = $client_id
+        GROUP BY widget_trackings.widget_id
+    )
+    SELECT widgets.name
+    FROM custom_table
+    LEFT JOIN widgets
+    ON widgets.id = custom_table.widget_id
+    WHERE custom_table.CTA = (
+        SELECT MAX(custom_table.CTA)
+        FROM custom_table
+    )
+    LIMIT 1");
+
+    /* ADDED 1 WITH AND LIMIT 1 */
+
+    // return DB::select("WITH custom_table AS (
+    //     SELECT widget_trackings.widget_id,
+    //         help_table_1.conversions AS num_of_conversions,
+    //         help_table_2.impressions AS num_of_impressions,
+    //         (help_table_1.conversions * 100 / help_table_2.impressions) AS CTA
+    //     FROM widget_trackings
+    //     LEFT JOIN (
+    //         SELECT widget_id, count(*) AS conversions
+    //         FROM widget_trackings
+    //         WHERE `action` = 'conversion'
+    //         GROUP BY widget_id
+    //     ) AS help_table_1
+    //     ON widget_trackings.widget_id = help_table_1.widget_id
+    //     LEFT JOIN (
+    //         SELECT widget_id, count(*) AS impressions
+    //         FROM widget_trackings
+    //         WHERE `action` = 'impression'
+    //         GROUP BY widget_id
+    //     ) AS help_table_2
+    //     ON widget_trackings.widget_id = help_table_2.widget_id
+    //     LEFT JOIN widgets
+    //         ON widget_trackings.widget_id = widgets.id
+    //     WHERE widgets.client_id = $client_id
+    //     GROUP BY widget_trackings.widget_id
+    // )
+    // SELECT MAX(custom_table.CTA) AS MAX_CTA
+    // FROM custom_table");
+
+    /* OLD WAY */
+
+    // return DB::select("SELECT MAX(custom_table.CTA) AS MAX_CTA
+    // FROM (
+    //     SELECT widget_trackings.widget_id,
+    //         help_table_1.conversions AS num_of_conversions,
+    //         help_table_2.impressions AS num_of_impressions,
+    //         (help_table_1.conversions * 100 / help_table_2.impressions) AS CTA
+    //     FROM widget_trackings
+    //     LEFT JOIN (
+    //         SELECT widget_id, count(*) AS conversions
+    //         FROM widget_trackings
+    //         WHERE `action` = 'conversion'
+    //         GROUP BY widget_id
+    //     ) AS help_table_1
+    //     ON widget_trackings.widget_id = help_table_1.widget_id
+    //     LEFT JOIN (
+    //         SELECT widget_id, count(*) AS impressions
+    //         FROM widget_trackings
+    //         WHERE `action` = 'impression'
+    //         GROUP BY widget_id
+    //     ) AS help_table_2
+    //     ON widget_trackings.widget_id = help_table_2.widget_id
+    //     LEFT JOIN widgets
+    //         ON widget_trackings.widget_id = widgets.id
+    //     WHERE widgets.client_id = $client_id
+    //     GROUP BY widget_trackings.widget_id
+    // ) AS custom_table");
+}
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+
+
 </div>
 
 
