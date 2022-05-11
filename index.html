@@ -559,10 +559,10 @@ class UpdateUserRequest extends FormRequest
                 Rule::in([2]),
             ],
             'vertical_id' =&gt; [
-                'required',
                 'bail',
-                'exists:verticals,id',
+                'required',
                 'integer'
+                'exists:verticals,id',
             ],
             'target_audience_info' =&gt; [
                 'required',
