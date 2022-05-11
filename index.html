@@ -111,6 +111,69 @@
 
     <!-- SECTION START -->
     <p class="font-weight-bold text-dark">
+        Migration Class - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+        <pre>
+&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddVerticalIdColumnToWidgetsTable extends Migration
+{
+    /**
+        * Run the migrations.
+        *
+        * @return void
+        */
+    public function up()
+    {
+        Schema::table('widgets', function (Blueprint $table) {
+            $table-&gt;unsignedBigInteger('url_id')-&gt;nullable()-&gt;after('uuid')-&gt;change();
+            $table-&gt;dropForeign('widgets_url_id_foreign');
+            $table-&gt;foreign('url_id')-&gt;references('id')-&gt;on('client_urls')-&gt;onDelete('set null');
+
+            $table-&gt;unsignedBigInteger('vertical_id')-&gt;nullable()-&gt;after('status')-&gt;default(1);
+            $table-&gt;foreign('vertical_id')-&gt;references('id')-&gt;on('verticals')-&gt;onDelete('set null');
+
+            $table-&gt;timestamp('created_at')-&gt;default(\DB::raw('CURRENT_TIMESTAMP'));
+            $table-&gt;timestamp('updated_at')-&gt;default(\DB::raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'));
+        });
+    }
+
+    /**
+        * Reverse the migrations.
+        *
+        * @return void
+        */
+    public function down()
+    {
+        Schema::table('widgets', function (Blueprint $table) {
+            $table-&gt;dropForeign(['vertical_id']);
+            $table-&gt;dropColumn('vertical_id');
+        });
+    }
+}            
+
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+
+
+
+
+
+    <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
         DTO Class - Thunder, SDS
         <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
           data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
