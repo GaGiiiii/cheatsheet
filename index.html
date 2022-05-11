@@ -942,6 +942,77 @@ private function bestCTA(int $client_id)
       <!-- SECTION END -->
 
 
+
+
+         <!-- SECTION START -->
+    <p class="font-weight-bold text-dark">
+        Multiple Databases - Thunder, SDS
+        <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+          data-target="#collapseExample4" aria-expanded="false" aria-controls="collapseExample4">+</button>
+        <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+      </p>
+      <hr>
+      <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+        <pre>
+
+
+</pre>
+
+        <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse" data-target="collapseExample3"
+          aria-expanded="false" aria-controls="collapseExample3">-</button>
+      </div>
+      <!-- SECTION END -->
+In User Model - protected $connection = 'users';
+In Migration - $table->foreign('user_id')->references('id')->on('hypknowledge_users.users')->onDelete('set null');
+In Request - 'user_id' => 'bail|required|integer|exists:users.hypknowledge_users.users,id'
+
+In .env - 
+    DB_HOST_USERS=mysql
+    DB_PORT_USERS=3306
+    DB_DATABASE_USERS=hypknowledge_users
+    DB_USERNAME_USERS=root
+    DB_PASSWORD_USERS=root
+
+In config/database.php - 
+        'mysql' =&gt; [
+            'driver' =&gt; 'mysql',
+            'url' =&gt; env('DATABASE_URL'),
+            'host' =&gt; env('DB_HOST', '127.0.0.1'),
+            'port' =&gt; env('DB_PORT', '3306'),
+            'database' =&gt; env('DB_DATABASE', 'forge'),
+            'username' =&gt; env('DB_USERNAME', 'forge'),
+            'password' =&gt; env('DB_PASSWORD', ''),
+            'unix_socket' =&gt; env('DB_SOCKET', ''),
+            'charset' =&gt; 'utf8mb4',
+            'collation' =&gt; 'utf8mb4_unicode_ci',
+            'prefix' =&gt; '',
+            'prefix_indexes' =&gt; true,
+            'strict' =&gt; false,
+            'engine' =&gt; null,
+            'options' =&gt; extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA =&gt; env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+        'users' =&gt; [
+            'driver' =&gt; 'mysql',
+            'url' =&gt; env('DATABASE_URL_USERS'),
+            'host' =&gt; env('DB_HOST_USERS', '127.0.0.1'),
+            'port' =&gt; env('DB_PORT_USERS', '3306'),
+            'database' =&gt; env('DB_DATABASE_USERS', 'forge'),
+            'username' =&gt; env('DB_USERNAME_USERS', 'forge'),
+            'password' =&gt; env('DB_PASSWORD_USERS', ''),
+            'unix_socket' =&gt; env('DB_SOCKET_USERS', ''),
+            'charset' =&gt; 'utf8mb4',
+            'collation' =&gt; 'utf8mb4_unicode_ci',
+            'prefix' =&gt; '',
+            'prefix_indexes' =&gt; true,
+            'strict' =&gt; false,
+            'engine' =&gt; null,
+            'options' =&gt; extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA =&gt; env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
 </div>
 
 
