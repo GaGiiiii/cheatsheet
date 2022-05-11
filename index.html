@@ -558,6 +558,12 @@ class UpdateUserRequest extends FormRequest
                 'integer',
                 Rule::in([2]),
             ],
+            'vertical_id' =&gt; [
+                'required',
+                'bail',
+                'exists:verticals,id',
+                'integer'
+            ],
             'target_audience_info' =&gt; [
                 'required',
                 // Mora da bude sledece strukture:
