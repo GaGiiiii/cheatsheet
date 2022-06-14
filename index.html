@@ -1035,6 +1035,171 @@ In config/database.php -
                         <!-- SECTION END -->
 
 
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Excel Export - Thunder, SDS
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+&lt;?php
+
+namespace App\Exports;
+
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
+
+class SDSCL25Export implements FromQuery, WithHeadings, WithStrictNullComparison
+{
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function query()
+    {
+        return DB::table('questionnaire')-&gt;select(
+            'age',
+            'date',
+            'height',
+            'initials',
+            'sex',
+            'gender_identity',
+            'weight',
+            'work_hours',
+            'what_describes_schedule',
+            'do_you_have_bed_partner',
+            'how_much_sleep_get_per_night',
+            'how_much_sleep_do_you_spend_in_bed',
+            DB::raw('ROUND(how_much_sleep_get_per_night / how_much_sleep_do_you_spend_in_bed * 100, 2)'),
+            'race_ethnicity',
+            // 'other_ethnicity',
+            'other_ethnicity_value',
+            'school_degree',
+            'hypertension',
+            'country',
+            'zip_code',
+            'question_1',
+            'question_2',
+            'question_3',
+            'question_4',
+            'question_5',
+            'question_6',
+            'question_7',
+            'question_8',
+            'question_9',
+            'question_10',
+            'question_11',
+            'question_12',
+            'question_13',
+            'question_14',
+            'question_15',
+            'question_16',
+            'question_17',
+            'question_18',
+            'question_19',
+            'question_20',
+            'question_21',
+            'question_22',
+            'question_23',
+            'question_24',
+            'question_25',
+            DB::raw('(question_1+
+            question_2+
+            question_3+
+            question_4+
+            question_5+
+            question_6+
+            question_7+
+            question_8+
+            question_9+
+            question_10+
+            question_11+
+            question_12+
+            question_13+
+            question_14+
+            question_15+
+            question_16+
+            question_17+
+            question_18+
+            question_19+
+            question_20+
+            question_21+
+            question_22+
+            question_23+
+            question_24+
+            question_25)')
+        )-&gt;where('type', 'sds-cl-25')-&gt;orderBy('id');
+    }
+
+    public function headings(): array
+    {
+        return [
+            'AGE',
+            'DATE',
+            'HEIGHT',
+            'INITIALS',
+            'SEX',
+            'GENDER_IDENTITY',
+            'WEIGHT',
+            'WORK_HOURS',
+            'SCHEDULE',
+            'BED_PARTNER',
+            'TST',
+            'TIB',
+            'SE',
+            'ETHNICITY',
+            'OTHER_ETHNICITY',
+            'SCHOOL_DEGREE',
+            'HYPERTENSION',
+            'COUNTRY',
+            'ZIP/POSTAL CODE',
+            'Q1',
+            'Q2',
+            'Q3',
+            'Q4',
+            'Q5',
+            'Q6',
+            'Q7',
+            'Q8',
+            'Q9',
+            'Q10',
+            'Q11',
+            'Q12',
+            'Q13',
+            'Q14',
+            'Q15',
+            'Q16',
+            'Q17',
+            'Q18',
+            'Q19',
+            'Q20',
+            'Q21',
+            'Q22',
+            'Q23',
+            'Q24',
+            'Q25',
+            'TOTAL_SCORE',
+        ];
+    }
+}
+
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
                     </div>
 
 
