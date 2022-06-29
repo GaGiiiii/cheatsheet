@@ -702,6 +702,11 @@ class UpdateUserRequest extends FormRequest
         ];
     }
 
+    protected function failedAuthorization()
+    {
+        throw new CustomFailedAuthorizationException();
+    }
+
 //    protected function failedValidation(Validator $validator)
 //    {
 //        $response = response()-&gt;json([
@@ -712,6 +717,43 @@ class UpdateUserRequest extends FormRequest
 //
 //        throw new ValidationException($validator, $response);
 //    }
+}
+            
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            CustomFailedAuthorizationException Class - Hypk
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+&lt;?php
+
+namespace App\Exceptions\Users;
+
+use Exception;
+
+class CustomFailedAuthorizationException extends Exception
+{
+    public function render($request)
+    {
+        return response()-&gt;json([
+            "message" =&gt; "Unauthorized action.",
+        ], 401);
+    }
 }
             
 </pre>
