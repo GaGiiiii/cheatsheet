@@ -768,6 +768,2698 @@ class CustomFailedAuthorizationException extends Exception
 
                         <!-- SECTION START -->
                         <p class="font-weight-bold text-dark">
+                            Factory Class - Thunder
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+&lt;?php
+
+namespace Database\Factories;
+
+use App\Models\WidgetTemplateFormat;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class WidgetTemplateV2Factory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; WidgetTemplateFormat::factory()-&gt;create()-&gt;id,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ];
+    }
+}
+
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Feature Test Class (User) - Thunder
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+&lt;?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Laravel\Passport\Passport;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+class UserTest extends TestCase
+{
+    use RefreshDatabase;
+    use WithFaker;
+
+    /**
+     * @group userTests
+     * @group userTestsAdd
+     */
+    public function test_register_new_user()
+    {
+        $response = $this-&gt;postJson('/api/v1/register', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; '1234567',
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...'
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'User Created']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsAdd
+     */
+    public function test_register_new_user_invalid_data()
+    {
+        $response = $this-&gt;postJson('/api/v1/register', [
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; '1234567',
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'httasps://google.com',
+            'email' =&gt; 'milica.petrovdsadsadsaic1@gmail.com',
+            'password' =&gt; 'bananastodsalicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment([
+                'email' =&gt; ['Email account invalid'],
+                'password' =&gt; ['The password confirmation does not match.'],
+                'first_name' =&gt; ['The first name field is required.'],
+                'website' =&gt; ['The website format is invalid.']
+            ]);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsAdd
+     */
+    public function test_register_new_user_invalid_data_weak_password()
+    {
+        $response = $this-&gt;postJson('/api/v1/register', [
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; '1234567',
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'httasps://google.com',
+            'email' =&gt; 'milica.petrovdsadsadsaic1@gmail.com',
+            'password' =&gt; '12345678',
+            'password_confirmation' =&gt; '12345678'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment([
+                'email' =&gt; ['Email account invalid'],
+                'password' =&gt; ['This password is not secure. Please use more complex password.'],
+                'first_name' =&gt; ['The first name field is required.'],
+                'website' =&gt; ['The website format is invalid.']
+            ]);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsLogout
+     */
+    public function test_logout()
+    {
+        $user = User::factory()-&gt;create();
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/logout');
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Successfully logged out'
+            ]);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsLogout
+     */
+    public function test_logout_not_logged_in()
+    {
+        $response = $this-&gt;getJson('/api/v1/logout');
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Unauthenticated.'
+            ]);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsLogin
+     */
+    public function test_login_already_logged_in()
+    {
+        $user = User::factory()-&gt;create();
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/login', [
+            'email' =&gt; 'admin@thunder.com',
+            'password' =&gt; 'password'
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    // ==================================== CREATE CLIENTS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsCreateClient
+     */
+    public function test_create_client_client()
+    {
+        $user = User::factory()-&gt;create();
+        $user-&gt;assignRole('Client');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/clients', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateClient
+     */
+    public function test_create_client()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/clients', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'New Client Created.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateClient
+     */
+    public function test_create_client_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/clients', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'New Client Created.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateClient
+     */
+    public function test_create_client_marketing_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/clients', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateClient
+     */
+    public function test_create_client_not_logged_in()
+    {
+        $response = $this-&gt;postJson('/api/v1/clients', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateClient
+     */
+    public function test_create_client_invalid_data()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/clients', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; "123456",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'hsadps:/asgle.com',
+            'email' =&gt; 'milica.peastrovic1@gmail.com',
+            'password' =&gt; 'aaaaaa...',
+            'password_confirmation' =&gt; 'aaaaaa...',
+            'vertical_id' =&gt; "dsa",
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'The given data was invalid.',
+                'errors' =&gt; [
+                    'vertical_id' =&gt; ['The vertical id must be an integer.'],
+                    'service_modal_id' =&gt; ['The service modal id field is required.'],
+                    'password' =&gt; ['This password is not secure. Please use more complex password.']
+                ]
+            ]);
+    }
+
+    // ==================================== GET CLIENTS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_all_clients_not_logged_in()
+    {
+        $response = $this-&gt;getJson('/api/v1/clients');
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_all_clients_client()
+    {
+        $user = User::factory()-&gt;create();
+        $user-&gt;assignRole('Client');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/clients');
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_all_clients_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/clients');
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_all_clients_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/clients');
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_all_clients_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/clients');
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_client_not_logged_in()
+    {
+        $response = $this-&gt;getJson('/api/v1/clients/4');
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_client_himself()
+    {
+        $user = User::factory()-&gt;create();
+        $user-&gt;assignRole('Client');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/clients/$user-&gt;id");
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_client_other_than_himself()
+    {
+        $user = User::factory()-&gt;create();
+        $user-&gt;assignRole('Client');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;getJson("/api/v1/clients/$client-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_client_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/clients/4');
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_client_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/clients/4');
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetClients
+     */
+    public function test_get_client_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/clients/4');
+
+        $response-&gt;assertStatus(200);
+    }
+
+    // ==================================== UPDATE CLIENTS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateClient
+     */
+    public function test_update_client()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/clients/$client-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Client Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateClient
+     */
+    public function test_update_client_updates_himself()
+    {
+        $user = User::factory()-&gt;create();
+        $user-&gt;assignRole('Client');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/clients/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Client Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateClient
+     */
+    public function test_update_client_updates_other_clients()
+    {
+        $user = User::factory()-&gt;create();
+        $user-&gt;assignRole('Client');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/clients/$client-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateClient
+     */
+    public function test_update_client_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/clients/$client-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Client Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateClient
+     */
+    public function test_update_client_marketing_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/clients/$client-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateClient
+     */
+    public function test_update_client_not_logged_in()
+    {
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/clients/$client-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; rand(1000000, 9999999) . "",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'https://google.com',
+            'email' =&gt; 'milica.petrovic1@gmail.com',
+            'vertical_id' =&gt; 1,
+            'service_modal_id' =&gt; 1
+        ]);
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateClient
+     */
+    public function test_update_client_invalid_data()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/clients/$client-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'phone' =&gt; "123456",
+            'address' =&gt; 'Test Address',
+            'company' =&gt; 'Test Company',
+            'website' =&gt; 'hsadps:/asgle.com',
+            'email' =&gt; 'milica.peastrovic1@gmail.com',
+            'vertical_id' =&gt; "dsa",
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'The given data was invalid.',
+                'errors' =&gt; [
+                    'vertical_id' =&gt; ['The vertical id must be an integer.'],
+                    'service_modal_id' =&gt; ['The service modal id field is required.'],
+                ]
+            ]);
+    }
+
+    // ==================================== DELETE CLIENTS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteClient
+     */
+    public function test_delete_client()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;deleteJson("/api/v1/clients/$client-&gt;id");
+        $client = $client-&gt;refresh();
+
+        $response-&gt;assertStatus(204);
+        $this-&gt;assertNotNull($client-&gt;deleted_at);
+    }
+    /**
+     * @group userTests
+     * @group userTestsDeleteClient
+     */
+    public function test_delete_client_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;deleteJson("/api/v1/clients/$client-&gt;id");
+        $client = $client-&gt;refresh();
+
+        $response-&gt;assertStatus(403);
+        $this-&gt;assertNull($client-&gt;deleted_at);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteClient
+     */
+    public function test_delete_client_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;deleteJson("/api/v1/clients/$client-&gt;id");
+        $client = $client-&gt;refresh();
+
+        $response-&gt;assertStatus(403);
+        $this-&gt;assertNull($client-&gt;deleted_at);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteClient
+     */
+    public function test_delete_client_doesnt_exist()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $client = User::factory()-&gt;create();
+
+        $response = $this-&gt;deleteJson("/api/v1/clients/213123131");
+        $client = $client-&gt;refresh();
+
+        $response-&gt;assertStatus(404);
+        $this-&gt;assertNull($client-&gt;deleted_at);
+    }
+
+    // ==================================== CREATE ADMINS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsCreateAdmin
+     */
+    public function test_create_admin()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/admins', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'permission_levels' =&gt; [2, 3],
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Admin Created.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateAdmin
+     */
+    public function test_create_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/admins', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'permission_levels' =&gt; [1],
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'The given data was invalid.',
+                'errors' =&gt; [
+                    'permission_levels' =&gt; ['The selected permission levels is invalid.']
+                ]
+            ]);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateAdmin
+     */
+    public function test_create_admin_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/admins', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'permission_levels' =&gt; [2, 3],
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateAdmin
+     */
+    public function test_create_admin_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/admins', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'permission_levels' =&gt; [2, 3],
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsCreateAdmin
+     */
+    public function test_create_admin_not_logged_in()
+    {
+        $response = $this-&gt;postJson('/api/v1/admins', [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'password' =&gt; 'bananastolicakupus123...',
+            'password_confirmation' =&gt; 'bananastolicakupus123...',
+            'permission_levels' =&gt; [2, 3],
+        ]);
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    // ==================================== GET ADMINS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_all_admins_not_logged_in()
+    {
+        $response = $this-&gt;getJson('/api/v1/admins');
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_all_admins_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/admins');
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_all_admins_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/admins');
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_all_admins_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson('/api/v1/admins');
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_not_logged_in()
+    {
+        $response = $this-&gt;getJson('/api/v1/admins/1');
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_administrator_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/admins/$user-&gt;id");
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_administrator_requesting_smaller_admins()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_administrator_requesting_other_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_account_manager_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/admins/$user-&gt;id");
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_account_manager_requesting_other_admins()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        $user2-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_marketing_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/admins/$user-&gt;id");
+
+        $response-&gt;assertStatus(200);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsGetAdmins
+     */
+    public function test_get_admin_marketing_requesting_other_admins()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        $user2-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;getJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    // ==================================== UPDATE ADMINS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_not_logged_in()
+    {
+        $response = $this-&gt;getJson('/api/v1/admins');
+
+        $response
+            -&gt;assertStatus(401)
+            -&gt;assertJsonFragment(['message' =&gt; 'Unauthenticated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_administrator_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Admin Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_administrator_requesting_am()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user2-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'permission_levels' =&gt; [2]
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Admin Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_administrator_requesting_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user2-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'permission_levels' =&gt; [2]
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Admin Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_account_manager_requesting_others()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Account Manager');
+        Passport::actingAs($user2);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_marketing_requesting_others()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Marketing');
+        Passport::actingAs($user2);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_account_manager_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Admin Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_account_manager_requesting_himself_changing_permissions()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'permission_levels' =&gt; [2]
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_marketing_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Admin Updated.']);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsUpdateAdmin
+     */
+    public function test_update_admin_marketing_requesting_himself_changing_permissions()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;putJson("/api/v1/admins/$user-&gt;id", [
+            'first_name' =&gt; 'GaGi',
+            'last_name' =&gt; 'Fhnfh',
+            'email' =&gt; 'milica.petrovic.admin@gmail.com',
+            'permission_levels' =&gt; [3]
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    // ==================================== DELETE ADMINS ====================================
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_administrator_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user-&gt;id");
+        $user = $user-&gt;refresh();
+
+        $response-&gt;assertStatus(204);
+        $this-&gt;assertNotNull($user-&gt;deleted_at);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_administrator_requesting_other_administrators()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_administrator_requesting_am()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2-&gt;assignRole('Account Manager');
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user2-&gt;id");
+        $user2 = $user2-&gt;refresh();
+
+        $response-&gt;assertStatus(204);
+        $this-&gt;assertNotNull($user2-&gt;deleted_at);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_administrator_requesting_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        $user2-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user2-&gt;id");
+        $user2 = $user2-&gt;refresh();
+
+        $response-&gt;assertStatus(204);
+        $this-&gt;assertNotNull($user2-&gt;deleted_at);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_am_requesting_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        $user2-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user2-&gt;id");
+        $user2 = $user2-&gt;refresh();
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_am_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_am_requesting_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        $user2-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_marketing_requesting_himself()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_marketing_requesting_am()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        $user2-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group userTests
+     * @group userTestsDeleteAdmin
+     */
+    public function test_delete_admin_marketing_requesting_administrator()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        $user2-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/admins/$user2-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+}
+
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Feature Test Class (WTemplate) - Thunder
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+&lt;?php
+
+namespace Tests\Feature;
+
+use App\Models\WidgetTemplateV2;
+use App\Models\User;
+use App\Models\WidgetTemplateFormat;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Laravel\Passport\Passport;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+class WidgetTemplateV2Test extends TestCase
+{
+    use RefreshDatabase;
+    use WithFaker;
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsAdd
+     */
+    public function test_add_new_widget_template_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; $format-&gt;id,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsAdd
+     */
+    public function test_add_new_widget_template_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; $format-&gt;id,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response-&gt;assertStatus(201)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Template created.'
+            ]);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsAdd
+     */
+    public function test_add_new_widget_template()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; $format-&gt;id,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response-&gt;assertStatus(201)-&gt;assertJsonFragment([
+            'message' =&gt; 'Template created.'
+        ]);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsAdd
+     */
+    public function test_add_new_widget_template_format_does_not_exist()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; 1,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsAdd
+     */
+    public function test_add_new_widget_template_wrong_data()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+            'name' =&gt; Str::random(1000),
+            'format_id' =&gt; $format-&gt;id,
+            'description' =&gt; Str::random(1000),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsUpdate
+     */
+    public function test_update_widget_template_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; $widgetTemplate-&gt;format-&gt;id,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsUpdate
+     */
+    public function test_update_widget_template_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; $widgetTemplate-&gt;format-&gt;id,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Template updated.']);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsUpdate
+     */
+    public function test_update_widget_template()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'format_id' =&gt; $widgetTemplate-&gt;format-&gt;id,
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Template updated.']);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsUpdate
+     */
+    public function test_update_widget_template_missing_data()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+
+        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+            'description' =&gt; $this-&gt;faker-&gt;text(),
+            'html' =&gt; $this-&gt;faker-&gt;text(),
+        ]);
+
+        // Log::debug($response-&gt;dump());
+
+        $response-&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.'])
+            -&gt;assertJsonFragment(['errors' =&gt; [
+                'name' =&gt; ['The name field is required.'],
+                'format_id' =&gt; ['The format id field is required.']
+            ]]);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsDelete
+     */
+    public function test_delete_widget_template_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsDelete
+     */
+    public function test_delete_widget_template_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id");
+
+        $response-&gt;assertStatus(200)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Template deleted.'
+            ]);
+    }
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsDelete
+     */
+    public function test_delete_widget_template()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id");
+
+        $response-&gt;assertStatus(200)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Template deleted.'
+            ]);
+    }
+
+    /**
+     * @group widgetTemplatesTests
+     * @group widgetTemplatesTestsDelete
+     */
+    public function test_delete_widget_template_that_does_not_exist()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/22");
+
+        $response
+            -&gt;assertStatus(404)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Template not found.'
+            ]);
+    }
+}
+
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Feature Test Class (Campaign) - Thunder
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+&lt;?php
+
+namespace Tests\Feature;
+
+use App\Models\Campaign;
+use App\Models\ClientCampaignNewsletter;
+use App\Models\Error;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Laravel\Passport\Passport;
+use Spatie\Permission\Models\Role;
+use Tests\TestCase;
+
+class CampaignTest extends TestCase
+{
+    use RefreshDatabase;
+    use WithFaker;
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+22 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "2"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+22 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "2"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response-&gt;assertStatus(200)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Campaign Created.'
+            ]);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+22 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "2"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response-&gt;assertStatus(200)-&gt;assertJsonFragment([
+            'message' =&gt; 'Campaign Created.'
+        ]);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_status_not_scheduled()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+22 minutes', strtotime('now'))),
+            'status' =&gt; 'schedulededede',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_wrong_target_audience_info_format1()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+22 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; [["201" =&gt; 1], "countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_wrong_target_audience_info_format2()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+22 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2ds" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_wrong_target_audience_info_format3()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+22 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1asd"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_wrong_time()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; $this-&gt;faker-&gt;name(),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+2 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsAdd
+     */
+    public function test_add_new_campaign_no_name()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;postJson('/api/v1/campaigns', [
+            'token' =&gt; Str::random(10),
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+20 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["6" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["7" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment(['message' =&gt; 'The given data was invalid.']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsUpdate
+     */
+    public function test_update_campaign_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::find(6);
+        $user3 = User::find(7);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $ccn = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user2-&gt;id,
+        ]);
+        $ccn2 = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user3-&gt;id
+        ]);
+
+        $response = $this-&gt;putJson("/api/v1/campaigns/$campaign-&gt;id", [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; "Djadji Campaign",
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+10 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["$user2-&gt;id" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["$user3-&gt;id" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response-&gt;assertStatus(403);
+    }
+    /**
+     * @group campaignTests
+     * @group campaignTestsUpdate
+     */
+    public function test_update_campaign_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::find(6);
+        $user3 = User::find(7);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $ccn = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user2-&gt;id,
+        ]);
+        $ccn2 = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user3-&gt;id
+        ]);
+
+        $response = $this-&gt;putJson("/api/v1/campaigns/$campaign-&gt;id", [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; "Djadji Campaign",
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+10 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["$user2-&gt;id" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["$user3-&gt;id" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Campaign Updated']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsUpdate
+     */
+    public function test_update_campaign()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::find(6);
+        $user3 = User::find(7);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $ccn = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user2-&gt;id,
+        ]);
+        $ccn2 = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user3-&gt;id
+        ]);
+
+        $response = $this-&gt;putJson("/api/v1/campaigns/$campaign-&gt;id", [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; "Djadji Campaign",
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+10 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["$user2-&gt;id" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["$user3-&gt;id" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Campaign Updated']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsUpdate
+     */
+    public function test_update_campaign_missing_data()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::find(6);
+        $user3 = User::find(7);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $ccn = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user2-&gt;id
+        ]);
+        $ccn2 = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user3-&gt;id
+        ]);
+
+        $response = $this-&gt;putJson("/api/v1/campaigns/$campaign-&gt;id", [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; "Djadji Campaign",
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["$user2-&gt;id" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["$user3-&gt;id" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response-&gt;assertStatus(500);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsUpdate
+     */
+    public function test_update_campaign_already_sent()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::find(6);
+        $user3 = User::find(7);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create(['status' =&gt; 'sent']);
+        $ccn = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user2-&gt;id
+        ]);
+        $ccn2 = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user3-&gt;id
+        ]);
+
+        $response = $this-&gt;putJson("/api/v1/campaigns/$campaign-&gt;id", [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; "Djadji Campaign",
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+10 minutes', strtotime('now'))),
+            'status' =&gt; 'scheduled',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["$user2-&gt;id" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["$user3-&gt;id" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(400)
+            -&gt;assertJsonFragment(['message' =&gt; 'Campaign already sent.']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsUpdate
+     */
+    public function test_update_campaign_pause_campaign()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::find(6);
+        $user3 = User::find(7);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $ccn = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user2-&gt;id
+        ]);
+        $ccn2 = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user3-&gt;id
+        ]);
+
+        $response = $this-&gt;putJson("/api/v1/campaigns/$campaign-&gt;id", [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; "Djadji Campaign",
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+10 minutes', strtotime('now'))),
+            'status' =&gt; 'paused',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["$user2-&gt;id" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["$user3-&gt;id" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Campaign Updated']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsUpdate
+     */
+    public function test_update_campaign_change_from_paused_to_active()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user2 = User::find(6);
+        $user3 = User::find(7);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create(['status' =&gt; 'paused']);
+        $ccn = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user2-&gt;id
+        ]);
+        $ccn2 = ClientCampaignNewsletter::factory()-&gt;create([
+            'campaign_id' =&gt; $campaign-&gt;id,
+            'client_id' =&gt; $user3-&gt;id
+        ]);
+
+        $response = $this-&gt;putJson("/api/v1/campaigns/$campaign-&gt;id", [
+            'token' =&gt; Str::random(10),
+            'name' =&gt; "Djadji Campaign",
+            'scheduled_on' =&gt; date("Y-m-d H:i:s", strtotime('+10 minutes', strtotime('now'))),
+            'status' =&gt; 'active',
+            'subject' =&gt; $this-&gt;faker-&gt;text(15),
+            'title' =&gt; $this-&gt;faker-&gt;text(20),
+            'first_text' =&gt; '&lt;a href="https://google.com"&gt;google test&lt;/a&gt;',
+            'mail_template_blade' =&gt; 'primary.blade.php',
+            'target_audience_info' =&gt; [
+                ["$user2-&gt;id" =&gt; ["countries" =&gt; [["2" =&gt; 1], ["201" =&gt; 1]], "mail_driver" =&gt; "1"]],
+                ["$user3-&gt;id" =&gt; ["countries" =&gt; [["201" =&gt; 2]], "mail_driver" =&gt; "1"]]
+            ],
+            'mail_template_name' =&gt; 'Primary'
+        ]);
+
+        $response
+            -&gt;assertStatus(200)
+            -&gt;assertJsonFragment(['message' =&gt; 'Campaign Updated']);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsDelete
+     */
+    public function test_delete_campaign_account_manager()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Account Manager');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $campaign-&gt;status = 'paused';
+        $campaign-&gt;save();
+        $response = $this-&gt;deleteJson("/api/v1/campaigns/$campaign-&gt;id");
+
+        $response-&gt;assertStatus(403);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsDelete
+     */
+    public function test_delete_campaign_marketing()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Marketing');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $campaign-&gt;status = 'paused';
+        $campaign-&gt;save();
+        $response = $this-&gt;deleteJson("/api/v1/campaigns/$campaign-&gt;id");
+        $campaign = $campaign-&gt;refresh();
+
+        $response-&gt;assertStatus(204);
+        $this-&gt;assertNotNull($campaign-&gt;deleted_at);
+    }
+    /**
+     * @group campaignTests
+     * @group campaignTestsDelete
+     */
+    public function test_delete_campaign()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $campaign-&gt;status = 'paused';
+        $campaign-&gt;save();
+        $response = $this-&gt;deleteJson("/api/v1/campaigns/$campaign-&gt;id");
+        $campaign = $campaign-&gt;refresh();
+
+        $response-&gt;assertStatus(204);
+        $this-&gt;assertNotNull($campaign-&gt;deleted_at);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsDelete
+     */
+    public function test_delete_campaign_that_doesnt_exist()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $response = $this-&gt;deleteJson("/api/v1/campaigns/22");
+
+        $response
+            -&gt;assertStatus(422)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Campaign Not Found'
+            ]);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsDelete
+     */
+    public function test_delete_campaign_that_isnt_paused_with_no_errors()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+        $response = $this-&gt;deleteJson("/api/v1/campaigns/$campaign-&gt;id");
+
+        $response
+            -&gt;assertStatus(400)
+            -&gt;assertJsonFragment([
+                'message' =&gt; 'Please pause the campaign before deleting.'
+            ]);
+    }
+
+    /**
+     * @group campaignTests
+     * @group campaignTestsDelete
+     */
+    public function test_delete_campaign_that_isnt_paused_with_errors()
+    {
+        $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+        $user-&gt;assignRole('Administrator');
+        Passport::actingAs($user);
+
+        $campaign = Campaign::factory()-&gt;create();
+
+        foreach ($campaign-&gt;target_audience_info as $clientKEY =&gt; $clientValue) {
+            ClientCampaignNewsletter::factory()-&gt;create([
+                'client_id' =&gt; key($clientValue),
+                'campaign_id' =&gt; $campaign-&gt;id,
+                'marketing_platform_id' =&gt; $clientValue[key($clientValue)]['mail_driver'] // Which mail Driver
+            ]);
+        }
+
+        foreach ($campaign-&gt;clientCampaignNewsletters as $ccn) {
+            $error = Error::factory()-&gt;create([
+                'ccc_id' =&gt; $ccn-&gt;id,
+            ]);
+            $ccn-&gt;error_id = $error-&gt;id;
+            $ccn-&gt;save();
+        }
+
+        $response = $this-&gt;deleteJson("/api/v1/campaigns/$campaign-&gt;id");
+
+        $response-&gt;assertStatus(204);
+    }
+}
+
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
+
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Unit Test Class - Thunder
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+/**
+* Returns number of subscribed users for specified day and widget.
+*
+* @param int $widget_id
+* @param string $day Eg. (2016-04-31)
+* @param bool $allWidgets
+* @param User|null $client
+* @return object|null
+*/
+private function subscribedForTheDay(
+    int $widget_id,
+    string $day,
+    bool $allWidgets,
+    ?User $client
+) {
+    $arr = explode('-', $day);
+
+    return DB::table('lead_metadata')
+        -&gt;select(
+            $allWidgets === false ? 'leads.widget_id' : 'leads.client_id',
+            DB::raw("COUNT(DISTINCT lead_id) AS num_of_subscribed"),
+        )-&gt;leftJoin('leads', 'leads.id', '=', 'lead_metadata.lead_id')
+        -&gt;where('lead_metadata.status', '=', 'subscribed')
+        -&gt;whereRaw("YEAR(lead_metadata.created_at) = {$arr[0]}")
+        -&gt;whereRaw("MONTH(lead_metadata.created_at) = {$arr[1]}")
+        -&gt;whereRaw("DAY(lead_metadata.created_at) = {$arr[2]}")
+        -&gt;where(
+            $allWidgets === false ? 'leads.widget_id' : 'leads.client_id',
+            '=',
+            $allWidgets === false ? $widget_id : $client-&gt;id
+        )
+        -&gt;groupBy($allWidgets === false ? 'leads.widget_id' : 'leads.client_id')
+        -&gt;first();
+}    
+
+public function findWithReports($id)
+{
+    $q = DB::table('campaigns')-&gt;select(
+        'campaigns.*',
+        DB::raw('ifnull(help_table_1.num_of_opens, 0) AS action_open'),
+        DB::raw('ifnull(help_table_2.num_of_clicks, 0) AS action_click'),
+        DB::raw('ifnull(help_table_3.num_of_delivered, 0) AS action_delivered'),
+        DB::raw('ifnull(help_table_4.num_of_errors, 0) AS num_of_errors'),
+        DB::raw('if(help_table_4.num_of_errors &gt; 0, "error", campaigns.status) AS status'),
+    )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, SUM(help_table_1_1.num_of_opens) AS num_of_opens 
+            FROM `client_campaign_newsletter` ccn
+            LEFT JOIN (SELECT ccc_id, count(ccc_id) AS num_of_opens FROM `opens` GROUP BY ccc_id) help_table_1_1
+            ON help_table_1_1.ccc_id = ccn.id 
+            GROUP BY campaign_id) AS help_table_1"),
+            'campaigns.id',
+            '=',
+            'help_table_1.campaign_id'
+        )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, SUM(help_table_2_1.num_of_clicks) AS num_of_clicks 
+            FROM `client_campaign_newsletter` ccn
+            LEFT JOIN (SELECT ccc_id, count(ccc_id) AS num_of_clicks FROM `clicks` GROUP BY ccc_id) AS help_table_2_1
+            ON help_table_2_1.ccc_id = ccn.id 
+            GROUP BY campaign_id) AS help_table_2"),
+            'campaigns.id',
+            '=',
+            'help_table_2.campaign_id'
+        )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, SUM(delivered_count) AS num_of_delivered 
+            FROM `client_campaign_newsletter` 
+            GROUP BY campaign_id) AS help_table_3"),
+            'campaigns.id',
+            '=',
+            'help_table_3.campaign_id'
+        )
+        -&gt;leftJoin(
+            DB::raw("(SELECT campaign_id, COUNT(error_id) AS num_of_errors 
+            FROM `client_campaign_newsletter` 
+            GROUP BY campaign_id) AS help_table_4"),
+            'campaigns.id',
+            '=',
+            'help_table_4.campaign_id'
+        )-&gt;where('id', '=', $id);
+
+    $q = $q-&gt;whereNull('deleted_at');
+
+    return  $q-&gt;first();
+}
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
                             Query Builder - Thunder, SDS
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
