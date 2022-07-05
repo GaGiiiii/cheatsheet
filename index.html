@@ -397,19 +397,19 @@ class UserController extends Controller
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         } catch (Exception $e) {
             Log::error('GetAll Users Exception Error', [$e-&gt;getMessage()]);
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         }
 
         return (UserResource::collection($users))-&gt;additional([
-            'message' =&gt; 'User found'
+            'message' =&gt; 'Users found.'
         ]);
     }
 
@@ -428,19 +428,19 @@ class UserController extends Controller
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         } catch (Exception $e) {
             Log::error('Create User Exception Error', [$e-&gt;getMessage()]);
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         }
 
         return (new UserResource($user))-&gt;additional([
-            'message' =&gt; 'User created'
+            'message' =&gt; 'User created.'
         ])-&gt;response()-&gt;setStatusCode(201);
     }
 
@@ -459,24 +459,24 @@ class UserController extends Controller
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         } catch (ModelNotFoundException $e) {
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "User not found",
+                "message" =&gt; "User not found.",
             ], 404);
         } catch (Exception $e) {
             Log::error('Get User Exception Error', [$e-&gt;getMessage()]);
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         }
 
         return (new UserResource($user))-&gt;additional([
-            'message' =&gt; 'User found'
+            'message' =&gt; 'User found.'
         ]);
     }
 
@@ -496,24 +496,24 @@ class UserController extends Controller
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         } catch (ModelNotFoundException $e) {
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "User not found",
+                "message" =&gt; "User not found.",
             ], 404);
         } catch (Exception $e) {
             Log::error('Update User Exception Error', [$e-&gt;getMessage()]);
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         }
 
         return (new UserResource($user))-&gt;additional([
-            'message' =&gt; 'User updated'
+            'message' =&gt; 'User updated.'
         ]);
     }
 
@@ -533,24 +533,24 @@ class UserController extends Controller
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         } catch (ModelNotFoundException $e) {
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "User not found",
+                "message" =&gt; "User not found.",
             ], 404);
         } catch (Exception $e) {
             Log::error('Delete User Exception Error', [$e-&gt;getMessage()]);
 
             return response()-&gt;json([
                 "data" =&gt; null,
-                "message" =&gt; "Server Error",
+                "message" =&gt; "Server error.",
             ], 500);
         }
 
         return (new UserResource($user))-&gt;additional([
-            'message' =&gt; 'User Deleted'
+            'message' =&gt; 'User deleted.'
         ]);
     }
 }
@@ -639,7 +639,7 @@ class UpdateUserRequest extends FormRequest
             'vertical_id' =&gt; [
                 'bail',
                 'required',
-                'integer'
+                'integer',
                 'exists:verticals,id',
             ],
             'target_audience_info' =&gt; [
