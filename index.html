@@ -781,10 +781,10 @@ class CustomFailedAuthorizationException extends Exception
 
 namespace Database\Factories;
 
-use App\Models\WidgetTemplateFormat;
+use App\Models\MarketingTemplateFormat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class WidgetTemplateV2Factory extends Factory
+class MarketingTemplateFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -795,7 +795,7 @@ class WidgetTemplateV2Factory extends Factory
     {
         return [
             'name' =&gt; $this-&gt;faker-&gt;name(),
-            'format_id' =&gt; WidgetTemplateFormat::factory()-&gt;create()-&gt;id,
+            'format_id' =&gt; MarketingTemplateFormat::factory()-&gt;create()-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
             'html' =&gt; $this-&gt;faker-&gt;text(),
         ];
@@ -2298,9 +2298,9 @@ class UserTest extends TestCase
 
 namespace Tests\Feature;
 
-use App\Models\WidgetTemplateV2;
+use App\Models\MarketingTemplate;
 use App\Models\User;
-use App\Models\WidgetTemplateFormat;
+use App\Models\MarketingTemplateFormat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Log;
@@ -2309,23 +2309,23 @@ use Laravel\Passport\Passport;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class WidgetTemplateV2Test extends TestCase
+class MarketingTemplateTest extends TestCase
 {
     use RefreshDatabase;
     use WithFaker;
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsAdd
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsAdd
      */
-    public function test_add_new_widget_template_account_manager()
+    public function test_add_new_marketing_template_account_manager()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplateFormat::factory()-&gt;create();
         $user-&gt;assignRole('Account Manager');
         Passport::actingAs($user);
 
-        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+        $response = $this-&gt;postJson('/api/v1/marketing-templates', [
             'name' =&gt; $this-&gt;faker-&gt;name(),
             'format_id' =&gt; $format-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
@@ -2336,17 +2336,17 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsAdd
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsAdd
      */
-    public function test_add_new_widget_template_marketing()
+    public function test_add_new_marketing_template_marketing()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplateFormat::factory()-&gt;create();
         $user-&gt;assignRole('Marketing');
         Passport::actingAs($user);
 
-        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+        $response = $this-&gt;postJson('/api/v1/marketing-templates', [
             'name' =&gt; $this-&gt;faker-&gt;name(),
             'format_id' =&gt; $format-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
@@ -2360,17 +2360,17 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsAdd
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsAdd
      */
-    public function test_add_new_widget_template()
+    public function test_add_new_marketing_template()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplateFormat::factory()-&gt;create();
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
-        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+        $response = $this-&gt;postJson('/api/v1/marketing-templates', [
             'name' =&gt; $this-&gt;faker-&gt;name(),
             'format_id' =&gt; $format-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
@@ -2383,16 +2383,16 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsAdd
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsAdd
      */
-    public function test_add_new_widget_template_format_does_not_exist()
+    public function test_add_new_marketing_template_format_does_not_exist()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
-        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+        $response = $this-&gt;postJson('/api/v1/marketing-templates', [
             'name' =&gt; $this-&gt;faker-&gt;name(),
             'format_id' =&gt; 1,
             'description' =&gt; $this-&gt;faker-&gt;text(),
@@ -2405,17 +2405,17 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsAdd
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsAdd
      */
-    public function test_add_new_widget_template_wrong_data()
+    public function test_add_new_marketing_template_wrong_data()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = WidgetTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplateFormat::factory()-&gt;create();
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
-        $response = $this-&gt;postJson('/api/v1/widget-templates-v2', [
+        $response = $this-&gt;postJson('/api/v1/marketing-templates', [
             'name' =&gt; Str::random(1000),
             'format_id' =&gt; $format-&gt;id,
             'description' =&gt; Str::random(1000),
@@ -2428,20 +2428,20 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsUpdate
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsUpdate
      */
-    public function test_update_widget_template_account_manager()
+    public function test_update_marketing_template_account_manager()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Account Manager');
         Passport::actingAs($user);
 
-        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+        $marketingTemplate = MarketingTemplate::factory()-&gt;create();
 
-        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+        $response = $this-&gt;putJson("/api/v1/marketing-templates/$marketingTemplate-&gt;id", [
             'name' =&gt; $this-&gt;faker-&gt;name(),
-            'format_id' =&gt; $widgetTemplate-&gt;format-&gt;id,
+            'format_id' =&gt; $marketingTemplate-&gt;format-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
             'html' =&gt; $this-&gt;faker-&gt;text(),
         ]);
@@ -2449,20 +2449,20 @@ class WidgetTemplateV2Test extends TestCase
         $response-&gt;assertStatus(403);
     }
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsUpdate
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsUpdate
      */
-    public function test_update_widget_template_marketing()
+    public function test_update_marketing_template_marketing()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Marketing');
         Passport::actingAs($user);
 
-        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+        $marketingTemplate = MarketingTemplate::factory()-&gt;create();
 
-        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+        $response = $this-&gt;putJson("/api/v1/marketing-templates/$marketingTemplate-&gt;id", [
             'name' =&gt; $this-&gt;faker-&gt;name(),
-            'format_id' =&gt; $widgetTemplate-&gt;format-&gt;id,
+            'format_id' =&gt; $marketingTemplate-&gt;format-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
             'html' =&gt; $this-&gt;faker-&gt;text(),
         ]);
@@ -2473,20 +2473,20 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsUpdate
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsUpdate
      */
-    public function test_update_widget_template()
+    public function test_update_marketing_template()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
-        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+        $marketingTemplate = MarketingTemplate::factory()-&gt;create();
 
-        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+        $response = $this-&gt;putJson("/api/v1/marketing-templates/$marketingTemplate-&gt;id", [
             'name' =&gt; $this-&gt;faker-&gt;name(),
-            'format_id' =&gt; $widgetTemplate-&gt;format-&gt;id,
+            'format_id' =&gt; $marketingTemplate-&gt;format-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
             'html' =&gt; $this-&gt;faker-&gt;text(),
         ]);
@@ -2497,18 +2497,18 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsUpdate
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsUpdate
      */
-    public function test_update_widget_template_missing_data()
+    public function test_update_marketing_template_missing_data()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
-        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
+        $marketingTemplate = MarketingTemplate::factory()-&gt;create();
 
-        $response = $this-&gt;putJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id", [
+        $response = $this-&gt;putJson("/api/v1/marketing-templates/$marketingTemplate-&gt;id", [
             'description' =&gt; $this-&gt;faker-&gt;text(),
             'html' =&gt; $this-&gt;faker-&gt;text(),
         ]);
@@ -2524,33 +2524,33 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsDelete
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsDelete
      */
-    public function test_delete_widget_template_account_manager()
+    public function test_delete_marketing_template_account_manager()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Account Manager');
         Passport::actingAs($user);
 
-        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
-        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id");
+        $marketingTemplate = MarketingTemplate::factory()-&gt;create();
+        $response = $this-&gt;deleteJson("/api/v1/marketing-templates/$marketingTemplate-&gt;id");
 
         $response-&gt;assertStatus(403);
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsDelete
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsDelete
      */
-    public function test_delete_widget_template_marketing()
+    public function test_delete_marketing_template_marketing()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Marketing');
         Passport::actingAs($user);
 
-        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
-        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id");
+        $marketingTemplate = MarketingTemplate::factory()-&gt;create();
+        $response = $this-&gt;deleteJson("/api/v1/marketing-templates/$marketingTemplate-&gt;id");
 
         $response-&gt;assertStatus(200)
             -&gt;assertJsonFragment([
@@ -2558,17 +2558,17 @@ class WidgetTemplateV2Test extends TestCase
             ]);
     }
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsDelete
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsDelete
      */
-    public function test_delete_widget_template()
+    public function test_delete_marketing_template()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
-        $widgetTemplate = WidgetTemplateV2::factory()-&gt;create();
-        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/$widgetTemplate-&gt;id");
+        $marketingTemplate = MarketingTemplate::factory()-&gt;create();
+        $response = $this-&gt;deleteJson("/api/v1/marketing-templates/$marketingTemplate-&gt;id");
 
         $response-&gt;assertStatus(200)
             -&gt;assertJsonFragment([
@@ -2577,16 +2577,16 @@ class WidgetTemplateV2Test extends TestCase
     }
 
     /**
-     * @group widgetTemplatesTests
-     * @group widgetTemplatesTestsDelete
+     * @group marketingTemplatesTests
+     * @group marketingTemplatesTestsDelete
      */
-    public function test_delete_widget_template_that_does_not_exist()
+    public function test_delete_marketing_template_that_does_not_exist()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
-        $response = $this-&gt;deleteJson("/api/v1/widget-templates-v2/22");
+        $response = $this-&gt;deleteJson("/api/v1/marketing-templates/22");
 
         $response
             -&gt;assertStatus(404)
@@ -4902,7 +4902,7 @@ $grades = Database::getInstance()-&gt;getAllGrades();
 &lt;button type="button" class="btn-sm btn-danger text-white" data-bs-toggle="modal" data-bs-target="#deleteCourseModal&lt;?php echo $course['id']; ?&gt;" style="border: none; background-color: transparent;"&gt;
   &lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash text-danger" viewBox="0 0 16 16"&gt;
     &lt;path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" /&gt;
-    &lt;path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" /&gt;
+    &lt;path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3h11v1h-11z" /&gt;
   &lt;/svg&gt;
 &lt;/button&gt;
 
