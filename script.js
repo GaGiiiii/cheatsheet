@@ -63,7 +63,7 @@ laravelGenerateTerminalCommandsForm.addEventListener('submit', (e) => {
     e.preventDefault();
     let resourceName = resourceNameInput.value;
     console.log(resourceName)
-    let text = `php artisan create_${resourceName.toLowerCase()}s_table && \
+    let text = `php artisan make:migration create_${resourceName.toLowerCase()}s_table && \
 php artisan make:controller ${resourceName}/${resourceName}Controller --api && \
 php artisan make:model ${resourceName} && \
 php artisan make:request ${resourceName}/Create${resourceName}Request && \
