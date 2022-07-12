@@ -115,6 +115,15 @@
 
                     <div class="collapse" id="laravel-collapse">
 
+
+                        <form id="laravel-generate-terminal-commands-form" class="mb-5 w-50 rounded border border-secondary shadow px-3 py-3">
+                            <div class="form-group">
+                              <label>Enter resource name</label>
+                              <input id='resource-name' type="text" class="form-control" placeholder="Eg. User | Newsletter | Movie | NewsletterLocation | NewsletterClient">
+                            </div>
+                            <button id="generate-commands-btn" type="submit" class="btn btn-primary w-100">Generate commands</button>
+                        </form>
+
                         <!-- SECTION START -->
                         <p class="font-weight-bold text-dark">
                             Migration Class - Thunder, SDS
@@ -781,7 +790,7 @@ class CustomFailedAuthorizationException extends Exception
 
 namespace Database\Factories;
 
-use App\Models\MarketingTemplateFormat;
+use App\Models\MarketingTemplatesFormat;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MarketingTemplateFactory extends Factory
@@ -795,7 +804,7 @@ class MarketingTemplateFactory extends Factory
     {
         return [
             'name' =&gt; $this-&gt;faker-&gt;name(),
-            'format_id' =&gt; MarketingTemplateFormat::factory()-&gt;create()-&gt;id,
+            'format_id' =&gt; MarketingTemplatesFormat::factory()-&gt;create()-&gt;id,
             'description' =&gt; $this-&gt;faker-&gt;text(),
             'html' =&gt; $this-&gt;faker-&gt;text(),
         ];
@@ -2300,7 +2309,7 @@ namespace Tests\Feature;
 
 use App\Models\MarketingTemplate;
 use App\Models\User;
-use App\Models\MarketingTemplateFormat;
+use App\Models\MarketingTemplatesFormat;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Log;
@@ -2321,7 +2330,7 @@ class MarketingTemplateTest extends TestCase
     public function test_add_new_marketing_template_account_manager()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = MarketingTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplatesFormat::factory()-&gt;create();
         $user-&gt;assignRole('Account Manager');
         Passport::actingAs($user);
 
@@ -2342,7 +2351,7 @@ class MarketingTemplateTest extends TestCase
     public function test_add_new_marketing_template_marketing()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = MarketingTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplatesFormat::factory()-&gt;create();
         $user-&gt;assignRole('Marketing');
         Passport::actingAs($user);
 
@@ -2366,7 +2375,7 @@ class MarketingTemplateTest extends TestCase
     public function test_add_new_marketing_template()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = MarketingTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplatesFormat::factory()-&gt;create();
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
@@ -2411,7 +2420,7 @@ class MarketingTemplateTest extends TestCase
     public function test_add_new_marketing_template_wrong_data()
     {
         $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
-        $format = MarketingTemplateFormat::factory()-&gt;create();
+        $format = MarketingTemplatesFormat::factory()-&gt;create();
         $user-&gt;assignRole('Administrator');
         Passport::actingAs($user);
 
