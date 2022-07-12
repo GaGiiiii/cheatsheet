@@ -116,12 +116,66 @@
                     <div class="collapse" id="laravel-collapse">
 
 
-                        <form id="laravel-generate-terminal-commands-form" class="mb-5 w-50 rounded border border-secondary shadow px-3 py-3">
+                        <form id="laravel-generate-terminal-commands-form"
+                            class="mb-5 w-50 rounded border border-secondary shadow px-3 py-3">
                             <div class="form-group">
-                              <label>Enter resource name</label>
-                              <input id='resource-name' type="text" class="form-control" placeholder="Eg. User | Newsletter | Movie | NewsletterLocation | NewsletterClient">
+                                <label>Enter resource name</label>
+                                <input id='resource-name' type="text" class="form-control"
+                                    placeholder="Eg. User | Newsletter | Movie | NewsletterLocation | NewsletterClient">
                             </div>
-                            <button id="generate-commands-btn" type="submit" class="btn btn-primary w-100">Generate commands</button>
+                            <div id="project-location-div" class="form-group d-none">
+                                <label>Enter project location</label>
+                                <input id='project-location-input' type="text" class="form-control"
+                                    placeholder="Eg. /var/www/project_name | /home/username/project_name">
+                            </div>
+                            <div class="text-center">
+                                <div>
+                                    <div class="form-check form-check">
+                                        <input id="laravel-checkbox-all" class="form-check-input" type="checkbox" value="all">
+                                        <label class="form-check-label">Check all</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="migration">
+                                        <label class="form-check-label">Migration</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="model">
+                                        <label class="form-check-label">Model</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="dto">
+                                        <label class="form-check-label">DTO</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="service">
+                                        <label class="form-check-label">Service</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="controller">
+                                        <label class="form-check-label">Controller</label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="requests">
+                                        <label class="form-check-label">Requests</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="factory">
+                                        <label class="form-check-label">Factory</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="feature">
+                                        <label class="form-check-label">Feature test</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="unit">
+                                        <label class="form-check-label">Unit test</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="generate-commands-btn" type="submit" class="btn btn-primary w-100 mt-2">Generate
+                                commands</button>
                         </form>
 
                         <!-- SECTION START -->
