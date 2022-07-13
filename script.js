@@ -222,7 +222,7 @@ function initGenerateCommands() {
                             if (text.length > 0) {
                                 text += ' && ';
                             }
-                            text += `&& php artisan make:resource ${resourceName}/${resourceName}Resource`;
+                            text += `php artisan make:resource ${resourceName}/${resourceName}Resource`;
 
                             break;
                         case 'requests':
