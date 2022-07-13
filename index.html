@@ -157,6 +157,10 @@
                                 </div>
                                 <div>
                                     <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" value="resource">
+                                        <label class="form-check-label">Resource</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
                                         <input class="form-check-input" type="checkbox" value="requests">
                                         <label class="form-check-label">Requests</label>
                                     </div>
@@ -184,7 +188,7 @@
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="migration" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -249,7 +253,7 @@ class AddVerticalIdColumnToWidgetsTable extends Migration
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="dto" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -298,7 +302,7 @@ class UserData extends DataTransferObject
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="service" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -415,7 +419,7 @@ class UserService
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="controller" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -636,7 +640,7 @@ class UserController extends Controller
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="request" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -798,7 +802,7 @@ class UpdateUserRequest extends FormRequest
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="cfae" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -835,7 +839,7 @@ class CustomFailedAuthorizationException extends Exception
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="factory" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -882,7 +886,7 @@ class MarketingTemplateFactory extends Factory
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="feature-user" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -2352,7 +2356,7 @@ class UserTest extends TestCase
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="feature-wtemplate" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -2676,7 +2680,7 @@ class MarketingTemplateTest extends TestCase
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="feature-campaign" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -3419,7 +3423,7 @@ class CampaignTest extends TestCase
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="unit" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -3527,7 +3531,7 @@ public function findWithReports($id)
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="query-builder" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -3635,7 +3639,7 @@ public function findWithReports($id)
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="raw-sql" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -3767,7 +3771,7 @@ private function bestCTA(int $client_id)
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="mdbs" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
@@ -3841,7 +3845,7 @@ In config/database.php -
                             <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
                                 data-target="#collapseExample4" aria-expanded="false"
                                 aria-controls="collapseExample4">+</button>
-                            <button class="btn btn-primary btn-sm copy-btn">Copy</button>
+                            <button data-title="excel" class="btn btn-primary btn-sm copy-btn">Copy</button>
                         </p>
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
