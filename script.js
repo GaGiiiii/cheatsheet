@@ -53,22 +53,22 @@ function initCopyBtns() {
                     case "request":
                     case "factory":
                         textArea.textContent = copyText.replaceAll('User', resourceNameInput.value)
-                            .replaceAll('user', resourceNameInput.value.toLowerCase())
+                            .replaceAll('user', camelize(resourceNameInput.value))
                             .replaceAll('Users', resourceNameInput.value + 's')
-                            .replaceAll('users', resourceNameInput.value.toLowerCase() + 's');
+                            .replaceAll('users',  camelize(resourceNameInput.value) + 's');
                         break;
                     case "feature-wtemplate":
                         textArea.textContent = copyText.replaceAll('MarketingTemplate', resourceNameInput.value)
-                            .replaceAll('marketingTemplates', resourceNameInput.value.toLowerCase())
-                            .replaceAll('marketingTemplate', resourceNameInput.value + 's')
+                            .replaceAll('marketingTemplates', camelize(resourceNameInput.value))
+                            .replaceAll('marketingTemplate',  camelize(resourceNameInput.value) + 's')
                             .replaceAll('marketing_template', convertPascalToSnake(resourceNameInput.value))
                             .replaceAll('Template', resourceNameInput.value);
                         break;
                     case "feature-campaign":
                         textArea.textContent = copyText.replaceAll('Campaign', resourceNameInput.value)
-                            .replaceAll('campaign', resourceNameInput.value.toLowerCase())
+                            .replaceAll('campaign',  camelize(resourceNameInput.value))
                             .replaceAll('_campaign', "_" + convertPascalToSnake(resourceNameInput.value))
-                            .replaceAll('campaigns', resourceNameInput.value.toLowerCase() + 's');
+                            .replaceAll('campaigns',  camelize(resourceNameInput.value) + 's');
                         break;
                     default:
                         textArea.textContent = copyText;
@@ -276,6 +276,12 @@ php artisan make:request ${resourceName}/GetAll${resourceName}sRequest`;
 function convertPascalToSnake(s) {
     return s.replace(/(?:^|\.?)([A-Z])/g, function (x, y) { return "_" + y.toLowerCase() }).replace(/^_/, "");
 }
+
+function camelize(str) {
+    return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {
+      return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    }).replace(/\s+/g, '');
+  }
 
 initCollapse();
 initSidebar();
