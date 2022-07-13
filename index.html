@@ -453,9 +453,10 @@ class UserController extends Controller
     /**
         * Display a listing of the resource.
         *
+        * @param GetAllUsersRequest $request
         * @return JsonResource
         */
-    public function index()
+    public function index(GetAllUsersRequest $request)
     {
         try {
             $users = $this-&gt;userService-&gt;getAll();
@@ -514,10 +515,11 @@ class UserController extends Controller
     /**
         * Display the specified resource.
         *
+        * @param  GetUserRequest  $request
         * @param  int  $id
         * @return JsonResource
         */
-    public function show($id)
+    public function show(GetUserRequest $request, int $id)
     {
         try {
             $user = $this-&gt;userService-&gt;getById($id);
