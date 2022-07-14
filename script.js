@@ -176,7 +176,7 @@ function initGenerateCommands() {
 && php artisan make:request ${resourceName}/Delete${resourceName}Request\
 && php artisan make:request ${resourceName}/Get${resourceName}Request\
 && php artisan make:request ${resourceName}/GetAll${resourceName}sRequest\
-&& php artisan make:factory ${resourceName}/${resourceName}Factory\
+&& php artisan make:factory ${resourceName}Factory\
 && php artisan make:test ${resourceName}/${resourceName}Test\
 && php artisan make:test ${resourceName}/${resourceName}Test --unit`;
         } else {
@@ -242,7 +242,7 @@ php artisan make:request ${resourceName}/GetAll${resourceName}sRequest`;
                             if (text.length > 0) {
                                 text += ' && ';
                             }
-                            text += `php artisan make:factory ${resourceName}/${resourceName}Factory`;
+                            text += `php artisan make:factory ${resourceName}Factory`;
 
                             break;
                         case 'feature':
