@@ -2387,6 +2387,80 @@ class MarketingTemplateTest extends TestCase
     use WithFaker;
 
     /**
+    * @group marketingTemplatesTests
+    * @group marketingTemplatesTestsGetAll
+    */
+   public function test_get_all_marketing_templates_account_manager()
+   {
+       $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+       $user-&gt;assignRole('Account Manager');
+       Passport::actingAs($user);
+       $marketingTemplates = MarketingTemplate::factory()-&gt;count(20)-&gt;create();
+
+       $response = $this-&gt;getJson('/api/v1/marketing-templates');
+
+       $response-&gt;assertStatus(403);
+   }
+
+   /**
+    * @group marketingTemplatesTests
+    * @group marketingTemplatesTestsGetAll
+    */
+   public function test_get_all_marketing_templates_marketing()
+   {
+       $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+       $user-&gt;assignRole('Marketing');
+       Passport::actingAs($user);
+       $marketingTemplates = MarketingTemplate::factory()-&gt;count(20)-&gt;create();
+
+       $response = $this-&gt;getJson('/api/v1/marketing-templates');
+
+       $response-&gt;assertStatus(200)
+           -&gt;assertJsonFragment([
+               'message' =&gt; 'MarketingTemplates found.'
+           ])-&gt;assertJsonCount(10, 'data');
+       // 10 Because we have 10 paginated
+   }
+
+   /**
+    * @group marketingTemplatesTests
+    * @group marketingTemplatesTestsGetAll
+    */
+   public function test_get_all_marketing_templates()
+   {
+       $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+       $user-&gt;assignRole('Administrator');
+       Passport::actingAs($user);
+       $marketingTemplates = MarketingTemplate::factory()-&gt;count(20)-&gt;create();
+
+       $response = $this-&gt;getJson('/api/v1/marketing-templates');
+
+       $response-&gt;assertStatus(200)
+           -&gt;assertJsonFragment([
+               'message' =&gt; 'MarketingTemplates found.'
+           ])-&gt;assertJsonCount(10, 'data');
+       // 10 Because we have 10 paginated
+   }
+
+   /**
+    * @group marketingTemplatesTests
+    * @group marketingTemplatesTestsGetAll
+    */
+   public function test_get_all_marketing_templates_empty()
+   {
+       $user = User::factory()-&gt;create(['is_client' =&gt; 0]);
+       $user-&gt;assignRole('Marketing');
+       Passport::actingAs($user);
+
+       $response = $this-&gt;getJson('/api/v1/marketing-templates');
+
+       $response-&gt;assertStatus(200)
+           -&gt;assertJsonFragment([
+               'message' =&gt; 'MarketingTemplates found.'
+           ])-&gt;assertJsonCount(0, 'data');
+   }
+
+    /**
      * @group marketingTemplatesTests
      * @group marketingTemplatesTestsAdd
      */
