@@ -131,7 +131,8 @@
                             <div class="text-center">
                                 <div>
                                     <div class="form-check form-check">
-                                        <input id="laravel-checkbox-all" class="form-check-input" type="checkbox" value="all">
+                                        <input id="laravel-checkbox-all" class="form-check-input" type="checkbox"
+                                            value="all">
                                         <label class="form-check-label">Check all</label>
                                     </div>
                                     <div class="form-check form-check-inline">
@@ -4070,6 +4071,38 @@ class SDSCL25Export implements FromQuery, WithHeadings, WithStrictNullComparison
         ];
     }
 }
+
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
+
+
+
+
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Relationship with nested relationships - Thunder
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button data-title="excel" class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+    public function testInfo()
+    {
+        return $this-&gt;hasOne(TestInfo::class, 'newsletter_id', 'id')-&gt;with('options');
+    }
 
 </pre>
 
