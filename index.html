@@ -3508,92 +3508,579 @@ class CampaignTest extends TestCase
                         <hr>
                         <div class="collapse custom-collapse-class" id="collapseExampleOC3">
                             <pre>
-/**
-* Returns number of subscribed users for specified day and widget.
-*
-* @param int $widget_id
-* @param string $day Eg. (2016-04-31)
-* @param bool $allWidgets
-* @param User|null $client
-* @return object|null
-*/
-private function subscribedForTheDay(
-    int $widget_id,
-    string $day,
-    bool $allWidgets,
-    ?User $client
-) {
-    $arr = explode('-', $day);
+&lt;?php
 
-    return DB::table('lead_metadata')
-        -&gt;select(
-            $allWidgets === false ? 'leads.widget_id' : 'leads.client_id',
-            DB::raw("COUNT(DISTINCT lead_id) AS num_of_subscribed"),
-        )-&gt;leftJoin('leads', 'leads.id', '=', 'lead_metadata.lead_id')
-        -&gt;where('lead_metadata.status', '=', 'subscribed')
-        -&gt;whereRaw("YEAR(lead_metadata.created_at) = {$arr[0]}")
-        -&gt;whereRaw("MONTH(lead_metadata.created_at) = {$arr[1]}")
-        -&gt;whereRaw("DAY(lead_metadata.created_at) = {$arr[2]}")
-        -&gt;where(
-            $allWidgets === false ? 'leads.widget_id' : 'leads.client_id',
-            '=',
-            $allWidgets === false ? $widget_id : $client-&gt;id
-        )
-        -&gt;groupBy($allWidgets === false ? 'leads.widget_id' : 'leads.client_id')
-        -&gt;first();
-}    
+namespace Tests\Unit;
 
-public function findWithReports($id)
+use App\Models\Lead;
+use App\Models\Newsletter;
+use App\Models\NewsletterClientPlatform;
+use App\Models\NewsletterClientPlatformError;
+use App\Models\LeadMetadata;
+use App\Models\NewsletterClient;
+use App\Models\NewsletterClientPlatformLeadMetadata;
+use App\Models\NewsletterCountry;
+use App\Models\Setting;
+use App\Models\Task;
+use App\Repository\Newsletter\NewsletterRepository;
+use App\Repository\NewsletterClientPlatform\NewsletterClientPlatformRepository;
+use App\Repository\NewsletterClientPlatformError\NewsletterClientPlatformErrorRepository;
+use App\Repository\Lead\LeadMetadataRepository;
+use App\Repository\Setting\SettingRepository;
+use App\Repository\Task\TaskRepository;
+use App\Services\Newsletter\NewsletterService;
+use App\Services\NewsletterClientPlatform\NewsletterClientPlatformService;
+use App\Services\NewsletterClientPlatformError\NewsletterClientPlatformErrorService;
+use App\Services\Lead\LeadMetadataService;
+use App\Services\MailDriver\Drivers\GetResponseMailDriver;
+use App\Services\MailDriver\MailDriverService;
+use App\Services\Task\TaskService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Log;
+// use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
+
+class GetReponseTest extends TestCase
 {
-    $q = DB::table('campaigns')-&gt;select(
-        'campaigns.*',
-        DB::raw('ifnull(help_table_1.num_of_opens, 0) AS action_open'),
-        DB::raw('ifnull(help_table_2.num_of_clicks, 0) AS action_click'),
-        DB::raw('ifnull(help_table_3.num_of_delivered, 0) AS action_delivered'),
-        DB::raw('ifnull(help_table_4.num_of_errors, 0) AS num_of_errors'),
-        DB::raw('if(help_table_4.num_of_errors &gt; 0, "error", campaigns.status) AS status'),
-    )
-        -&gt;leftJoin(
-            DB::raw("(SELECT campaign_id, SUM(help_table_1_1.num_of_opens) AS num_of_opens 
-            FROM `client_campaign_newsletter` ccn
-            LEFT JOIN (SELECT ccc_id, count(ccc_id) AS num_of_opens FROM `opens` GROUP BY ccc_id) help_table_1_1
-            ON help_table_1_1.ccc_id = ccn.id 
-            GROUP BY campaign_id) AS help_table_1"),
-            'campaigns.id',
-            '=',
-            'help_table_1.campaign_id'
-        )
-        -&gt;leftJoin(
-            DB::raw("(SELECT campaign_id, SUM(help_table_2_1.num_of_clicks) AS num_of_clicks 
-            FROM `client_campaign_newsletter` ccn
-            LEFT JOIN (SELECT ccc_id, count(ccc_id) AS num_of_clicks FROM `clicks` GROUP BY ccc_id) AS help_table_2_1
-            ON help_table_2_1.ccc_id = ccn.id 
-            GROUP BY campaign_id) AS help_table_2"),
-            'campaigns.id',
-            '=',
-            'help_table_2.campaign_id'
-        )
-        -&gt;leftJoin(
-            DB::raw("(SELECT campaign_id, SUM(delivered_count) AS num_of_delivered 
-            FROM `client_campaign_newsletter` 
-            GROUP BY campaign_id) AS help_table_3"),
-            'campaigns.id',
-            '=',
-            'help_table_3.campaign_id'
-        )
-        -&gt;leftJoin(
-            DB::raw("(SELECT campaign_id, COUNT(error_id) AS num_of_errors 
-            FROM `client_campaign_newsletter` 
-            GROUP BY campaign_id) AS help_table_4"),
-            'campaigns.id',
-            '=',
-            'help_table_4.campaign_id'
-        )-&gt;where('id', '=', $id);
+    use RefreshDatabase;
+    use WithFaker;
 
-    $q = $q-&gt;whereNull('deleted_at');
+    private MailDriverService $mailDriverService;
+    private NewsletterClientPlatformService $newsletterClientPlatformService;
+    private TaskService $taskService;
+    private NewsletterService $newsletterService;
+    private NewsletterClientPlatformErrorService $newsletterErrorService;
+    private LeadMetadataService $leadMetadataService;
 
-    return  $q-&gt;first();
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this-&gt;mailDriverService = new MailDriverService(new SettingRepository(new Setting()));
+        $this-&gt;newsletterClientPlatformService = new NewsletterClientPlatformService(
+            new NewsletterClientPlatformRepository(new NewsletterClientPlatform())
+        );
+        $this-&gt;taskService = new TaskService(new TaskRepository(new Task()));
+        $this-&gt;newsletterService = new NewsletterService(
+            new NewsletterRepository(new Newsletter()),
+            $this-&gt;taskService
+        );
+        $this-&gt;newsletterErrorService = new NewsletterClientPlatformErrorService(
+            new NewsletterClientPlatformErrorRepository(new NewsletterClientPlatformError())
+        );
+        $this-&gt;leadMetadataService = new LeadMetadataService(new LeadMetadataRepository(new LeadMetadata()));
+    }
+
+    /**
+     * @group getResponse
+     * @group getResponseAddNL
+     */
+    public function test_add_newsletter_gr()
+    {
+        $newsletter = Newsletter::factory()-&gt;create();
+        $countries = [155, 201];
+        $marketingPlatform = 1;
+        $clients = [6, 7];
+
+        $this-&gt;createLeadsAndTheirMetadatas($countries);
+        $this-&gt;createNewsletterCountries($newsletter, $countries);
+        $this-&gt;createNewsletterClientPlatformLeads($newsletter, $clients, $countries);
+
+        foreach ($clients as $client) {
+            $newsletterClient =
+                NewsletterClient::where(&apos;newsletter_id&apos;, $newsletter-&gt;id)-&gt;where(&apos;client_id&apos;, $client)-&gt;first();
+            $newsletterClientPlatform =
+                NewsletterClientPlatform::where(&apos;newsletter_client_id&apos;, $newsletterClient-&gt;id)
+                -&gt;where(&apos;marketing_platform_id&apos;, 1)-&gt;first();
+
+            $getResponse = new GetResponseMailDriver($client, $marketingPlatform);
+            $result = $getResponse-&gt;addNewsletter(
+                $newsletter,
+                $this-&gt;newsletterClientPlatformService,
+                $newsletterClientPlatform,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $task = $this-&gt;taskService-&gt;findWhere([&apos;task_scope_id&apos; =&gt; $newsletterClientPlatform-&gt;id]);
+            $errors = NewsletterClientPlatformError::where(
+                &apos;newsletter_client_platform_id&apos;,
+                $newsletterClientPlatform-&gt;id
+            )-&gt;first();
+
+            $this-&gt;assertTrue($result);
+            $this-&gt;assertNotNull($newsletterClientPlatform-&gt;newsletter_id_on_platform);
+            $this-&gt;assertNotNull($task);
+            $this-&gt;assertNull($errors);
+        }
+    }
+
+    /**
+     * @group getResponse
+     * @group getResponseAddNL
+     */
+    public function test_add_newsletter_gr_with_errors()
+    {
+        $newsletter = Newsletter::factory()-&gt;create([
+            &apos;scheduled_on&apos; =&gt; date(&quot;Y-m-d H:i:s&quot;, strtotime(&apos;-22 minutes&apos;, strtotime(&apos;now&apos;))),
+        ]);
+        $countries = [155, 201];
+        $clients = [6, 7];
+
+        $this-&gt;createLeadsAndTheirMetadatas($countries);
+        $this-&gt;createNewsletterCountries($newsletter, $countries);
+        $this-&gt;createNewsletterClientPlatformLeads($newsletter, $clients, $countries);
+
+        foreach ($clients as $client) {
+            $newsletterClient =
+                NewsletterClient::where(&apos;newsletter_id&apos;, $newsletter-&gt;id)-&gt;where(&apos;client_id&apos;, $client)-&gt;first();
+            $newsletterClientPlatform =
+                NewsletterClientPlatform::where(&apos;newsletter_client_id&apos;, $newsletterClient-&gt;id)
+                -&gt;where(&apos;marketing_platform_id&apos;, 1)-&gt;first();
+
+            $getResponse = new GetResponseMailDriver($client, 1);
+            $result = $getResponse-&gt;addNewsletter(
+                $newsletter,
+                $this-&gt;newsletterClientPlatformService,
+                $newsletterClientPlatform,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries
+            );
+
+            $task = $this-&gt;taskService-&gt;findWhere([&apos;task_scope_id&apos; =&gt; $newsletterClientPlatform-&gt;id]);
+            $errors = NewsletterClientPlatformError::where(
+                &apos;newsletter_client_platform_id&apos;,
+                $newsletterClientPlatform-&gt;id
+            )-&gt;first();
+
+            $this-&gt;assertFalse($result);
+            $this-&gt;assertNull($newsletterClientPlatform-&gt;newsletter_id_on_platform);
+            $this-&gt;assertEmpty($task);
+            $this-&gt;assertNotNull($errors);
+        }
+    }
+
+    /**
+     * @group getResponse
+     * @group getResponseUpdateNL
+     */
+    public function test_update_newsletter_gr()
+    {
+        $newsletter = Newsletter::factory()-&gt;create();
+        $countries = [155, 201];
+        $clients = [6, 7];
+
+        $this-&gt;createLeadsAndTheirMetadatas($countries);
+        $this-&gt;createNewsletterCountries($newsletter, $countries);
+        $this-&gt;createNewsletterClientPlatformLeads($newsletter, $clients, $countries);
+
+        foreach ($clients as $client) {
+            $newsletterClient =
+                NewsletterClient::where(&apos;newsletter_id&apos;, $newsletter-&gt;id)-&gt;where(&apos;client_id&apos;, $client)-&gt;first();
+            $newsletterClientPlatform =
+                NewsletterClientPlatform::where(&apos;newsletter_client_id&apos;, $newsletterClient-&gt;id)
+                -&gt;where(&apos;marketing_platform_id&apos;, 1)-&gt;first();
+
+            $getResponse = new GetResponseMailDriver($client, 1);
+            $result = $getResponse-&gt;addNewsletter(
+                $newsletter,
+                $this-&gt;newsletterClientPlatformService,
+                $newsletterClientPlatform,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformBefore = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $nameCopy = $newsletter-&gt;name;
+            $newsletter-&gt;name = &quot;Novi Djadji TEST&quot;;
+
+            $result2 = $getResponse-&gt;updateNewsletter(
+                $newsletter,
+                1,
+                $this-&gt;newsletterClientPlatformService,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries,
+                &apos;scheduled&apos;
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformAfter = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+
+            $result3 = $newsletterClientPlatformBefore !== $newsletterClientPlatformAfter;
+
+            $this-&gt;assertTrue($result);
+            $this-&gt;assertTrue($result2);
+            $this-&gt;assertNotNull($newsletterClientPlatformBefore);
+            $this-&gt;assertNotNull($newsletterClientPlatformAfter);
+            $this-&gt;assertTrue($result3);
+
+            $newsletter-&gt;name = $nameCopy;
+        }
+    }
+
+    /**
+     * @group getResponse
+     * @group getResponseUpdateNL
+     */
+    public function test_update_newsletter_gr_change_status_to_paused()
+    {
+        $newsletter = Newsletter::factory()-&gt;create();
+        $countries = [155, 201];
+        $clients = [6, 7];
+
+        $this-&gt;createLeadsAndTheirMetadatas($countries);
+        $this-&gt;createNewsletterCountries($newsletter, $countries);
+        $this-&gt;createNewsletterClientPlatformLeads($newsletter, $clients, $countries);
+
+        foreach ($clients as $client) {
+            $newsletterClient =
+                NewsletterClient::where(&apos;newsletter_id&apos;, $newsletter-&gt;id)-&gt;where(&apos;client_id&apos;, $client)-&gt;first();
+            $newsletterClientPlatform =
+                NewsletterClientPlatform::where(&apos;newsletter_client_id&apos;, $newsletterClient-&gt;id)
+                -&gt;where(&apos;marketing_platform_id&apos;, 1)-&gt;first();
+
+            $getResponse = new GetResponseMailDriver($client, 1);
+            $result = $getResponse-&gt;addNewsletter(
+                $newsletter,
+                $this-&gt;newsletterClientPlatformService,
+                $newsletterClientPlatform,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformBefore = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $newsletter-&gt;status = &quot;paused&quot;;
+
+            $result2 = $getResponse-&gt;updateNewsletter(
+                $newsletter,
+                2,
+                $this-&gt;newsletterClientPlatformService,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries,
+                &apos;paused&apos;
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformAfter = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $result3 = $newsletterClientPlatformBefore === $newsletterClientPlatformAfter;
+            $tasks = $this-&gt;taskService-&gt;findWhere([&apos;task_scope_id&apos; =&gt; $newsletterClientPlatform-&gt;id]);
+
+            $this-&gt;assertTrue($result);
+            $this-&gt;assertTrue($result2);
+            $this-&gt;assertNotNull($newsletterClientPlatformBefore);
+            $this-&gt;assertNotNull($newsletterClientPlatformAfter);
+            $this-&gt;assertTrue($result3);
+            $this-&gt;assertEmpty($tasks);
+
+            // REVERT NEWSLETTER STATUS FOR THE NEXT CLIENT
+            $newsletter-&gt;status = &quot;scheduled&quot;;
+        }
+    }
+
+    /**
+     * @group getResponse
+     * @group getResponseUpdateNL
+     */
+    public function test_update_newsletter_gr_change_status_to_active()
+    {
+        $newsletter = Newsletter::factory()-&gt;create([
+            &apos;status&apos; =&gt; &apos;paused&apos;
+        ]);
+        $countries = [155, 201];
+        $clients = [6, 7];
+
+        $this-&gt;createLeadsAndTheirMetadatas($countries);
+        $this-&gt;createNewsletterCountries($newsletter, $countries);
+        $this-&gt;createNewsletterClientPlatformLeads($newsletter, $clients, $countries);
+
+        foreach ($clients as $client) {
+            $newsletterClient =
+                NewsletterClient::where(&apos;newsletter_id&apos;, $newsletter-&gt;id)-&gt;where(&apos;client_id&apos;, $client)-&gt;first();
+            $newsletterClientPlatform =
+                NewsletterClientPlatform::where(&apos;newsletter_client_id&apos;, $newsletterClient-&gt;id)
+                -&gt;where(&apos;marketing_platform_id&apos;, 1)-&gt;first();
+
+            $getResponse = new GetResponseMailDriver($client, 1);
+            $result = $getResponse-&gt;addNewsletter(
+                $newsletter,
+                $this-&gt;newsletterClientPlatformService,
+                $newsletterClientPlatform,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformBefore = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $newsletter-&gt;status = &quot;scheduled&quot;;
+
+            $result2 = $getResponse-&gt;updateNewsletter(
+                $newsletter,
+                2,
+                $this-&gt;newsletterClientPlatformService,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries,
+                &apos;scheduled&apos;
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformAfter = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $result3 = $newsletterClientPlatformBefore === $newsletterClientPlatformAfter;
+
+            $this-&gt;assertTrue($result);
+            $this-&gt;assertTrue($result2);
+            $this-&gt;assertNotNull($newsletterClientPlatformBefore);
+            $this-&gt;assertNotNull($newsletterClientPlatformAfter);
+            $this-&gt;assertTrue($result3);
+
+            // REVERT NEWSLETTER STATUS FOR THE NEXT CLIENT
+            $newsletter-&gt;status = &quot;paused&quot;;
+        }
+    }
+
+    /**
+     * @group getResponse
+     * @group getResponseUpdateNL
+     */
+    public function test_update_newsletter_gr_change_status_to_active_already_active()
+    {
+        $newsletter = Newsletter::factory()-&gt;create();
+        $countries = [155, 201];
+        $clients = [6, 7];
+
+        $this-&gt;createLeadsAndTheirMetadatas($countries);
+        $this-&gt;createNewsletterCountries($newsletter, $countries);
+        $this-&gt;createNewsletterClientPlatformLeads($newsletter, $clients, $countries);
+
+        foreach ($clients as $client) {
+            $newsletterClient =
+                NewsletterClient::where(&apos;newsletter_id&apos;, $newsletter-&gt;id)-&gt;where(&apos;client_id&apos;, $client)-&gt;first();
+            $newsletterClientPlatform =
+                NewsletterClientPlatform::where(&apos;newsletter_client_id&apos;, $newsletterClient-&gt;id)
+                -&gt;where(&apos;marketing_platform_id&apos;, 1)-&gt;first();
+
+            $getResponse = new GetResponseMailDriver($client, 1);
+            $result = $getResponse-&gt;addNewsletter(
+                $newsletter,
+                $this-&gt;newsletterClientPlatformService,
+                $newsletterClientPlatform,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformBefore = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $newsletter-&gt;status = &quot;scheduled&quot;;
+
+            $result2 = $getResponse-&gt;updateNewsletter(
+                $newsletter,
+                2,
+                $this-&gt;newsletterClientPlatformService,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries,
+                &apos;scheduled&apos;
+            );
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformAfter = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $result3 = $newsletterClientPlatformBefore === $newsletterClientPlatformAfter;
+            $error =
+                NewsletterClientPlatformError::where(
+                    &apos;newsletter_client_platform_id&apos;,
+                    $newsletterClientPlatform-&gt;id
+                )-&gt;first();
+
+            $this-&gt;assertTrue($result);
+            $this-&gt;assertFalse($result2);
+            $this-&gt;assertNotNull($newsletterClientPlatformBefore);
+            $this-&gt;assertNotNull($newsletterClientPlatformAfter);
+            $this-&gt;assertTrue($result3);
+            $this-&gt;assertNotNull($error);
+        }
+    }
+
+    /**
+     * @group getResponse
+     * @group getResponseDeleteNL1
+     */
+    public function test_delete_newsletter_gr()
+    {
+        $newsletter = Newsletter::factory()-&gt;create();
+        $countries = [155, 201];
+        $clients = [6, 7];
+
+        $this-&gt;createLeadsAndTheirMetadatas($countries);
+        $this-&gt;createNewsletterCountries($newsletter, $countries);
+        $this-&gt;createNewsletterClientPlatformLeads($newsletter, $clients, $countries);
+
+        foreach ($clients as $client) {
+            $newsletterClient =
+                NewsletterClient::where(&apos;newsletter_id&apos;, $newsletter-&gt;id)-&gt;where(&apos;client_id&apos;, $client)-&gt;first();
+            $newsletterClientPlatform =
+                NewsletterClientPlatform::where(&apos;newsletter_client_id&apos;, $newsletterClient-&gt;id)
+                -&gt;where(&apos;marketing_platform_id&apos;, 1)-&gt;first();
+
+            $getResponse = new GetResponseMailDriver($client, 1);
+            $result = $getResponse-&gt;addNewsletter(
+                $newsletter,
+                $this-&gt;newsletterClientPlatformService,
+                $newsletterClientPlatform,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries
+            );
+
+            $result2 = $getResponse-&gt;updateNewsletter(
+                $newsletter,
+                2,
+                $this-&gt;newsletterClientPlatformService,
+                $this-&gt;taskService,
+                $this-&gt;newsletterService,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;leadMetadataService,
+                $countries,
+                &apos;paused&apos;
+            );
+
+            $this-&gt;assertTrue($result2);
+
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformBefore = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+            $result3 = $getResponse-&gt;deleteNewsletter(
+                $newsletterClientPlatform,
+                $this-&gt;newsletterErrorService,
+                $this-&gt;newsletterClientPlatformService,
+                $this-&gt;taskService,
+                true
+            );
+            $newsletterClientPlatform-&gt;refresh();
+            $newsletterClientPlatformAfter = $newsletterClientPlatform-&gt;newsletter_id_on_platform;
+
+            $this-&gt;assertTrue($result);
+            $this-&gt;assertTrue($result3);
+            $this-&gt;assertNotNull($newsletterClientPlatformBefore);
+            $this-&gt;assertNull($newsletterClientPlatformAfter);
+        }
+    }
+
+    private function createLeadsAndTheirMetadatas(array $countries): void
+    {
+        $lead1 = Lead::factory()-&gt;create([
+            &apos;client_id&apos; =&gt; 6,
+            &apos;country_id&apos; =&gt; $countries[rand(0, 1)],
+            &apos;contact_data&apos; =&gt; &apos;dragoslav.gagi8@gmail.com&apos;
+        ]);
+
+        $lead2 = Lead::factory()-&gt;create([
+            &apos;client_id&apos; =&gt; 6,
+            &apos;country_id&apos; =&gt; $countries[rand(0, 1)],
+            &apos;contact_data&apos; =&gt; &apos;dragoslav.jankovic@quantox.com&apos;
+        ]);
+
+        $lead3 = Lead::factory()-&gt;create([
+            &apos;client_id&apos; =&gt; 7,
+            &apos;country_id&apos; =&gt; $countries[rand(0, 1)],
+            &apos;contact_data&apos; =&gt; &apos;dragoslav.jankovicc@gmail.com&apos;
+        ]);
+
+        LeadMetadata::factory()-&gt;create([
+            &apos;lead_id&apos; =&gt; $lead1-&gt;id,
+            &apos;marketing_platform_id&apos; =&gt; 1,
+            &apos;contact_id&apos; =&gt; &quot;nXdH&quot;,
+            &apos;status&apos; =&gt; &apos;subscribed&apos;
+        ]);
+
+        LeadMetadata::factory()-&gt;create([
+            &apos;lead_id&apos; =&gt; $lead2-&gt;id,
+            &apos;marketing_platform_id&apos; =&gt; 1,
+            &apos;contact_id&apos; =&gt; &quot;nXHI&quot;,
+            &apos;status&apos; =&gt; &apos;subscribed&apos;
+        ]);
+
+        LeadMetadata::factory()-&gt;create([
+            &apos;lead_id&apos; =&gt; $lead3-&gt;id,
+            &apos;marketing_platform_id&apos; =&gt; 1,
+            &apos;contact_id&apos; =&gt; &quot;nXdJ&quot;,
+            &apos;status&apos; =&gt; &apos;subscribed&apos;
+        ]);
+    }
+
+    private function createNewsletterCountries(Newsletter $newsletter, array $countries): void
+    {
+        foreach ($countries as $country) {
+            NewsletterCountry::create([
+                &apos;newsletter_id&apos; =&gt; $newsletter-&gt;id,
+                &apos;country_id&apos; =&gt; $country
+            ]);
+        }
+    }
+
+    private function createNewsletterClientPlatformLeads(Newsletter $newsletter, array $clients, array $countries): void
+    {
+        foreach ($clients as $client) {
+            $newsletterClient = NewsletterClient::factory()-&gt;create([
+                &apos;newsletter_id&apos; =&gt; $newsletter-&gt;id,
+                &apos;client_id&apos; =&gt; $client,
+            ]);
+
+            $newsletterClientPlatform = NewsletterClientPlatform::create([
+                &apos;newsletter_client_id&apos; =&gt; $newsletterClient-&gt;id,
+                &apos;marketing_platform_id&apos; =&gt; 1
+            ]);
+
+            $leadMetadatas = LeadMetadata::select(&apos;lead_metadata.id as lmdID&apos;)
+                -&gt;join(&apos;leads&apos;, &apos;lead_metadata.lead_id&apos;, &apos;=&apos;, &apos;leads.id&apos;)
+                -&gt;where(&apos;leads.client_id&apos;, $client)
+                -&gt;where(&apos;lead_metadata.marketing_platform_id&apos;, 1)
+                -&gt;where(&apos;lead_metadata.status&apos;, &apos;subscribed&apos;)
+                -&gt;where(&apos;leads.is_bot&apos;, 0)
+                -&gt;whereIn(&apos;leads.country_id&apos;, $countries)
+                -&gt;get();
+
+            foreach ($leadMetadatas as $leadMetadata) {
+                NewsletterClientPlatformLeadMetadata::create([
+                    &apos;newsletter_client_platform_id&apos; =&gt; $newsletterClientPlatform-&gt;id,
+                    &apos;lead_metadata_id&apos; =&gt; $leadMetadata-&gt;lmdID
+                ]);
+            }
+        }
+    }
 }
+
 </pre>
 
                             <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
