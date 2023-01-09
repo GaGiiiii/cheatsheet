@@ -4600,6 +4600,54 @@ class SDSCL25Export implements FromQuery, WithHeadings, WithStrictNullComparison
                         <!-- SECTION END -->
 
 
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Different connections whereHas - Hypknowledge
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button data-title="excel" class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+        NE MOZE!!!
+        Mora da se koristi 2 query-ja.
+        Prvo nadjemo sve usere a onda u drugom query-ju koristimo where in.
+        https://laracasts.com/discuss/channels/laravel/laravel-wherehas-with-multi-connection-databases
+
+        $userIDs = User::where('firstname', 'like', "%{$searchQuery}%")
+            -&gt;orWhere('lastname', 'like', "%{$searchQuery}%")
+            -&gt;orWhere('email', 'like', "%{$searchQuery}%")
+            -&gt;whereNull('deleted_at')
+            -&gt;select('id')
+            -&gt;pluck('id');
+
+        $data = SleepOptimizationData::with(['user', 'question' =&gt; function ($query) {
+            $query-&gt;select(DB::raw("sleep_optimization_questions.*, CASE
+            WHEN sleep_optimization_questions.id = 1 THEN 'Sleepiness'
+            WHEN sleep_optimization_questions.id = 2 THEN 'Fatigue'
+            WHEN sleep_optimization_questions.id = 4 THEN 'Productivity'
+            WHEN sleep_optimization_questions.id = 5 THEN 'Satisfaction'
+            WHEN sleep_optimization_questions.id = 6 THEN 'Happiness'
+            END AS question"));
+        }])
+            -&gt;whereHas('question', function ($query) use ($searchQuery) {
+                return $query-&gt;where('question', 'like', "%{$searchQuery}%");
+            })-&gt;orWhereIn('user_id', $userIDs)
+            -&gt;orderBy($sortField, $sortType);
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
                     </div>
 
 
