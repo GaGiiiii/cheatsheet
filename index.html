@@ -4648,6 +4648,40 @@ class SDSCL25Export implements FromQuery, WithHeadings, WithStrictNullComparison
                         <!-- SECTION END -->
 
 
+
+
+
+
+                        <!-- SECTION START -->
+                        <p class="font-weight-bold text-dark">
+                            Complex where query with multiple or's - Hypknowledge
+                            <button class="btn btn-primary btn-sm ml-2 cBTN" type="button" data-toggle="collapse"
+                                data-target="#collapseExample4" aria-expanded="false"
+                                aria-controls="collapseExample4">+</button>
+                            <button data-title="excel" class="btn btn-primary btn-sm copy-btn">Copy</button>
+                        </p>
+                        <hr>
+                        <div class="collapse custom-collapse-class" id="collapseExampleOC3">
+                            <pre>
+        $query-&gt;where("$usersDB.users.id", $request-&gt;get('user_id'));
+        $query-&gt;where('type', $request-&gt;get('type', 'sds-cl-25'));
+
+        $query-&gt;where(function ($query) use ($searchQuery, $usersDB, $mainDB) {
+            $query-&gt;where("$usersDB.users.firstname", 'like', "%{$searchQuery}%")
+                -&gt;orWhere("$usersDB.users.lastname", 'like', "%{$searchQuery}%")
+                -&gt;orWhere("$usersDB.users.username", 'like', "%{$searchQuery}%")
+                -&gt;orWhere("$usersDB.users.email", 'like', "%{$searchQuery}%")
+                -&gt;orWhere("$mainDB.users_groups.name", 'like', "%{$searchQuery}%");
+        });
+</pre>
+
+                            <button class="btn btn-primary btn-sm cBTN-close" data-toggle="collapse"
+                                data-target="collapseExample3" aria-expanded="false"
+                                aria-controls="collapseExample3">-</button>
+                        </div>
+                        <!-- SECTION END -->
+
+
                     </div>
 
 
